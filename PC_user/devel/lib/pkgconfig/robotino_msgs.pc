@@ -1,8 +1,8 @@
-prefix=/home/juliobotic/FestinoPumas/PC_user/devel
+prefix=/home/robocup/FestinoPumas/PC_user/devel
 
 Name: robotino_msgs
 Description: Description of robotino_msgs
 Version: 0.1.0
-Cflags: -I/home/juliobotic/FestinoPumas/PC_user/devel/include
+Cflags: -I/home/robocup/FestinoPumas/PC_user/devel/include
 Libs: -L${prefix}/lib 
 Requires: 

@@ -2,7 +2,7 @@
 
 message(STATUS "robotino_msgs: 5 messages, 2 services")
 
-set(MSG_I_FLAGS "-Irobotino_msgs:/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg;-Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg")
+set(MSG_I_FLAGS "-Irobotino_msgs:/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg;-Istd_msgs:/opt/ros/melodic/share/std_msgs/cmake/../msg")
 
 # Find all generators
 find_package(gencpp REQUIRED)
@@ -17,39 +17,39 @@ add_custom_target(robotino_msgs_generate_messages ALL)
 
 
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" ""
 )
 
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
-  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" ""
+  COMMAND ${CATKIN_ENV} ${PYTHON_EXECUTABLE} ${GENMSG_CHECK_DEPS_SCRIPT} "robotino_msgs" "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" ""
 )
 
 #
@@ -59,31 +59,31 @@ add_custom_target(_robotino_msgs_generate_messages_check_deps_${_filename}
 ### Section generating for lang: gencpp
 ### Generating Messages
 _generate_msg_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
@@ -91,13 +91,13 @@ _generate_msg_cpp(robotino_msgs
 
 ### Generating Services
 _generate_srv_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
 )
 _generate_srv_cpp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gencpp_INSTALL_DIR}/robotino_msgs
@@ -115,19 +115,19 @@ add_custom_target(robotino_msgs_generate_messages_cpp
 add_dependencies(robotino_msgs_generate_messages robotino_msgs_generate_messages_cpp)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_cpp _robotino_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -140,31 +140,31 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS robotino_msgs_generate_messages_cpp
 ### Section generating for lang: geneus
 ### Generating Messages
 _generate_msg_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
@@ -172,13 +172,13 @@ _generate_msg_eus(robotino_msgs
 
 ### Generating Services
 _generate_srv_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
 )
 _generate_srv_eus(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${geneus_INSTALL_DIR}/robotino_msgs
@@ -196,19 +196,19 @@ add_custom_target(robotino_msgs_generate_messages_eus
 add_dependencies(robotino_msgs_generate_messages robotino_msgs_generate_messages_eus)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_eus _robotino_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -221,31 +221,31 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS robotino_msgs_generate_messages_eus
 ### Section generating for lang: genlisp
 ### Generating Messages
 _generate_msg_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
@@ -253,13 +253,13 @@ _generate_msg_lisp(robotino_msgs
 
 ### Generating Services
 _generate_srv_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
 )
 _generate_srv_lisp(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genlisp_INSTALL_DIR}/robotino_msgs
@@ -277,19 +277,19 @@ add_custom_target(robotino_msgs_generate_messages_lisp
 add_dependencies(robotino_msgs_generate_messages robotino_msgs_generate_messages_lisp)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_lisp _robotino_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -302,31 +302,31 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS robotino_msgs_generate_messages_lis
 ### Section generating for lang: gennodejs
 ### Generating Messages
 _generate_msg_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
@@ -334,13 +334,13 @@ _generate_msg_nodejs(robotino_msgs
 
 ### Generating Services
 _generate_srv_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
 )
 _generate_srv_nodejs(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${gennodejs_INSTALL_DIR}/robotino_msgs
@@ -358,19 +358,19 @@ add_custom_target(robotino_msgs_generate_messages_nodejs
 add_dependencies(robotino_msgs_generate_messages robotino_msgs_generate_messages_nodejs)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_nodejs _robotino_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility
@@ -383,31 +383,31 @@ list(APPEND ${PROJECT_NAME}_EXPORTED_TARGETS robotino_msgs_generate_messages_nod
 ### Section generating for lang: genpy
 ### Generating Messages
 _generate_msg_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
 )
 _generate_msg_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
@@ -415,13 +415,13 @@ _generate_msg_py(robotino_msgs
 
 ### Generating Services
 _generate_srv_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
 )
 _generate_srv_py(robotino_msgs
-  "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv"
+  "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv"
   "${MSG_I_FLAGS}"
   ""
   ${CATKIN_DEVEL_PREFIX}/${genpy_INSTALL_DIR}/robotino_msgs
@@ -439,19 +439,19 @@ add_custom_target(robotino_msgs_generate_messages_py
 add_dependencies(robotino_msgs_generate_messages robotino_msgs_generate_messages_py)
 
 # add dependencies to all check dependencies targets
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/ResetOdometry.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/EncoderReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/DigitalReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/MotorReadings.msg" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/PowerReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
-get_filename_component(_filename "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/srv/SetEncoderPosition.srv" NAME_WE)
+get_filename_component(_filename "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_msgs/msg/AnalogReadings.msg" NAME_WE)
 add_dependencies(robotino_msgs_generate_messages_py _robotino_msgs_generate_messages_check_deps_${_filename})
 
 # target for backward compatibility

@@ -1,8 +1,8 @@
-# Install script for directory: /home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description
+# Install script for directory: /home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/juliobotic/FestinoPumas/PC_user/install")
+  set(CMAKE_INSTALL_PREFIX "/home/robocup/FestinoPumas/PC_user/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/juliobotic/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_description.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/robocup/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_description.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/robotino_description/cmake" TYPE FILE FILES
-    "/home/juliobotic/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_descriptionConfig.cmake"
-    "/home/juliobotic/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_descriptionConfig-version.cmake"
+    "/home/robocup/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_descriptionConfig.cmake"
+    "/home/robocup/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/catkin_generated/installspace/robotino_descriptionConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/robotino_description" TYPE FILE FILES "/home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/robotino_description" TYPE FILE FILES "/home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description/package.xml")
 endif()
 

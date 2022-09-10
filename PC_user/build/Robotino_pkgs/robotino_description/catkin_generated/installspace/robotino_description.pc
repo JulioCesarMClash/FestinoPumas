@@ -1,4 +1,4 @@
-prefix=/home/juliobotic/FestinoPumas/PC_user/install
+prefix=/home/robocup/FestinoPumas/PC_user/install
 
 Name: robotino_description
 Description: Description of robotino_description

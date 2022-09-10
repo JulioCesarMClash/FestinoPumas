@@ -67,14 +67,14 @@ set(robotino_description_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(robotino_description_SOURCE_PREFIX /home/juliobotic/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description)
-  set(robotino_description_DEVEL_PREFIX /home/juliobotic/FestinoPumas/PC_user/devel)
+  set(robotino_description_SOURCE_PREFIX /home/robocup/FestinoPumas/PC_user/src/Robotino_pkgs/robotino_description)
+  set(robotino_description_DEVEL_PREFIX /home/robocup/FestinoPumas/PC_user/devel)
   set(robotino_description_INSTALL_PREFIX "")
   set(robotino_description_PREFIX ${robotino_description_DEVEL_PREFIX})
 else()
   set(robotino_description_SOURCE_PREFIX "")
   set(robotino_description_DEVEL_PREFIX "")
-  set(robotino_description_INSTALL_PREFIX /home/juliobotic/FestinoPumas/PC_user/install)
+  set(robotino_description_INSTALL_PREFIX /home/robocup/FestinoPumas/PC_user/install)
   set(robotino_description_PREFIX ${robotino_description_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/juliobotic/FestinoPumas/PC_user/install/lib;/home/juliobotic/RobotinoTesis/Tesis_workspace/devel/lib;/home/juliobotic/RobotinoTesis/Tesis_workspace/install/lib;/opt/ros/melodic/lib)
+    foreach(path /home/robocup/FestinoPumas/PC_user/install/lib;/home/robocup/TMR-2022-AutoModelCar/catkin_ws/devel/lib;/opt/ros/melodic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
