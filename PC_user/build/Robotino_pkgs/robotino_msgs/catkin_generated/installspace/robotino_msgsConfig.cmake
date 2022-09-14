@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/robocup/FestinoPumas/PC_user/install/lib;/home/robocup/TMR-2022-AutoModelCar/catkin_ws/devel/lib;/opt/ros/melodic/lib)
+    foreach(path /home/robocup/FestinoPumas/PC_user/install/lib;/home/robocup/FestinoPumas/PC_user/devel/lib;/home/robocup/TMR-2022-AutoModelCar/catkin_ws/devel/lib;/opt/ros/melodic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
