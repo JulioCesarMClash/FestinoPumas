@@ -1,31 +1,31 @@
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
-Change Dir: /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp
+Change Dir: /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-c3QrKC
 
-Run Build Command(s):/usr/bin/make cmTC_ca036/fast && /usr/bin/make -f CMakeFiles/cmTC_ca036.dir/build.make CMakeFiles/cmTC_ca036.dir/build
-make[1]: se entra en el directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_ca036.dir/src.c.o
-/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_ca036.dir/src.c.o   -c /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp/src.c
-Linking C executable cmTC_ca036
-/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ca036.dir/link.txt --verbose=1
-/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    -rdynamic CMakeFiles/cmTC_ca036.dir/src.c.o  -o cmTC_ca036 
-CMakeFiles/cmTC_ca036.dir/src.c.o: En la función `main':
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_75d92/fast && /usr/bin/make  -f CMakeFiles/cmTC_75d92.dir/build.make CMakeFiles/cmTC_75d92.dir/build
+make[1]: se entra en el directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-c3QrKC'
+Building C object CMakeFiles/cmTC_75d92.dir/src.c.o
+/usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_75d92.dir/src.c.o -c /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-c3QrKC/src.c
+Linking C executable cmTC_75d92
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_75d92.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_75d92.dir/src.c.o -o cmTC_75d92 
+CMakeFiles/cmTC_75d92.dir/src.c.o: En la función `main':
 src.c:(.text+0x3e): referencia a `pthread_create' sin definir
 src.c:(.text+0x4a): referencia a `pthread_detach' sin definir
 src.c:(.text+0x56): referencia a `pthread_cancel' sin definir
 src.c:(.text+0x67): referencia a `pthread_join' sin definir
 src.c:(.text+0x7b): referencia a `pthread_atfork' sin definir
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_ca036.dir/build.make:103: fallo en las instrucciones para el objetivo 'cmTC_ca036'
-make[1]: *** [cmTC_ca036] Error 1
-make[1]: se sale del directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp'
-Makefile:138: fallo en las instrucciones para el objetivo 'cmTC_ca036/fast'
-make: *** [cmTC_ca036/fast] Error 2
+CMakeFiles/cmTC_75d92.dir/build.make:98: fallo en las instrucciones para el objetivo 'cmTC_75d92'
+make[1]: *** [cmTC_75d92] Error 1
+make[1]: se sale del directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-c3QrKC'
+Makefile:127: fallo en las instrucciones para el objetivo 'cmTC_75d92/fast'
+make: *** [cmTC_75d92/fast] Error 2
 
 
 Source file was:
 #include <pthread.h>
 
-void* test_func(void* data)
+static void* test_func(void* data)
 {
   return data;
 }
@@ -43,23 +43,24 @@ int main(void)
   return 0;
 }
 
-Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_c96e1/fast && /usr/bin/make -f CMakeFiles/cmTC_c96e1.dir/build.make CMakeFiles/cmTC_c96e1.dir/build
-make[1]: se entra en el directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_c96e1.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_c96e1.dir/CheckFunctionExists.c.o   -c /usr/local/share/cmake-3.17/Modules/CheckFunctionExists.c
-Linking C executable cmTC_c96e1
-/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c96e1.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_c96e1.dir/CheckFunctionExists.c.o  -o cmTC_c96e1  -lpthreads 
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-D0kP5m
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_80379/fast && /usr/bin/make  -f CMakeFiles/cmTC_80379.dir/build.make CMakeFiles/cmTC_80379.dir/build
+make[1]: se entra en el directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-D0kP5m'
+Building C object CMakeFiles/cmTC_80379.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -o CMakeFiles/cmTC_80379.dir/CheckFunctionExists.c.o -c /home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-D0kP5m/CheckFunctionExists.c
+Linking C executable cmTC_80379
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_80379.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_80379.dir/CheckFunctionExists.c.o -o cmTC_80379  -lpthreads 
 /usr/bin/ld: no se puede encontrar -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_c96e1.dir/build.make:103: fallo en las instrucciones para el objetivo 'cmTC_c96e1'
-make[1]: *** [cmTC_c96e1] Error 1
-make[1]: se sale del directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeTmp'
-Makefile:138: fallo en las instrucciones para el objetivo 'cmTC_c96e1/fast'
-make: *** [cmTC_c96e1/fast] Error 2
+CMakeFiles/cmTC_80379.dir/build.make:98: fallo en las instrucciones para el objetivo 'cmTC_80379'
+make[1]: *** [cmTC_80379] Error 1
+make[1]: se sale del directorio '/home/robocup/FestinoPumas/PC_user/build/CMakeFiles/CMakeScratch/TryCompile-D0kP5m'
+Makefile:127: fallo en las instrucciones para el objetivo 'cmTC_80379/fast'
+make: *** [cmTC_80379/fast] Error 2
 
 
 

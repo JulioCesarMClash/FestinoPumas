@@ -37,7 +37,12 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+# Set default install directory permissions.
+if(NOT DEFINED CMAKE_OBJDUMP)
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+endif()
+
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   
       if (NOT EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}")
         file(MAKE_DIRECTORY "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}")
@@ -47,7 +52,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
       endif()
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/_setup_util.py")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -56,10 +61,10 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE PROGRAM FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/_setup_util.py")
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE PROGRAM FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/_setup_util.py")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/env.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -68,10 +73,10 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE PROGRAM FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/env.sh")
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE PROGRAM FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/env.sh")
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/setup.bash;/home/robocup/FestinoPumas/PC_user/install/local_setup.bash")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -80,13 +85,13 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/setup.bash"
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/local_setup.bash"
     )
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/setup.sh;/home/robocup/FestinoPumas/PC_user/install/local_setup.sh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -95,13 +100,13 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/setup.sh"
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/local_setup.sh"
     )
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/setup.zsh;/home/robocup/FestinoPumas/PC_user/install/local_setup.zsh")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -110,13 +115,13 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/setup.zsh"
     "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/local_setup.zsh"
     )
 endif()
 
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/home/robocup/FestinoPumas/PC_user/install/.rosinstall")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
@@ -125,24 +130,30 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/.rosinstall")
+  file(INSTALL DESTINATION "/home/robocup/FestinoPumas/PC_user/install" TYPE FILE FILES "/home/robocup/FestinoPumas/PC_user/build/catkin_generated/installspace/.rosinstall")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/robocup/FestinoPumas/PC_user/build/gtest/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/freenect_stack/freenect_launch/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/freenect_stack/freenect_stack/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_description/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Robotino_pkgs/robotino_msgs/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/config_files/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/exploration/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/Objct_det/img_proc/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/navig_msgs/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/map_sparser/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/RefBoxComm/refbox_msgs/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/freenect_stack/freenect_camera/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/sensor_scan_fix/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/mvn_pln/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/path_planner/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/simple_move/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/map_augmenter/cmake_install.cmake")
   include("/home/robocup/FestinoPumas/PC_user/build/Navigation/obstacle_detector/cmake_install.cmake")
+  include("/home/robocup/FestinoPumas/PC_user/build/Pos_control/pos_definition/cmake_install.cmake")
 
 endif()
 

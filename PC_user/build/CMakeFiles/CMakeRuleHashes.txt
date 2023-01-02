@@ -1,4 +1,5 @@
 # Hashes of file build rules.
+bf2b0c2e711266b6ec97b2b324cf30ca /home/robocup/FestinoPumas/PC_user/devel/include/freenect_camera/FreenectConfig.h
 b5c9db8811c7751b997df930c2a29cfb /home/robocup/FestinoPumas/PC_user/devel/include/navig_msgs/Edges.h
 428bd1dc5dbe56e17945dc8b7d9d7014 /home/robocup/FestinoPumas/PC_user/devel/include/navig_msgs/GeometryGraph.h
 a4727b7b278b217000b894a1950826cb /home/robocup/FestinoPumas/PC_user/devel/include/navig_msgs/GetBoundaryPoints.h
@@ -90,3 +91,4 @@ ddaffe69c98df09cac7ee0218f631919 Navigation/navig_msgs/CMakeFiles/_navig_msgs_ge
 5f510e985fb687a3529ebdcb28be47b3 Robotino_pkgs/robotino_msgs/CMakeFiles/robotino_msgs_generate_messages_lisp
 5f510e985fb687a3529ebdcb28be47b3 Robotino_pkgs/robotino_msgs/CMakeFiles/robotino_msgs_generate_messages_nodejs
 5f510e985fb687a3529ebdcb28be47b3 Robotino_pkgs/robotino_msgs/CMakeFiles/robotino_msgs_generate_messages_py
+13c30980ee74387e32bda871f397116a freenect_stack/freenect_camera/CMakeFiles/freenect_camera_gencfg

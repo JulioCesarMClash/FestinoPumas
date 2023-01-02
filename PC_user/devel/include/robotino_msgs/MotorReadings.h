@@ -8,7 +8,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <memory>
 
 #include <ros/types.h>
 #include <ros/serialization.h>
@@ -42,13 +42,13 @@ struct MotorReadings_
    typedef ros::Time _stamp_type;
   _stamp_type stamp;
 
-   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _velocities_type;
+   typedef std::vector<float, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<float>> _velocities_type;
   _velocities_type velocities;
 
-   typedef std::vector<int32_t, typename ContainerAllocator::template rebind<int32_t>::other >  _positions_type;
+   typedef std::vector<int32_t, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<int32_t>> _positions_type;
   _positions_type positions;
 
-   typedef std::vector<float, typename ContainerAllocator::template rebind<float>::other >  _currents_type;
+   typedef std::vector<float, typename std::allocator_traits<ContainerAllocator>::template rebind_alloc<float>> _currents_type;
   _currents_type currents;
 
 
