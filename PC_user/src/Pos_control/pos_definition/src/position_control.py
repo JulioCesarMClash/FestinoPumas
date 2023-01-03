@@ -12,7 +12,7 @@ import tf
 
 from geometry_msgs.msg import *
 from std_msgs.msg import *
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import *
 
 
 class position_control:
@@ -20,14 +20,14 @@ class position_control:
   def move_distance(goal_dist, goal_angle, pub_goal_dist):
     msg_dist = Float32MultiArray()
     msg_dist.data = [goal_dist, goal_angle]
-    print("Publishing distance")
+    print("Publishing distance, not yet")
     pub_goal_dist.publish(msg_dist)
 
   def __init__(self):
-    self.piece_pos_sub = rospy.Subscriber("/redpiece_pos",Point,self.callback_piece_pos)
+    self.piece_pos_sub = rospy.Subscriber("/redpiece_pos",PointStamped,self.callback_piece_pos)
 
   def callback_piece_pos(self,data):
-    piece_pos = [data.x, data.y,data.z]
+    piece_pos = [data.point.x, data.point.y,data.point.z]
     print(piece_pos)
 
 

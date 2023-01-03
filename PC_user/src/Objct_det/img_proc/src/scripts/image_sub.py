@@ -23,7 +23,7 @@ from cv_bridge import CvBridge, CvBridgeError
 class image_converter:
 
   def __init__(self):
-    self.position_pub = rospy.Publisher("redpiece_pos",Point,queue_size=10)
+    self.position_pub = rospy.Publisher("redpiece_pos",PointStamped,queue_size=10)
 
     self.bridge = CvBridge()
     self.image_sub = rospy.Subscriber("/camera/rgb/image_color",Image,self.callback_image)
@@ -57,10 +57,16 @@ class image_converter:
 
     Masked_red = np.zeros((480, 640))
 
+    piece_pose = PointStamped()
+    piece_pose.header.frame_id = "piece_rgbd_sensor_link"
+    piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = 0,0,0
+
+
     img_hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
-    mean_red = (171.79478086924894, 219.36252045826512, 248.39407164939078, 0.0)
     delta_red = 115
+
+    mean_red = (171.79478086924894, 219.36252045826512, 248.39407164939078, 0.0)
     up_h_red = mean_red[0] + 10
     lw_h_red = mean_red[0] - 10
     up_s_red = mean_red[1] + 30
@@ -70,7 +76,40 @@ class image_converter:
     up_red = (up_h_red,up_s_red,up_v_red,0.0)
     lw_red = (lw_h_red,lw_s_red,lw_v_red,0.0)
     Fil_red = cv2.inRange(img_hsv, lw_red, up_red)
-    loc = cv2.findNonZero(Fil_red)
+
+    mean_red1 = (168.52717391304347, 173.29021739130434, 107.51413043478261, 0.0)
+    up_h_red1 = mean_red1[0] + 10
+    lw_h_red1 = mean_red1[0] - 10
+    up_s_red1 = mean_red1[1] + 30
+    lw_s_red1 = mean_red1[1] - 30
+    up_v_red1 = mean_red1[2] + delta_red
+    lw_v_red1 = mean_red1[2] - delta_red
+    up_red1 = (up_h_red1,up_s_red1,up_v_red1,0.0)
+    lw_red1 = (lw_h_red1,lw_s_red1,lw_v_red1,0.0)
+    Fil_red1 = cv2.inRange(img_hsv, lw_red1, up_red1)
+
+    Red_mask = cv2.bitwise_or(Fil_red, Fil_red1)
+
+    mean_red2 = (168.7984375, 212.20364583333333, 110.8015625, 0.0)
+    up_h_red2 = mean_red2[0] + 10
+    lw_h_red2 = mean_red2[0] - 10
+    up_s_red2 = mean_red2[1] + 30
+    lw_s_red2 = mean_red2[1] - 30
+    up_v_red2 = mean_red2[2] + delta_red
+    lw_v_red2 = mean_red2[2] - delta_red
+    up_red2 = (up_h_red2,up_s_red2,up_v_red2,0.0)
+    lw_red2 = (lw_h_red2,lw_s_red2,lw_v_red2,0.0)
+    Fil_red2 = cv2.inRange(img_hsv, lw_red2, up_red2)
+
+    Red_mask = cv2.bitwise_or(Red_mask, Fil_red2)
+    loc = cv2.findNonZero(Red_mask)
+
+
+
+
+
+
+
     #loc[i,0,0] : Points_i
     #loc[i,0,1] : Points_j
     for i in range(loc.shape[0]):
@@ -80,25 +119,21 @@ class image_converter:
       if math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z):
         nanis = 1
       else:
-        pos = (pos_x,pos_y,pos_z)
-        print(pos)
-        piece_pose = PointStamped()
-        piece_pose.header.frame_id = "piece_rgbd_sensor_link"
         piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = pos_x, pos_y, pos_z
-        listener = tf.TransformListener()
-        listener.waitForTransform("/base_link","piece_rgbd_sensor_link", rospy.Time(),rospy.Duration(1.0))
-        piece_pose = listener.transformPoint("/base_link",piece_pose)
-        print(piece_pose.point)
+        #listener = tf.TransformListener()
+        #listener.waitForTransform("/base_link","piece_rgbd_sensor_link", rospy.Time(),rospy.Duration(1.0))
+        #piece_pose = listener.transformPoint("/base_link",piece_pose)
+        print(piece_pose.point,"\n")
 
 
-    Fil_red = cv2.medianBlur(Fil_red,5)
-    M = cv2.moments(Fil_red)
+    Red_mask = cv2.medianBlur(Red_mask,5)
+    M = cv2.moments(Red_mask)
     try: 
       cX = int(M["m10"] / M["m00"])
       cY = int(M["m01"] / M["m00"])
       cv2.circle(cv_image, (cX, cY), 5, (255, 255, 255), -1)
       cv2.putText(cv_image, "centroid_Red", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-      Masked_red = cv2.bitwise_and(cv_image, cv_image, mask = Fil_red)
+      Masked_red = cv2.bitwise_and(cv_image, cv_image, mask = Red_mask)
       cX_depth = cX
       cY_depth = cY
       cv2.circle(depth_img, (cX_depth, cY_depth), 5, (0, 255, 255), -1)
@@ -128,9 +163,10 @@ class image_converter:
     cv2.circle(cv_image, (cX, cY), 5, (255, 255, 255), -1)
     cv2.putText(cv_image, "centroid_Black", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 """
-    cv2.imshow("Depth Image", depth_img)
-    cv2.imshow("Reconstructed from PointCloud", img_bgr)
-    cv2.imshow("Only Red figure", Masked_red)
+    #cv2.imshow("Depth Image", depth_img)
+    #cv2.imshow("RGB Image", cv_image)
+    #cv2.imshow("Only Red", Masked_red)
+    cv2.imshow("Red Piece Mask", Red_mask)
     cv2.waitKey(3)
 
     try:
