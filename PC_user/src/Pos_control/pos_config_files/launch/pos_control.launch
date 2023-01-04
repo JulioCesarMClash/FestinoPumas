@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="pos_definition" type="position_control.py" name="broadcaster_fixed" />
+</launch>

@@ -15,10 +15,6 @@ from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 from cv_bridge import CvBridge, CvBridgeError
 
-## Haz una media de medias de diferentes iluminaciones del cilindrito
-## Listo --- No uses un centroide, sino toda la mancha de color
-## Listo --- Identifica las coordenadas pixel de todos los pixeles que pertenezcan
-## al cilindrito 
 
 class image_converter:
 
@@ -102,13 +98,20 @@ class image_converter:
     Fil_red2 = cv2.inRange(img_hsv, lw_red2, up_red2)
 
     Red_mask = cv2.bitwise_or(Red_mask, Fil_red2)
+
+    mean_red3 = (174.05156250000002, 253.4765625, 165.7984375, 0.0)
+    up_h_red3 = mean_red3[0] + 10
+    lw_h_red3 = mean_red3[0] - 10
+    up_s_red3 = mean_red3[1] + 30
+    lw_s_red3 = mean_red3[1] - 30
+    up_v_red3 = mean_red3[2] + delta_red
+    lw_v_red3 = mean_red3[2] - delta_red
+    up_red3 = (up_h_red3,up_s_red3,up_v_red3,0.0)
+    lw_red3 = (lw_h_red3,lw_s_red3,lw_v_red3,0.0)
+    Fil_red3 = cv2.inRange(img_hsv, lw_red3, up_red3)
+
+    Red_mask = cv2.bitwise_or(Red_mask, Fil_red3)
     loc = cv2.findNonZero(Red_mask)
-
-
-
-
-
-
 
     #loc[i,0,0] : Points_i
     #loc[i,0,1] : Points_j
@@ -120,9 +123,6 @@ class image_converter:
         nanis = 1
       else:
         piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = pos_x, pos_y, pos_z
-        #listener = tf.TransformListener()
-        #listener.waitForTransform("/base_link","piece_rgbd_sensor_link", rospy.Time(),rospy.Duration(1.0))
-        #piece_pose = listener.transformPoint("/base_link",piece_pose)
         print(piece_pose.point,"\n")
 
 
@@ -164,7 +164,7 @@ class image_converter:
     cv2.putText(cv_image, "centroid_Black", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 """
     #cv2.imshow("Depth Image", depth_img)
-    #cv2.imshow("RGB Image", cv_image)
+    cv2.imshow("RGB Image", cv_image)
     #cv2.imshow("Only Red", Masked_red)
     cv2.imshow("Red Piece Mask", Red_mask)
     cv2.waitKey(3)
