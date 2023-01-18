@@ -5,15 +5,25 @@ import roslib
 roslib.load_manifest('img_proc')
 import sys
 import rospy
-import cv2
 import ros_numpy
 import numpy as np
 import math
 import tf
+import tf_conversions
+import tf2_ros
+import cv2
+
 from std_msgs.msg import *
 from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 from cv_bridge import CvBridge, CvBridgeError
+
+def move_distance(goal_dist, goal_angle, pub_goal_dist):
+  msg_dist = Float32MultiArray()
+  msg_dist.data = [goal_dist, goal_angle]
+  print(msg_dist)
+  pub_goal_dist.publish(msg_dist)
+
 
 def callback_depth_points(data):
   global arr, img_bgr
@@ -40,10 +50,13 @@ def callback_image(data):
   except CvBridgeError as e:
     print(e)
 
+  tfBuffer = tf2_ros.Buffer()
+
   Masked_red = np.zeros((480, 640))
 
   piece_pose = PointStamped()
-  piece_pose.header.frame_id = "piece_rgbd_sensor_link"
+  piece_pose.header.stamp = rospy.Time.now()
+  piece_pose.header.frame_id = "kinect_link"
   piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = 0,0,0
 
 
@@ -112,7 +125,18 @@ def callback_image(data):
       nanis = 1
     else:
       piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = pos_x, pos_y, pos_z
-      print(piece_pose.point,"\n")
+      #print(piece_pose.point,"\n")
+
+  br = tf.TransformBroadcaster()
+  rate = rospy.Rate(1.0)
+  br.sendTransform((piece_pose.point.z, piece_pose.point.x, piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "kinect_link")
+  
+  listener = tf.TransformListener()
+  listener.waitForTransform('/base_link', 'kinect_link', rospy.Time(), rospy.Duration(1.0))
+  piece_pose2 = listener.transformPoint('base_link', piece_pose)
+
+  #print(piece_pose2)
+  
 
 
   Red_mask = cv2.medianBlur(Red_mask,9)
@@ -151,10 +175,10 @@ def callback_image(data):
   cY = int(M["m01"] / M["m00"])
   cv2.circle(cv_image, (cX, cY), 5, (255, 255, 255), -1)
   cv2.putText(cv_image, "centroid_Black", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-"""
-  #cv2.imshow("Depth Image", depth_img)
+  """
+
   cv2.imshow("RGB Image", cv_image)
-  #cv2.imshow("Only Red", Masked_red)
+
   cv2.imshow("Red Piece Mask", Red_mask)
   cv2.waitKey(3)
 
@@ -164,20 +188,22 @@ def callback_image(data):
     print(e)
 
 def main(args):
+  rospy.init_node('image_sub', anonymous=True)
+
   global bridge, cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub
   print("Image Processing Node - Looking for piece")
+
   bridge = CvBridge()
 
-  position_pub = rospy.Publisher("redpiece_pos",PointStamped,queue_size=10)
-  image_sub = rospy.Subscriber("/camera/rgb/image_color",Image,callback_image)
-  depth_image_sub = rospy.Subscriber("/camera/depth/image_raw",Image,callback_depth_image)
-  depth_points_sub = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
+  position_pub      = rospy.Publisher("/redpiece_pos",PointStamped,queue_size=10)
+  image_sub         = rospy.Subscriber("/camera/rgb/image_color",Image,callback_image)
+  depth_image_sub   = rospy.Subscriber("/camera/depth/image_raw",Image,callback_depth_image)
+  depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
   
   cv_depth = np.zeros((480, 640))
   depth_img = np.zeros((480, 640))
   arr = np.zeros((480, 640))
 
-  rospy.init_node('image_sub', anonymous=True)
   try:
     rospy.spin()
   except KeyboardInterrupt:
