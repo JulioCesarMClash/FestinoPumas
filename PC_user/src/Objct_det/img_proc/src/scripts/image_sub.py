@@ -26,13 +26,28 @@ def move_distance(goal_dist, goal_angle, pub_goal_dist):
 
 
 def callback_depth_points(data):
-  global arr, img_bgr
+  global arr, img_bgr, Red_mask
   arr = ros_numpy.point_cloud2.pointcloud2_to_array(data)
   rgb_arr = arr['rgb'].copy()
   rgb_arr.dtype = np.uint32
   r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
   img_bgr = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
-  
+
+  # Medias de color en hsv de la pieza en distintas iluminaciones
+  mean_R_l1 = (171.79478086924894, 219.36252045826512, 248.39407164939078, 0.0)
+  mean_R_l2 = (168.52717391304347, 173.29021739130434, 107.51413043478261, 0.0)
+  mean_R_l3 = (168.7984375, 212.20364583333333, 110.8015625, 0.0)
+  mean_R_l4 = (174.05156250000002, 253.4765625, 165.7984375, 0.0)
+
+  Fil_R_l1 = segment_color(img_bgr,arr,mean_R_l1)
+  Fil_R_l2 = segment_color(img_bgr,arr,mean_R_l2)
+  Fil_R_l3 = segment_color(img_bgr,arr,mean_R_l3)
+  Fil_R_l4 = segment_color(img_bgr,arr,mean_R_l4)
+
+  Red_mask1 = cv2.bitwise_or(Fil_R_l1, Fil_R_l2)
+  Red_mask2 = cv2.bitwise_or(Red_mask1, Fil_R_l3)
+  Red_mask3 = cv2.bitwise_or(Red_mask2, Fil_R_l4)
+  Red_mask = cv2.medianBlur(Red_mask3,9)
 
 def callback_depth_image(data):
   global depth_img
@@ -42,9 +57,22 @@ def callback_depth_image(data):
     print(e)
   depth_img = depth_img*10
   
+def segment_color(img_bgr, img_xyz, hsv_mean):
+  img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+  delta = 115
+  up_h = hsv_mean[0] + 10
+  lw_h = hsv_mean[0] - 10
+  up_s = hsv_mean[1] + 30
+  lw_s = hsv_mean[1] - 30
+  up_v = hsv_mean[2] + delta
+  lw_v = hsv_mean[2] - delta
+  up = (up_h,up_s,up_v,0.0)
+  lw = (lw_h,lw_s,lw_v,0.0)
+  Fil = cv2.inRange(img_hsv, lw, up)
+  return Fil
 
 def callback_image(data):
-  global depth_img, arr, img_bgr
+  global depth_img, arr, img_bgr, Red_mask
   try:
     cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
   except CvBridgeError as e:
@@ -59,87 +87,42 @@ def callback_image(data):
   piece_pose.header.frame_id = "kinect_link"
   piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = 0,0,0
 
-
   img_hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
 
-  delta_red = 115
+  # --Listo-- utilizar la funcion para obtener las medias (en vez de tanto bloque de texto) 
+  # --Listo-- (puede ser dentro del callback de la nube de puntos)
+  # definir un archivo (yaml o txt o algo) donde se definan los parametros que se usaran por objeto (en este caso las medias de color)
+  # imprimor cuatos pixeles entran en cada intervalo de color y buscar el umbral minimo que corresponderia a la pieza
+  # eliminar pixeles sueltos si estan fuera de la mancha (con erode)
+  # quitar el medianBlur - erode
+  # migrar a Juskeshino 
+  # atiende a servicio que pasa la informacion necesaria y me devuelve coordenada de la pieza
 
-  mean_red = (171.79478086924894, 219.36252045826512, 248.39407164939078, 0.0)
-  up_h_red = mean_red[0] + 10
-  lw_h_red = mean_red[0] - 10
-  up_s_red = mean_red[1] + 30
-  lw_s_red = mean_red[1] - 30
-  up_v_red = mean_red[2] + delta_red
-  lw_v_red = mean_red[2] - delta_red
-  up_red = (up_h_red,up_s_red,up_v_red,0.0)
-  lw_red = (lw_h_red,lw_s_red,lw_v_red,0.0)
-  Fil_red = cv2.inRange(img_hsv, lw_red, up_red)
-
-  mean_red1 = (168.52717391304347, 173.29021739130434, 107.51413043478261, 0.0)
-  up_h_red1 = mean_red1[0] + 10
-  lw_h_red1 = mean_red1[0] - 10
-  up_s_red1 = mean_red1[1] + 30
-  lw_s_red1 = mean_red1[1] - 30
-  up_v_red1 = mean_red1[2] + delta_red
-  lw_v_red1 = mean_red1[2] - delta_red
-  up_red1 = (up_h_red1,up_s_red1,up_v_red1,0.0)
-  lw_red1 = (lw_h_red1,lw_s_red1,lw_v_red1,0.0)
-  Fil_red1 = cv2.inRange(img_hsv, lw_red1, up_red1)
-
-  Red_mask = cv2.bitwise_or(Fil_red, Fil_red1)
-
-  mean_red2 = (168.7984375, 212.20364583333333, 110.8015625, 0.0)
-  up_h_red2 = mean_red2[0] + 10
-  lw_h_red2 = mean_red2[0] - 10
-  up_s_red2 = mean_red2[1] + 30
-  lw_s_red2 = mean_red2[1] - 30
-  up_v_red2 = mean_red2[2] + delta_red
-  lw_v_red2 = mean_red2[2] - delta_red
-  up_red2 = (up_h_red2,up_s_red2,up_v_red2,0.0)
-  lw_red2 = (lw_h_red2,lw_s_red2,lw_v_red2,0.0)
-  Fil_red2 = cv2.inRange(img_hsv, lw_red2, up_red2)
-
-  Red_mask = cv2.bitwise_or(Red_mask, Fil_red2)
-
-  mean_red3 = (174.05156250000002, 253.4765625, 165.7984375, 0.0)
-  up_h_red3 = mean_red3[0] + 10
-  lw_h_red3 = mean_red3[0] - 10
-  up_s_red3 = mean_red3[1] + 30
-  lw_s_red3 = mean_red3[1] - 30
-  up_v_red3 = mean_red3[2] + delta_red
-  lw_v_red3 = mean_red3[2] - delta_red
-  up_red3 = (up_h_red3,up_s_red3,up_v_red3,0.0)
-  lw_red3 = (lw_h_red3,lw_s_red3,lw_v_red3,0.0)
-  Fil_red3 = cv2.inRange(img_hsv, lw_red3, up_red3)
-
-  Red_mask = cv2.bitwise_or(Red_mask, Fil_red3)
   loc = cv2.findNonZero(Red_mask)
 
   #loc[i,0,0] : Points_i
   #loc[i,0,1] : Points_j
   for i in range(loc.shape[0]):
+    print(loc.shape[0])
     pos_x = float(arr[loc[i,0,1],loc[i,0,0]][0])
     pos_y = float(arr[loc[i,0,1],loc[i,0,0]][1])
     pos_z = float(arr[loc[i,0,1],loc[i,0,0]][2])
-    if math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z):
-      nanis = 1
-    else:
+    #-Sacar la media de los puntos
+    if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
       piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = pos_x, pos_y, pos_z
       #print(piece_pose.point,"\n")
 
   br = tf.TransformBroadcaster()
   rate = rospy.Rate(1.0)
-  br.sendTransform((piece_pose.point.z, piece_pose.point.x, piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "kinect_link")
+  #br.sendTransform((piece_pose.point.z, piece_pose.point.x, piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "kinect_link")
+  br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
   
-  listener = tf.TransformListener()
-  listener.waitForTransform('/base_link', 'kinect_link', rospy.Time(), rospy.Duration(1.0))
-  piece_pose2 = listener.transformPoint('base_link', piece_pose)
+  #listener = tf.TransformListener()
+  #listener.waitForTransform('/base_link', 'kinect_link', rospy.Time(), rospy.Duration(1.0))
+  #piece_pose2 = listener.transformPoint('base_link', piece_pose)
 
   #print(piece_pose2)
   
-
-
-  Red_mask = cv2.medianBlur(Red_mask,9)
   M = cv2.moments(Red_mask)
   try: 
     cX = int(M["m10"] / M["m00"])
@@ -154,7 +137,6 @@ def callback_image(data):
   except ZeroDivisionError as e:
     print("Object not found")
 
-  
   mean_blk = (73.37954475229168, 93.521268925739, 0.0, 0.0)
   delta_blk = 100
   up_h_blk = mean_blk[0] + delta_blk
@@ -190,7 +172,7 @@ def callback_image(data):
 def main(args):
   rospy.init_node('image_sub', anonymous=True)
 
-  global bridge, cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub
+  global bridge, cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, depth_img, Red_mask
   print("Image Processing Node - Looking for piece")
 
   bridge = CvBridge()
