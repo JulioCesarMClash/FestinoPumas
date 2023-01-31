@@ -1,3 +1,5 @@
 <launch>
-  <node pkg="pos_definition" type="position_control.py" name="broadcaster_fixed" />
+  <node name="position_control_broadcaster" pkg="pos_definition" type="position_control.py" respawn="false" output="screen" >
+    <param name="camera" type="string" value="camera_link"/>
+  </node>
 </launch>
