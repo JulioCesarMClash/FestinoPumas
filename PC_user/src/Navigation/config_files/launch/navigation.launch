@@ -1,8 +1,8 @@
 <launch>  
   <arg name="static_map_file"  default="$(find config_files)/maps/Lab_arena_hor_clean.yaml"/>
   <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/Lab_arena_hor_blocked.yaml"/>
-  <arg name="initial_pose_x" default="-2.5"/>
-  <arg name="initial_pose_y" default="2.0"/>
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
   <arg name="laser_scan_topic" default="/scan"/>
   <arg name="point_cloud_topic" default="/hsrb/head_rgbd_sensor/depth_registered/rectified_points"/>
@@ -55,8 +55,8 @@
     <param name="point_cloud_topic" value="$(arg point_cloud_topic)"/>
     <param name="laser_scan_topic" value="$(arg laser_scan_topic)"/>
     <param name="cloud_downsampling" value="$(arg cloud_downsampling)"/>
-    <param name="inflation_radius" value="0.1"/>
-    <param name="cost_radius" value="0.1"/>
+    <param name="inflation_radius" value="0.2"/>
+    <param name="cost_radius" value="0.5"/>
     <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
     <!--###decay_factor-->
 
@@ -91,5 +91,5 @@
 
   </node>
 
-  
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/>
 </launch>
