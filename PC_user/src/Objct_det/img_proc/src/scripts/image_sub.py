@@ -114,8 +114,8 @@ def callback_image(data):
 
   br = tf.TransformBroadcaster()
   rate = rospy.Rate(1.0)
-  #br.sendTransform((piece_pose.point.z, piece_pose.point.x, piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "kinect_link")
-  br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
+  br.sendTransform((piece_pose.point.z, piece_pose.point.x, piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
+  #br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
   
   #listener = tf.TransformListener()
   #listener.waitForTransform('/base_link', 'kinect_link', rospy.Time(), rospy.Duration(1.0))
