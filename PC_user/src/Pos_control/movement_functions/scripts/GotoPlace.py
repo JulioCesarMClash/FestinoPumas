@@ -30,6 +30,9 @@ def locations_doc(loc_name):
     elif loc_name == 'Hallway':
         x = 1.0
         y = -3.0
+    elif loc_name == 'Bedroom':
+        x = 5.167
+        y = -1.350
     else:
         print("No se donde es eso")
         loc_name = 'nowhere'
