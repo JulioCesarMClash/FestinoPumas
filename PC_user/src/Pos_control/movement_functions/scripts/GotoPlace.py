@@ -33,6 +33,12 @@ def locations_doc(loc_name):
     elif loc_name == 'Bedroom':
         x = 5.167
         y = -1.350
+    elif loc_name == 'Docs_Office':
+        x = 0.0
+        y = -2.308
+    elif loc_name == 'Mark_Office':
+        x = 0.0
+        y = -5.542
     else:
         print("No se donde es eso")
         loc_name = 'nowhere'
