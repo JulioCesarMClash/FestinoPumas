@@ -22,7 +22,7 @@ def mps_state_gen():
     machine_types = ['CS','RS','DS','SS','BS']
     mps_type = machine_types[random.randint(0,len(machine_types))]
     mps_num = random.randint(1,2)
-    fail_time = random.randint(0,60)
+    fail_time = random.randint(0,10)
     mps_names = ['M-'+mps_type+str(int(mps_num)),'C-'+mps_type+str(int(mps_num))] 
     state_msg = 'Machine '+mps_names[0]+' down for '+str(int(fail_time))+' sec \nMachine '+mps_names[1]+' down for '+str(int(fail_time))+' sec'
     print(state_msg)
