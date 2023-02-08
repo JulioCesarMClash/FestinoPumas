@@ -2,6 +2,9 @@
 #include <cmath>
 #include "ros/ros.h"
 #include "sensor_msgs/LaserScan.h"
+#include "geometry_msgs/PoseStamped.h"
+#include <tf/transform_listener.h>
+
 
 sensor_msgs::LaserScan laserScan;
 
@@ -98,13 +101,23 @@ bool detectDoorInFront()
 */
 int main(int argc, char** argv)
 {
-	std::cout << "INITIALIZING PLANNING NODE BY NARCOSOFT... " << std::endl;
+	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
     ros::init(argc, argv, "test_planning_1");
     ros::NodeHandle n;
     ros::Subscriber subLaserScan = n.subscribe("/scan", 1, callbackLaserScan);
+    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000);//, latch=True);
     ros::Rate loop(30);
-
-
+    geometry_msgs::PoseStamped loc_tf;
+    loc_tf.header.frame_id = "map";
+    loc_tf.pose.position.x = 0.0;
+    loc_tf.pose.position.y = 0.0;
+    loc_tf.pose.position.z = 0.0;
+    loc_tf.pose.orientation.x = 0.0;
+    loc_tf.pose.orientation.y = 0.0;
+    loc_tf.pose.orientation.z = 0.0;
+    loc_tf.pose.orientation.w = 0.0;
+    tf::TransformListener listener;
+    tf::StampedTransform transform;
 
     while(ros::ok() && !fail && !success){
         switch(state){
@@ -128,18 +141,34 @@ int main(int argc, char** argv)
         		}
         		break;
 
-        	case SM_OPEN_DOOR:
+        	case SM_OPEN_DOOR:{
         		//Navigate case
-        		std::cout << "State machine: SM_OPEN_DOOR" << std::endl;	
+        		std::cout << "State machine: SM_OPEN_DOOR" << std::endl;
+                try{
+                      listener.lookupTransform(argv[1], "/map",  
+                                               ros::Time(0), transform);
+                    }
+                    catch (tf::TransformException ex){
+                      ROS_ERROR("%s",ex.what());
+                      ros::Duration(1.0).sleep();
+                    }
+                //loc_tf.pose.position.x = transform.getOrigin().x();
+                //loc_tf.pose.position.y = transform.getOrigin().y();
+                loc_tf.pose.position.x = 7.260;
+                loc_tf.pose.position.y = -2.304;
+                pub_goal.publish(loc_tf);
+                std::cout << "Goal: "<< argv[1] << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")\n" << std::endl;
         		state = SM_FINAL_STATE;
         		break;
+            }
 
-        	case SM_CLOSE_DOOR:
+        	case SM_CLOSE_DOOR:{
         		//door closed case
         		std::cout << "State machine: SM_CLOSE_DOOR" << std::endl;
-        		std::cout << "____________________________________________________________The door is closed" << std::endl;	
+        		std::cout << "The door is closed" << std::endl;	
         		state = SM_CHECK_DOOR;
         		break;
+            }
 
         	case SM_FINAL_STATE:
         		//Navigate case
