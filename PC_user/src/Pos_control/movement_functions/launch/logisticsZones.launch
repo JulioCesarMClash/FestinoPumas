@@ -1,6 +1,6 @@
 <launch>
   
-  <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="5 -5 0 0 0 0 1 map Log_origin 100" />
+  <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="6 -7 0 0 0 0 1 map Log_origin 100" />
 
   <!--MAGENTA ZONE/-->
   <!--MAGENTA ZONE/-->
@@ -126,24 +126,6 @@
 
   <node pkg="tf" type="static_transform_publisher" name="M_Z78_BC" args="-6.5 7.5 0 0 0 0 1 Log_origin M_Z78 100" />
 
-
-  <node pkg="tf" type="static_transform_publisher" name="M_Z81_BC" args="-7.5 0.5 0 0 0 0 1 Log_origin M_Z81 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="M_Z82_BC" args="-7.5 1.5 0 0 0 0 1 Log_origin M_Z82 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="M_Z83_BC" args="-7.5 2.5 0 0 0 0 1 Log_origin M_Z83 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="M_Z84_BC" args="-7.5 3.5 0 0 0 0 1 Log_origin M_Z84 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="M_Z85_BC" args="-7.5 4.5 0 0 0 0 1 Log_origin M_Z85 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="M_Z86_BC" args="-7.5 5.5 0 0 0 0 1 Log_origin M_Z86 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="M_Z87_BC" args="-7.5 6.5 0 0 0 0 1 Log_origin M_Z87 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="M_Z88_BC" args="-7.5 7.5 0 0 0 0 1 Log_origin M_Z88 100" />
-
-
   <!--CYAN ZONE/-->
   <!--CYAN ZONE/-->
   <!--CYAN ZONE/-->
@@ -268,22 +250,5 @@
   <node pkg="tf" type="static_transform_publisher" name="C_Z77_BC" args="6.5 6.5 0 0 0 0 1 Log_origin C_Z77 100" />
 
   <node pkg="tf" type="static_transform_publisher" name="C_Z78_BC" args="6.5 7.5 0 0 0 0 1 Log_origin C_Z78 100" />
-
-
-  <node pkg="tf" type="static_transform_publisher" name="C_Z81_BC" args="7.5 0.5 0 0 0 0 1 Log_origin C_Z81 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="C_Z82_BC" args="7.5 1.5 0 0 0 0 1 Log_origin C_Z82 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="C_Z83_BC" args="7.5 2.5 0 0 0 0 1 Log_origin C_Z83 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="C_Z84_BC" args="7.5 3.5 0 0 0 0 1 Log_origin C_Z84 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="C_Z85_BC" args="7.5 4.5 0 0 0 0 1 Log_origin C_Z85 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="C_Z86_BC" args="7.5 5.5 0 0 0 0 1 Log_origin C_Z86 100" />
-  
-  <node pkg="tf" type="static_transform_publisher" name="C_Z87_BC" args="7.5 6.5 0 0 0 0 1 Log_origin C_Z87 100" />
-
-  <node pkg="tf" type="static_transform_publisher" name="C_Z88_BC" args="7.5 7.5 0 0 0 0 1 Log_origin C_Z88 100" />
 
 </launch>
