@@ -2,6 +2,8 @@
   
   <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="6 -7 0 0 0 0 1 map Log_origin 100" />
 
+  <node pkg="tf" type="static_transform_publisher" name="MPS_BS_BC" args="4.629 -3.458 0 0 0 0 1 map MPS_BS 100" />
+
   <!--MAGENTA ZONE/-->
   <!--MAGENTA ZONE/-->
   <!--MAGENTA ZONE/-->
