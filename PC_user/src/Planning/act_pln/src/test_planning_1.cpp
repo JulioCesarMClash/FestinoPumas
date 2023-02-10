@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000);//, latch=True);
     ros::Rate loop(30);
     geometry_msgs::PoseStamped loc_tf;
-    loc_tf.header.frame_id = "map";
+    loc_tf.header.frame_id = "/map";
     loc_tf.pose.position.x = 0.0;
     loc_tf.pose.position.y = 0.0;
     loc_tf.pose.position.z = 0.0;
@@ -152,10 +152,11 @@ int main(int argc, char** argv)
                       ROS_ERROR("%s",ex.what());
                       ros::Duration(1.0).sleep();
                     }
-                //loc_tf.pose.position.x = transform.getOrigin().x();
-                //loc_tf.pose.position.y = transform.getOrigin().y();
-                loc_tf.pose.position.x = 7.260;
-                loc_tf.pose.position.y = -2.304;
+                std::cout << transform.getOrigin().x() << ',' << transform.getOrigin().y() << std::endl;
+                loc_tf.pose.position.x = -transform.getOrigin().x();
+                loc_tf.pose.position.y = -transform.getOrigin().y();
+                //loc_tf.pose.position.x = 4.629;
+                //loc_tf.pose.position.y = -3.458;
                 pub_goal.publish(loc_tf);
                 std::cout << "Goal: "<< argv[1] << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")\n" << std::endl;
         		state = SM_FINAL_STATE;

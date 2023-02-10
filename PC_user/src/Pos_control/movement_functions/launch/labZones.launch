@@ -14,8 +14,8 @@
   
   <node pkg="tf" type="static_transform_publisher" name="B_BC" args="5.167 -1.350 0 0 0 0 1 map Bedroom 100" />
 
-  <node pkg="tf" type="static_transform_publisher" name="DO_BC" args="0.0 -2.308 0 0 0 0 1 map Docs_Office 100" />
+  <node pkg="tf" type="static_transform_publisher" name="DO_BC" args="0.0 -2.29 0 0 0 0 1 map Docs_Office 100" />
 
-  <node pkg="tf" type="static_transform_publisher" name="MO_BC" args="0.0 -5.542 0 0 0 0 1 map Mark_Office 100" />
+  <node pkg="tf" type="static_transform_publisher" name="MO_BC" args="0.0 -5.54 0 0 0 0 1 map Mark_Office 100" />
 
 </launch>
