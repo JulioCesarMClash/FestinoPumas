@@ -18,6 +18,8 @@ from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 from cv_bridge import CvBridge, CvBridgeError
 
+bridge = CvBridge()
+
 def move_distance(goal_dist, goal_angle, pub_goal_dist):
   msg_dist = Float32MultiArray()
   msg_dist.data = [goal_dist, goal_angle]
@@ -47,14 +49,6 @@ def callback_depth_points(data):
   Red_mask2 = cv2.bitwise_or(Red_mask1, Fil_R_l3)
   Red_mask3 = cv2.bitwise_or(Red_mask2, Fil_R_l4)
   Red_mask = cv2.medianBlur(Red_mask3,9)
-
-def callback_depth_image(data):
-  global depth_img
-  try:
-    depth_img = bridge.imgmsg_to_cv2(data, "16UC1")
-  except CvBridgeError as e:
-    print(e)
-  depth_img = depth_img*10
   
 def segment_color(img_bgr, img_xyz, hsv_mean):
   img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -71,7 +65,7 @@ def segment_color(img_bgr, img_xyz, hsv_mean):
   return Fil
 
 def callback_image(data):
-  global depth_img, arr, img_bgr, Red_mask, msg_pub
+  global arr, img_bgr, Red_mask, msg_pub
   try:
     cv_image = bridge.imgmsg_to_cv2(data, "bgr8")
   except CvBridgeError as e:
@@ -87,7 +81,7 @@ def callback_image(data):
 
   ######## Looking for ARUCO TAG ########
   image_aruco = cv_image
-  dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_50)
+  dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
   parameters = cv2.aruco.DetectorParameters_create()
   markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(image_aruco, dictionary, parameters=parameters)
 
@@ -104,7 +98,7 @@ def callback_image(data):
       last_corner = (corners[(0,2,0)],corners[(0,2,1)])
           
       image = cv2.rectangle(image_aruco, first_corner, last_corner, color, thickness)
-      if markerIds[i] == 13:
+      if markerIds[i] == 101:
         print("Found MPS_1 ------------- Looking for piece")
         max_x = np.max([last_corner[0],first_corner[0]])
         min_x = np.min([last_corner[0],first_corner[0]])
@@ -127,7 +121,6 @@ def callback_image(data):
 
 
         ######## Looking for Piece ########
-        tfBuffer = tf2_ros.Buffer()
 
         Masked_red = np.zeros((480, 640))
         img_hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -157,7 +150,6 @@ def callback_image(data):
         br = tf.TransformBroadcaster()
         rate = rospy.Rate(1.0)
         br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
-        #br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), "piece_rgbd_sensor_link", "camera_link")
         print("Found Piece ------------- Tf Published")
         
         #listener = tf.TransformListener()
@@ -173,10 +165,6 @@ def callback_image(data):
           cv2.circle(cv_image, (cX, cY), 5, (255, 255, 255), -1)
           cv2.putText(cv_image, "centroid_Red", (cX - 25, cY - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
           Masked_red = cv2.bitwise_and(cv_image, cv_image, mask = Red_mask)
-          cX_depth = cX
-          cY_depth = cY
-          cv2.circle(depth_img, (cX_depth, cY_depth), 5, (0, 255, 255), -1)
-          cv2.putText(depth_img, "centroid_Red", (cX_depth - 25, cY_depth - 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         except ZeroDivisionError as e:
           print("Object not found")
 
@@ -201,7 +189,6 @@ def callback_image(data):
   cv2.imshow("Aruco Tags", image_aruco)
   cv2.imshow("Red Piece Mask", Red_mask)
 
-  
   cv2.waitKey(3)
 
   try:
@@ -212,20 +199,16 @@ def callback_image(data):
 def main(args):
   rospy.init_node('image_sub', anonymous=True)
 
-  global bridge, cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, depth_img, Red_mask, msg_pub
+  global cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, Red_mask, msg_pub
   print("Image Processing Node - Looking for piece")
-
-  bridge = CvBridge()
 
   position_pub      = rospy.Publisher("/redpiece_pos",PointStamped,queue_size=10)
   image_sub         = rospy.Subscriber("/camera/rgb/image_color",Image,callback_image)
-  depth_image_sub   = rospy.Subscriber("/camera/depth/image_raw",Image,callback_depth_image)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
   msg_pub = rospy.Publisher("/speak", String,queue_size=1)
   msg = String()
   
   cv_depth = np.zeros((480, 640))
-  depth_img = np.zeros((480, 640))
   arr = np.zeros((480, 640))
 
   try:
