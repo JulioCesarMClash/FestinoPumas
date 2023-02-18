@@ -149,7 +149,7 @@ int main(int argc, char** argv)
     tf::StampedTransform transform;
     arr_values.stamp.sec = 0;
     arr_values.stamp.nsec = 0;
-    arr_values.values = {0,1,0,0,0,0};
+    arr_values.values = {0,0,0,0,0,0};
     pub_digital.publish(arr_values);
 
     while(ros::ok() && !fail && !success){
@@ -163,6 +163,10 @@ int main(int argc, char** argv)
                 voice.data = msg;
                 pub_speaker.publish(voice);
                 ros::Duration(2, 0).sleep();
+                std::cout << "Open gripper" << std::endl;
+                arr_values.values = {1,0,0,0,0,0};
+                pub_digital.publish(arr_values);
+                ros::Duration(1, 0).sleep();
         		state = SM_CHECK_DOOR;
         		break;
 
@@ -204,8 +208,8 @@ int main(int argc, char** argv)
                 std::cout << transform.getOrigin().x() << ',' << transform.getOrigin().y() << std::endl;
                 loc_tf.pose.position.x = -transform.getOrigin().x();
                 loc_tf.pose.position.y = -transform.getOrigin().y();
-                loc_tf.pose.position.x = 4.629;
-                loc_tf.pose.position.y = -3.458;
+                //loc_tf.pose.position.x = 4.67;
+                //loc_tf.pose.position.y = -3.458;
                 //MPS_BS
                 msg = "Setting destination point";
                 std::cout << msg << std::endl;
@@ -239,6 +243,11 @@ int main(int argc, char** argv)
                 std::cout << "Publishing destination point" << std::endl;
                 pub_goal.publish(loc_tf);
                 std::cout << "Goal: "<< argv[1] << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")\n" << std::endl;
+                msg = "Navigating to destination point";
+                std::cout << msg << std::endl;
+                voice.data = msg;
+                pub_speaker.publish(voice);
+                ros::Duration(3, 0).sleep();
                 state = SM_WAIT_NAV_FINISH;
                 break;
             }
@@ -246,11 +255,6 @@ int main(int argc, char** argv)
             case SM_WAIT_NAV_FINISH:{
                 //wait for finished navigation
                 std::cout << "State machine: SM_WAIT_NAV_FINISH" << std::endl;
-                msg = "Navigating to destination point";
-                std::cout << msg << std::endl;
-                voice.data = msg;
-                pub_speaker.publish(voice);
-                ros::Duration(3, 0).sleep();
                 if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
                     msg = "Goal location reached";
                     std::cout << msg << std::endl;
@@ -259,14 +263,12 @@ int main(int argc, char** argv)
                     ros::Duration(3, 0).sleep();
                     state = SM_GRASP_OBJCT;
                 }
-                simple_move_goal_status.status = actionlib_msgs::GoalStatus::SUCCEEDED;
-                simple_move_status_id = -1;
                 break;
             }
 
             case SM_GRASP_OBJCT:{
                 std::cout << "Close gripper" << std::endl;
-                arr_values.values = {1,0,0,0,1,0};
+                arr_values.values = {0,1,0,0,1,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
                 state = SM_FINAL_STATE;
@@ -276,12 +278,14 @@ int main(int argc, char** argv)
         	case SM_FINAL_STATE:
         		//Navigate case
         		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
-        		sleep(30);
                 msg =  "I have finished test";
                 std::cout << msg << std::endl;
                 voice.data = msg;
                 pub_speaker.publish(voice);
                 ros::Duration(2, 0).sleep();
+                arr_values.values = {0,0,0,0,0,0};
+                pub_digital.publish(arr_values);
+                ros::Duration(1, 0).sleep();
         		success = true;
         		fail = true;
         		break;
