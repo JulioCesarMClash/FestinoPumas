@@ -77,9 +77,6 @@ def callback_depth_points(data):
   dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
   parameters = cv2.aruco.DetectorParameters_create()
   markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(img_bgr, dictionary, parameters=parameters)
-
-  msg = 'Hello, my name is Festino'
-  msg_pub.publish(msg)
   
   color = (255, 0, 0)
   thickness = 2
@@ -169,13 +166,11 @@ def callback_depth_points(data):
 def main(args):
   rospy.init_node('image_sub', anonymous=True)
 
-  global cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, Red_mask, msg_pub
+  global cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, Red_mask
   print("Image Processing Node - Looking for piece")
 
   position_pub      = rospy.Publisher("/redpiece_pos",PointStamped,queue_size=10)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
-  msg_pub = rospy.Publisher("/speak", String,queue_size=1)
-  msg = String()
   
   cv_depth = np.zeros((480, 640))
   arr = np.zeros((480, 640))

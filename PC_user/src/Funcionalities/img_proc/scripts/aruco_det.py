@@ -169,13 +169,11 @@ def callback_depth_points(data):
 def main(args):
   rospy.init_node('aruco_det', anonymous=True)
 
-  global rate, arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, msg_pub
+  global rate, arr, depth_img_bgr, aruco_pos_pub, depth_points_sub
   print("Image Processing Node - Looking for piece")
   rate = rospy.Rate(0.1)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
   aruco_pos_pub     = rospy.Publisher("/aruco_pos",PointStamped,queue_size=10)
-  msg_pub           = rospy.Publisher("/speak", String,queue_size=1)
-  msg = String()
   
   depth_img_bgr = np.zeros((480, 640))
   arr = np.zeros((480, 640))
