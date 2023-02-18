@@ -11,16 +11,12 @@ def talker():
     rospy.init_node('digital_gpio_values', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
         arr_values = DigitalReadings()
         arr_values.stamp.secs = 0
         arr_values.stamp.nsecs = 0
-        arr_values.values = [0,0,0,1,0,1]
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
+        arr_values.values = [0,0,0,0,0,0]
         pub_values.publish(arr_values)
         rate.sleep()
-
 if __name__ == '__main__':
     try:
         talker()
