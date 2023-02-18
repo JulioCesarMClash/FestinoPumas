@@ -9,6 +9,7 @@
 
 	<node name="image_sub" pkg="img_proc" type="image_sub.py" output="screen"> </node>
 	<node name="aruco_det" pkg="img_proc" type="aruco_det.py" output="screen"> </node>
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find funcs_config_files)/include/PointC_Imgs.rviz"/>
+	<node name="speaker" pkg="robotino_talk" type="speaker.py" output="screen"> </node>
+	<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find funcs_config_files)/include/PointC_Imgs.rviz"/-->
 
 </launch>
