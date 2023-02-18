@@ -259,8 +259,6 @@ int main(int argc, char** argv)
                     ros::Duration(3, 0).sleep();
                     state = SM_GRASP_OBJCT;
                 }
-                simple_move_goal_status.status = actionlib_msgs::GoalStatus::SUCCEEDED;
-                simple_move_status_id = -1;
                 break;
             }
 
