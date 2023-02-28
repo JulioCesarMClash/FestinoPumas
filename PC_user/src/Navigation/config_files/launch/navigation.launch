@@ -109,7 +109,7 @@
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/>
 
-  <node name="node_killer" pkg="act_pln" type="node_killer.py">
+  <node name="panic_stop" pkg="act_pln" type="panic_stop.py">
   </node>
 
 </launch>
