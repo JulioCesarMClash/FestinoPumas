@@ -6,19 +6,25 @@ from sensor_msgs.msg import *
 
 
 def callback_joy(data):
-    print(data.buttons[2])
+    stop_pub = rospy.Publisher("/navigation/stop",Empty,queue_size=10)
     if(data.buttons[2]):
-        nodes = os.popen("rosnode list").readlines()
+        alto = Empty()
+        stop_pub.publish(alto)
+        #  Node Killer
+        """nodes = os.popen("rosnode list").readlines()
         for i in range(len(nodes)):
             nodes[i] = nodes[i].replace("\n","")
         for node in nodes:
-            os.system("rosnode kill "+ node)
-        rospy.sleep(5)
+            os.system("rosnode kill "+ node)"""
+    
+    rospy.sleep(1)
 
 
 def main():
-    rospy.init_node('node_killer', anonymous=True)
+    rospy.init_node('panic_stop', anonymous=True)
     joy_sub = rospy.Subscriber("/joy",Joy,callback_joy)
+    
+
     rospy.spin()
 
 

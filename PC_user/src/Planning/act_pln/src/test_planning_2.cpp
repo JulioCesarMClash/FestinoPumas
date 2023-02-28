@@ -15,6 +15,8 @@ sensor_msgs::LaserScan laserScan;
 actionlib_msgs::GoalStatus nav_status;
 int simple_move_status_id = 0;
 actionlib_msgs::GoalStatus simple_move_goal_status;
+std_msgs::String locGoal;
+
 
 
 ros::NodeHandle* nh;
@@ -25,11 +27,15 @@ enum SMState {
 	SM_CHECK_DOOR,
 	SM_OPEN_DOOR,
 	SM_CLOSE_DOOR,
-    SM_SET_LOC,
-    SM_NAVIGATE_LOC,
-    SM_PUB_LOCAION,
+    SM_LISTEN_LOC_TAKE,
+    SM_NAVIGATE2_LOC,
+    SM_PUB_LOC_TAKE,
     SM_WAIT_NAV_FINISH,
+    SM_WAIT_NAV_DEL_FINISH,
+    SM_LISTEN_LOC_DEL,
+    SM_PUB_LOC_DEL,
     SM_GRASP_OBJCT,
+    SM_DELIVER_OBJCT,
 	SM_FINAL_STATE
 };
 
@@ -51,10 +57,6 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     range_c=range/2;
     range_i=range_c-(range/10);
     range_f=range_c+(range/10);
-    //std::cout<<"Range Size: "<< range << "\n ";
-    //std::cout<<"Range Central: "<< range_c << "\n ";
-    //std::cout<<"Range Initial: "<< range_i << "\n ";
-    //std::cout<<"Range Final: "<< range_f << "\n ";
 
     cont_laser=0;
     laser_l=0;
@@ -65,19 +67,14 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
             cont_laser++;
         }
     }
-    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
     if(laser_l/cont_laser > 0.5){
         flag_door = true;
-        //std::cout<<"door open"<<std::endl;
     }
     else {
         flag_door = false;
-        //std::cout<<"door closed"<<std::endl;
     }
-    
-     
-    
 }
+
 
 void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)
 {
@@ -85,47 +82,18 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
     std::stringstream ss;
     ss << msg->goal_id.id;
     ss >> simple_move_status_id;
+    //std::cout << simple_move_goal_status.status << std::endl;
+
 }
 
-/*
-bool detectDoorInFront()
-{
-    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
-    float laser_l=0;
-    range=laserScan.ranges.size();
-    std::cout<<laserScan.ranges.size()<<std::endl;
-    range_c=range/2;
-    range_i=range_c-(range/10);
-    range_f=range_c+(range/10);
-    
-    //cont_laser=0;
-    //laser_l=0;
-    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
-    {
-        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4){ 
-            laser_l=laser_l+laserScan.ranges[i]; 
-            cont_laser++;
-        }
-    }
-    
-    if((laser_l/cont_laser < 0.5) && (laserScan.ranges.size() != 0)){
-        std::cout<<laserScan.ranges.size()<<std::endl;
-        std::cout<<"Range Size: "<< range << "\n ";
-        std::cout<<"RangInie Central: "<< range_c << "\n ";
-        std::cout<<"Range tial: "<< range_i << "\n ";
-        std::cout<<"Range Final: "<< range_f << "\n ";
-        std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
-        return true;
-    }
-    return false;
-}
-*/
+
 int main(int argc, char** argv)
 {
     ros::Time::init();
     bool latch;
+    std::string loc_name;
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
-    ros::init(argc, argv, "test_planning_1");
+    ros::init(argc, argv, "test_planning_2");
     ros::NodeHandle n;
     ros::Subscriber subLaserScan = n.subscribe("/scan", 1, callbackLaserScan);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
@@ -157,13 +125,13 @@ int main(int argc, char** argv)
 
         	case SM_INIT:
         		//Init case
-        		std::cout << "State machine: SM_INIT" << std::endl;	
-                msg = "I am ready for the navigation test";
+        		std::cout << "\nState machine: SM_INIT" << std::endl;	
+                msg = "Ready for the navigation test";
                 std::cout << msg << std::endl;
                 voice.data = msg;
                 pub_speaker.publish(voice);
                 ros::Duration(2, 0).sleep();
-                std::cout << "Open gripper" << std::endl;
+                std::cout << "Opening Gripper" << std::endl;
                 arr_values.values = {1,0,0,0,0,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
@@ -172,7 +140,7 @@ int main(int argc, char** argv)
 
         	case SM_CHECK_DOOR:
         		//Checking open door case
-        		std::cout << "State machine: SM_CHECK_DOOR" << std::endl;
+        		std::cout << "\nState machine: SM_CHECK_DOOR" << std::endl;
                 msg = "Checking Door State";
                 std::cout << msg << std::endl;
                 voice.data = msg;
@@ -188,97 +156,175 @@ int main(int argc, char** argv)
         			state = SM_OPEN_DOOR;	
         		}
         		break;
+            
+            case SM_CLOSE_DOOR:{
+                //door closed case
+                std::cout << "\nState machine: SM_CLOSE_DOOR" << std::endl;
+                msg = "Door closed. Can you open the door, please";
+                std::cout << msg << std::endl;
+                voice.data = msg;
+                pub_speaker.publish(voice);
+                ros::Duration(3, 0).sleep();
+                state = SM_CHECK_DOOR;
+                break;
+            }
+
 
         	case SM_OPEN_DOOR:{
         		//Navigate case
-        		std::cout << "State machine: SM_OPEN_DOOR" << std::endl;
-                msg = "Door Open, thank you";
+        		std::cout << "\nState machine: SM_OPEN_DOOR" << std::endl;
+                msg = "Door Open, Listening to navigation goal";
                 std::cout << msg << std::endl;
                 voice.data = msg;
                 pub_speaker.publish(voice);
                 ros::Duration(2, 0).sleep();
+                state = SM_LISTEN_LOC_TAKE;
+                break;
+            }
+
+            case SM_LISTEN_LOC_TAKE:{
+                std::cout << "\nState machine: SM_LISTEN_LOC_TAKE" << std::endl;
+                std::cout << "Waiting for Take goal" << std::endl;
+                locGoal = *(ros::topic::waitForMessage<std_msgs::String>("zone_goal_take",ros::Duration(100)));
+                loc_name = locGoal.data;
+                std::cout << "Take goal Recieved" << std::endl;
+                //state = SM_PUB_LOC_TAKE;
+                state = SM_GRASP_OBJCT;
+                break;
+            }
+
+            case SM_PUB_LOC_TAKE:{
+                //pub goal location
+                std::cout << "\nState machine: SM_PUB_LOC_TAKE" << std::endl;
                 try{
-                      listener.lookupTransform(argv[1], "/map",  
+                      listener.lookupTransform(loc_name, "/map",  
                                                ros::Time(0), transform);
                     }
                     catch (tf::TransformException ex){
                       ROS_ERROR("%s",ex.what());
                       ros::Duration(1.0).sleep();
                     }
-                std::cout << transform.getOrigin().x() << ',' << transform.getOrigin().y() << std::endl;
                 loc_tf.pose.position.x = -transform.getOrigin().x();
                 loc_tf.pose.position.y = -transform.getOrigin().y();
-                //loc_tf.pose.position.x = 4.67;
-                //loc_tf.pose.position.y = -3.458;
+                //loc_tf.pose.position.x = 4.90;
+                //loc_tf.pose.position.y = -1.6;
                 //MPS_BS
-                msg = "Setting destination point";
-                std::cout << msg << std::endl;
-                voice.data = msg;
-                pub_speaker.publish(voice);
-                ros::Duration(2, 0).sleep();
-                msg = argv[1];
-                std::cout << msg << std::endl;
-                voice.data = msg;
-                pub_speaker.publish(voice);
-                ros::Duration(2, 0).sleep();
-        		state = SM_PUB_LOCAION;
-        		break;
-            }
-
-        	case SM_CLOSE_DOOR:{
-        		//door closed case
-        		std::cout << "State machine: SM_CLOSE_DOOR" << std::endl;
-                msg = "The door is closed. Can you open the door, please";
+                msg = "Publishing Goal Location";
                 std::cout << msg << std::endl;
                 voice.data = msg;
                 pub_speaker.publish(voice);
                 ros::Duration(3, 0).sleep();
-        		state = SM_CHECK_DOOR;
-        		break;
-            }
-
-            case SM_PUB_LOCAION:{
-                //pub goal location
-                std::cout << "State machine: SM_PUB_LOCAION" << std::endl;
-                std::cout << "Publishing destination point" << std::endl;
+                msg = locGoal.data;
+                voice.data = msg;
+                pub_speaker.publish(voice);
+                ros::Duration(2, 0).sleep();
+                
                 pub_goal.publish(loc_tf);
-                std::cout << "Goal: "<< argv[1] << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")\n" << std::endl;
-                msg = "Navigating to destination point";
-                std::cout << msg << std::endl;
-                voice.data = msg;
-                pub_speaker.publish(voice);
-                ros::Duration(3, 0).sleep();
+                std::cout << "Goal: "<< locGoal.data << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")" << std::endl;
+                
                 state = SM_WAIT_NAV_FINISH;
+                //state = SM_GRASP_OBJCT;
                 break;
             }
 
             case SM_WAIT_NAV_FINISH:{
                 //wait for finished navigation
-                std::cout << "State machine: SM_WAIT_NAV_FINISH" << std::endl;
+                std::cout << "\nState machine: SM_WAIT_NAV_FINISH" << std::endl;
                 if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
                     msg = "Goal location reached";
                     std::cout << msg << std::endl;
                     voice.data = msg;
                     pub_speaker.publish(voice);
                     ros::Duration(3, 0).sleep();
+                    simple_move_goal_status.status = actionlib_msgs::GoalStatus::PENDING;
+                    simple_move_status_id = 0;
                     state = SM_GRASP_OBJCT;
                 }
                 break;
             }
 
             case SM_GRASP_OBJCT:{
-                std::cout << "Close gripper" << std::endl;
+                std::cout << "\nState machine: SM_GRASP_OBJCT" << std::endl;
+                std::cout << "Closing Gripper" << std::endl;
                 arr_values.values = {0,1,0,0,1,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
+                //check if the sensor indicates that there is something inside the gripper and continue.
+                state = SM_LISTEN_LOC_DEL;
+                break;
+            }
+
+        case SM_LISTEN_LOC_DEL:{
+                std::cout << "\nState machine: SM_LISTEN_LOC_DEL" << std::endl;
+                std::cout << "Waiting for Deliver Goal" << std::endl;
+                locGoal = *(ros::topic::waitForMessage<std_msgs::String>("zone_goal_del",ros::Duration(100)));
+                loc_name = locGoal.data;
+                std::cout << "Deliver goal Recieved" << std::endl;
+                //state = SM_PUB_LOC_DEL;
+                state = SM_DELIVER_OBJCT;
+                break;
+            }
+
+            case SM_PUB_LOC_DEL:{
+                std::cout << "\nState machine: SM_PUB_LOC_DEL" << std::endl;
+                try{
+                      listener.lookupTransform(loc_name, "/map",  
+                                               ros::Time(0), transform);
+                    }
+                    catch (tf::TransformException ex){
+                      ROS_ERROR("%s",ex.what());
+                      ros::Duration(1.0).sleep();
+                    }
+                loc_tf.pose.position.x = -transform.getOrigin().x();
+                loc_tf.pose.position.y = -transform.getOrigin().y();
+                //loc_tf.pose.position.x = 4.9;
+                //loc_tf.pose.position.y = -1.6;
+                //MPS_BS
+                msg = "Publishing Goal Location";
+                std::cout << msg << std::endl;
+                voice.data = msg;
+                pub_speaker.publish(voice);
+                ros::Duration(3, 0).sleep();
+                msg = locGoal.data;
+                voice.data = msg;
+                pub_speaker.publish(voice);
+                ros::Duration(2, 0).sleep();
+                pub_goal.publish(loc_tf);
+                std::cout << "Goal: "<< locGoal.data << "-> (" << loc_tf.pose.position.x << ", " << loc_tf.pose.position.y << ")" << std::endl;
+                state = SM_WAIT_NAV_DEL_FINISH;
+                //state = SM_DELIVER_OBJCT;
+                break;
+            }
+
+            case SM_WAIT_NAV_DEL_FINISH:{
+                //wait for finished navigation
+                std::cout << "\nState machine: SM_WAIT_NAV_FINISH" << std::endl;
+                if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
+                    msg = "Goal location reached";
+                    std::cout << msg << std::endl;
+                    voice.data = msg;
+                    pub_speaker.publish(voice);
+                    ros::Duration(3, 0).sleep();
+                    state = SM_DELIVER_OBJCT;
+                }
+                break;
+            }
+
+            case SM_DELIVER_OBJCT:{
+                std::cout << "\nState machine: SM_DELIVER_OBJCT" << std::endl;
+                std::cout << "Openning Gripper" << std::endl;
+                arr_values.values = {1,0,0,0,1,0};
+                pub_digital.publish(arr_values);
+                ros::Duration(2, 0).sleep();
                 //check if the sensor indicates that there is something inside the gripper and continue.
                 state = SM_FINAL_STATE;
                 break;
             }
 
+
         	case SM_FINAL_STATE:{
         		//Navigate case
-        		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
+        		std::cout << "\nState machine: SM_FINAL_STATE" << std::endl;	
                 msg =  "I have finished test";
                 std::cout << msg << std::endl;
                 voice.data = msg;

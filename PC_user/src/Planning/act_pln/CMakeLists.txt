@@ -213,3 +213,11 @@ include_directories(
 add_executable(test_planning_1 src/test_planning_1.cpp)
 add_dependencies(test_planning_1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_planning_1 ${catkin_LIBRARIES})
+
+add_executable(test_planning_2 src/test_planning_2.cpp)
+add_dependencies(test_planning_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_planning_2 ${catkin_LIBRARIES})
+
+add_executable(loc_goal_pub src/loc_goal_pub.cpp)
+add_dependencies(loc_goal_pub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(loc_goal_pub ${catkin_LIBRARIES})
