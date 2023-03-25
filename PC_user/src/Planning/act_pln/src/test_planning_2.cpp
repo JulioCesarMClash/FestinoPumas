@@ -188,8 +188,8 @@ int main(int argc, char** argv)
                 locGoal = *(ros::topic::waitForMessage<std_msgs::String>("zone_goal_take",ros::Duration(100)));
                 loc_name = locGoal.data;
                 std::cout << "Take goal Recieved" << std::endl;
-                //state = SM_PUB_LOC_TAKE;
-                state = SM_GRASP_OBJCT;
+                state = SM_PUB_LOC_TAKE;
+                //state = SM_GRASP_OBJCT;
                 break;
             }
 
@@ -260,8 +260,8 @@ int main(int argc, char** argv)
                 locGoal = *(ros::topic::waitForMessage<std_msgs::String>("zone_goal_del",ros::Duration(100)));
                 loc_name = locGoal.data;
                 std::cout << "Deliver goal Recieved" << std::endl;
-                //state = SM_PUB_LOC_DEL;
-                state = SM_DELIVER_OBJCT;
+                state = SM_PUB_LOC_DEL;
+                //state = SM_DELIVER_OBJCT;
                 break;
             }
 
