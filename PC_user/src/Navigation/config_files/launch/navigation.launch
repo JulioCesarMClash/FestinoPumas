@@ -8,7 +8,7 @@
   <arg name="point_cloud_topic" default="/camera/depth_registered/points"/>
   <arg name="use_lidar" default="True"/>
   <arg name="use_sonars" default="False"/>
-  <arg name="use_point_cloud" default="True"/>
+  <arg name="use_point_cloud" default="False"/>
   <arg name="cloud_downsampling" default="9"/>
   <arg name="lidar_downsampling" default="2"/>
   <arg name="cloud_points_threshold" default="100"/>

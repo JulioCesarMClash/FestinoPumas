@@ -45,11 +45,19 @@
       <pose>-2.5 0.5 0 0 0 1.57</pose>
     </include>
     <!-- Team Magenta -->
+<<<<<<< HEAD
     <!--include>
       <name>M-CS1</name>
       <uri>model://mps_cap</uri>
       <pose>-2.5 2.5 0 0 0 3.1415</pose>
     </include-->
+=======
+    <include>
+      <name>M-CS1</name>
+      <uri>model://mps_cap</uri>
+      <pose>-2.5 2.5 0 0 0 3.1415</pose>
+    </include>
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
     
     <!-- Light -->
     <light name="light" type="point">
@@ -138,7 +146,11 @@
 -->
     <!-- Tags (are later grabbed by the mps)  -->
 <!-- Tags for MC-1-->
+<<<<<<< HEAD
     <!--include>
+=======
+    <include>
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
       <name>tag_201</name>
       <uri>model://tag</uri>
       <pose>0 -1 0.2 0 0 0</pose>
@@ -147,7 +159,11 @@
       <name>tag_202</name>
       <uri>model://tag</uri>
       <pose>0 -1 0.2 0 0 0</pose>
+<<<<<<< HEAD
 </include-->
+=======
+</include>
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
 
     <!-- Plugins for the world -->
     <plugin name="llsf_refbox_comm" filename="libllsf_refbox_comm.so" />

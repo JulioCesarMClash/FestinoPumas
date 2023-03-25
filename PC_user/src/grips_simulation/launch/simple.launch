@@ -43,7 +43,10 @@
 
   <!-- START YOUR ROBOT HERE -->
 
+<<<<<<< HEAD
   <include file="/home/robocup20/FestinoPumas/Robotino/src/Hardware/robotino_node/launch/robotino_kinect.launch" />
   <include file="$(find config_files)/launch/navigation_grips_sim.launch" />
 
+=======
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
 </launch>

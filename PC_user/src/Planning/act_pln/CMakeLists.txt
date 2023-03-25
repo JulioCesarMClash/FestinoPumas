@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   robotino_msgs
+  festino_tools
 )
 
 ## System dependencies are found with CMake's conventions
@@ -221,3 +222,7 @@ target_link_libraries(test_planning_2 ${catkin_LIBRARIES})
 add_executable(loc_goal_pub src/loc_goal_pub.cpp)
 add_dependencies(loc_goal_pub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(loc_goal_pub ${catkin_LIBRARIES})
+
+add_executable(random_navigation src/random_navigation.cpp)
+add_dependencies(random_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(random_navigation ${catkin_LIBRARIES})

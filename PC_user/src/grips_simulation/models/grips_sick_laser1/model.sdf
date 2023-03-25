@@ -40,8 +40,14 @@
         <update_rate>5</update_rate>
         <visualize>false</visualize>
         <plugin name="Sick" filename="libgazebo_ros_laser.so">
+<<<<<<< HEAD
         <topicName>scan</topicName>
         <frameName>hokuyo_laser_link</frameName>
+=======
+        <robotNamespace>grips1</robotNamespace>
+        <topicName>scan</topicName>
+        <frameName>grips1/laser</frameName>
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
         </plugin>
         <always_on>1</always_on>
         <update_rate>5</update_rate>

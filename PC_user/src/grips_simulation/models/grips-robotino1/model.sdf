@@ -1,5 +1,9 @@
 <?xml version="1.0" ?>
+<<<<<<< HEAD
 <sdf version="1.5">
+=======
+<sdf version="1.4">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
 
   <model name="grips-robotino1">
 
@@ -23,16 +27,23 @@
       <uri>model://grips-gripper</uri>
       <pose>0.285 0 0.92 0 0 0</pose>
     </include>
+<<<<<<< HEAD
     <include>
       <name>kinect_link</name>
       <uri>model://kinect</uri>
       <pose>0.13 0.0 0.91 0 0 0</pose>
     </include>
+=======
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
 
 
 
 
+<<<<<<< HEAD
     <joint name="base_to_hokuyo" type="revolute">
+=======
+    <joint name="sick_joint" type="revolute">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
       <child>sick_laser::link</child>
       <parent>robotino3::body</parent>
       <pose>0.085 0 0.03 0 0 0</pose>
@@ -70,6 +81,7 @@
       </axis>
     </joint>
 
+<<<<<<< HEAD
     <joint name="kinect_joint" type="fixed">
       <child>kinect_link::link</child>
       <parent>robotino3::body</parent>
@@ -84,11 +96,17 @@
     </joint>
 
   <plugin name="robot_move_plugin" filename="librobot_move_plugin.so">
+=======
+  <plugin name="grips_robot_plugin" filename="libgrips_robot_plugin.so">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
   <robotNamespace>grips1</robotNamespace>
   <opcServerAddress>opc.tcp://localhost:4810</opcServerAddress>
   <globalLocalization>true</globalLocalization>
   </plugin>
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
   </model>
 </sdf>
