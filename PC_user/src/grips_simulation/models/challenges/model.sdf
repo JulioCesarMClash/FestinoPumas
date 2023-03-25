@@ -1,0 +1,169 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="challenges">
+    <pose>0 0 0 0 0 0</pose>
+    <static>true</static>
+    <link name="field">
+      <pose>-2.5 2.5 0.01 0 0 0</pose>
+      <collision name="collision">
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5</size>
+          </plane>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>50</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="carpet">
+        <cast_shadows>false</cast_shadows>
+        <geometry>
+          <plane>
+            <normal>0 0 1</normal>
+            <size>5 5</size>
+          </plane>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://challenges/materials/scripts/</uri>
+            <uri>model://challenges/materials/textures/</uri>
+            <name>Logistics_League_Field/Image</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+
+    <link name="wall_left">
+      <pose>-5 3.57 0.25 0 0 0</pose>
+      <visual name="wall_left-visual">
+        <geometry>
+          <box>
+            <size>.02 2.85 .5</size>
+          </box>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="wall_left-collision">
+        <geometry>
+          <box>
+            <size>.02 2.85 .5</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall_bottom">
+      <pose>-2.19 0 0.25 0 0 1.5707</pose>
+      <visual name="wall_bottom-visual">
+        <geometry>
+          <box>
+            <size>.02 4.4 .5</size>
+          </box>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="wall_bottom-collision">
+        <geometry>
+          <box>
+            <size>.02 4.4 .5</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall_right">
+      <pose>0 2.5 0.25 0 0 0</pose>
+      <visual name="wall_right-visual">
+        <geometry>
+          <box>
+            <size>.02 5 .5</size>
+          </box>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="wall_right-collision">
+        <geometry>
+          <box>
+            <size>.02 5 .5</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall_top_left">
+      <pose>-3.97 5 0.25 0 0 1.5707</pose>
+      <visual name="wall_top_left-visual">
+        <geometry>
+          <box>
+            <size>.02 2.07 .5</size>
+          </box>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="wall_top_left-collision">
+        <geometry>
+          <box>
+            <size>.02 2.07 .5</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="wall_top_right">
+      <pose>-0.5 5 0.25 0 0 1.5707</pose>
+      <visual name="wall_top_right-visual">
+        <geometry>
+          <box>
+            <size>.02 1 .5</size>
+          </box>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+        </material>
+      </visual>
+      <collision name="wall_top_right-collision">
+        <geometry>
+          <box>
+            <size>.02 1 .5</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+
+  </model>
+</sdf>
