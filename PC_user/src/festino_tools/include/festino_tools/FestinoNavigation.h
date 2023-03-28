@@ -28,6 +28,7 @@ private:
     static ros::Publisher pubSimpleMoveDistAngle;
     static ros::Publisher pubSimpleMoveLateral;
     //Publishers and subscribers for mvn_pln
+    static ros::Publisher pubMvnPlnGetCloseLoc;
     static ros::Publisher pubMvnPlnGetCloseXYA;
     static ros::Publisher pubNavigationStop;
     //Publishers and subscribers for localization

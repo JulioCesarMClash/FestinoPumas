@@ -16,6 +16,7 @@ ros::Publisher FestinoNavigation::pubSimpleMoveDist;
 ros::Publisher FestinoNavigation::pubSimpleMoveDistAngle;
 ros::Publisher FestinoNavigation::pubSimpleMoveLateral;
 //Publishers and subscribers for mvn_pln
+ros::Publisher FestinoNavigation::pubMvnPlnGetCloseLoc;
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseXYA;
 ros::Publisher FestinoNavigation::pubNavigationStop;
 //Publishers and subscribers for localization
@@ -37,6 +38,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubSimpleMoveDistAngle = nh->advertise<std_msgs::Float32MultiArray>("/simple_move/goal_dist_angle", 10);
     pubSimpleMoveLateral   = nh->advertise<std_msgs::Float32          >("/simple_move/goal_dist_lateral", 10);
     pubMvnPlnGetCloseXYA   = nh->advertise<geometry_msgs::PoseStamped >("/move_base_simple/goal", 10);
+    pubMvnPlnGetCloseLoc   = nh->advertise<std_msgs::String>           ("/navigation/mvn_pln/get_close_loc", 1);
     pubNavigationStop      = nh->advertise<std_msgs::Empty>            ("/navigation/stop", 10);
     tf_listener = new tf::TransformListener();
 
@@ -196,7 +198,11 @@ void FestinoNavigation::startGetClose(float x, float y, float angle)
 
 void FestinoNavigation::startGetClose(std::string location)
 {
-    
+    std_msgs::String msg;
+    msg.data = location;
+    //FestinoNavigation::_isGlobalGoalReached = false;
+    pubMvnPlnGetCloseLoc.publish(msg);
+    ros::spinOnce();
 }
 
 bool FestinoNavigation::getClose(float x, float y, float angle, int timeOut_ms)
@@ -207,7 +213,8 @@ bool FestinoNavigation::getClose(float x, float y, float angle, int timeOut_ms)
 
 bool FestinoNavigation::getClose(std::string location, int timeOut_ms)
 {
-    
+    FestinoNavigation::startGetClose(location);
+    return FestinoNavigation::waitForGlobalGoalReached(timeOut_ms);   
 }
 
 void FestinoNavigation::stopNavigation()
