@@ -1,0 +1,112 @@
+<?xml version="1.0" ?>
+<<<<<<< HEAD
+<sdf version="1.5">
+=======
+<sdf version="1.4">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+
+  <model name="grips-robotino1">
+
+    <include>
+      <uri>model://robotino3</uri>
+      <pose>0 0 0 0 0 1.57</pose>
+    </include>
+
+    <include>
+      <name>sick_laser</name>
+      <uri>model://grips_sick_laser1</uri>
+      <pose>0.17 0 0.22 0 0 0</pose>
+    </include>
+    <include>
+      <name>camera_tag</name>
+      <uri>model://camera_ar1</uri>
+      <pose>0.2 0 0.53 0 0 0</pose>
+    </include>
+    <include>
+      <name>gripper</name>
+      <uri>model://grips-gripper</uri>
+      <pose>0.285 0 0.92 0 0 0</pose>
+    </include>
+<<<<<<< HEAD
+    <include>
+      <name>kinect_link</name>
+      <uri>model://kinect</uri>
+      <pose>0.13 0.0 0.91 0 0 0</pose>
+    </include>
+=======
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+
+
+
+
+<<<<<<< HEAD
+    <joint name="base_to_hokuyo" type="revolute">
+=======
+    <joint name="sick_joint" type="revolute">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+      <child>sick_laser::link</child>
+      <parent>robotino3::body</parent>
+      <pose>0.085 0 0.03 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+    <joint name="camera_tag_sensor_joint" type="revolute">
+      <child>camera_tag::link</child>
+      <parent>robotino3::body</parent>
+      <pose>0.04 0 0.02 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+    <joint name="gripper_joint" type="revolute">
+      <child>gripper::link_axis_x</child>
+      <parent>robotino3::body</parent>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+<<<<<<< HEAD
+    <joint name="kinect_joint" type="fixed">
+      <child>kinect_link::link</child>
+      <parent>robotino3::body</parent>
+      <pose>0.13 0.0 0.91 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+  <plugin name="robot_move_plugin" filename="librobot_move_plugin.so">
+=======
+  <plugin name="grips_robot_plugin" filename="libgrips_robot_plugin.so">
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+  <robotNamespace>grips1</robotNamespace>
+  <opcServerAddress>opc.tcp://localhost:4810</opcServerAddress>
+  <globalLocalization>true</globalLocalization>
+  </plugin>
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+  </model>
+</sdf>

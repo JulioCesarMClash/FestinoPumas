@@ -1,0 +1,16 @@
+<sdf version='1.7'>
+  <model name='robotino'>
+    <frame name='base_to_hokuyo' attached_to='base_link'>
+      <pose>0.127 0 0.22 0 -0 0</pose>
+    </frame>
+    <frame name='hokuyo_laser_link' attached_to='base_to_hokuyo'/>
+    <frame name='base_to_kinect' attached_to='base_link'>
+      <pose>0.13 0 0.91 0 -0 0</pose>
+    </frame>
+    <frame name='kinect_link' attached_to='base_to_kinect'/>
+    <frame name='platform_joint' attached_to='base_link'>
+      <pose>0 0 0 0 -0 0</pose>
+    </frame>
+    <frame name='platform_link' attached_to='platform_joint'/>
+  </model>
+</sdf>
