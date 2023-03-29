@@ -1,0 +1,10 @@
+insane_mode: false
+decay_rate: 0.5
+num_engineers: 2
+engineer_names: {"1": Al, "2": Bert}  # rosparam doesn't support numeric keys, so we have to make those strings.
+var_name: bar
+pseudo_random_numbers: [42, 666, 13]
+max_speed: .inf
+covariance: [[1, 2], [3, 4]]
+extra_params: {a: b, c: d}
+superfluous: true  # This is a truly superfluous parameter.
