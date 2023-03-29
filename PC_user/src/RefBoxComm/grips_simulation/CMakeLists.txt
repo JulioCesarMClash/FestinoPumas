@@ -122,13 +122,13 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Declare a cpp library
 
-<<<<<<< HEAD
+
 add_library(robot_move_plugin src/robot_move_plugin.cpp)
 target_link_libraries(robot_move_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
-=======
+
 add_library(grips_robot_plugin src/robot_move_plugin.cpp)
 target_link_libraries(grips_robot_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
->>>>>>> ff2589d8822fa20fecd780863cbd53ee42c486cf
+
 
 
 roslint_cpp()
