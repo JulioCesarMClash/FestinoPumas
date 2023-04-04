@@ -183,9 +183,9 @@ class PointingHandsDetector(smach.State):
                     c_pose_stamped.pose.orientation.w = 1
                     #print(c_pose_stamped)
 
-                    r_pose2map = self.tfBuffer.transform(r_pose_stamped, 'map', timeout=rospy.Duration(1))
-                    l_pose2map = self.tfBuffer.transform(l_pose_stamped, 'map', timeout=rospy.Duration(1))
-                    c_pose2map = self.tfBuffer.transform(c_pose_stamped, 'map', timeout=rospy.Duration(1))
+                    #r_pose2map = self.tfBuffer.transform(r_pose_stamped, 'map', timeout=rospy.Duration(1))
+                    #l_pose2map = self.tfBuffer.transform(l_pose_stamped, 'map', timeout=rospy.Duration(1))
+                    #c_pose2map = self.tfBuffer.transform(c_pose_stamped, 'map', timeout=rospy.Duration(1))
 
                     origin2rx = r_pose_stamped.pose.position.x - c_pose_stamped.pose.position.x
                     origin2ry = r_pose_stamped.pose.position.y - c_pose_stamped.pose.position.y
