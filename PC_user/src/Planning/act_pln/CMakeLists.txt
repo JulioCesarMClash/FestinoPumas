@@ -227,6 +227,12 @@ add_executable(random_navigation src/random_navigation.cpp)
 add_dependencies(random_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(random_navigation ${catkin_LIBRARIES})
 
+<<<<<<< HEAD
 add_executable(carry_my_luggage src/carry_my_luggage.cpp)
 add_dependencies(carry_my_luggage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(carry_my_luggage ${catkin_LIBRARIES})
+=======
+add_executable(navigation_challenge_track src/navigation_challenge_track.cpp)
+add_dependencies(navigation_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(navigation_challenge_track ${catkin_LIBRARIES})
+>>>>>>> ec9f213764d28b67be388336fe43b865f5b7724f
