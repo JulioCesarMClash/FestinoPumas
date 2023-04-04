@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     if(ros::param::has("~cmd_vel_topic"))
         ros::param::get("~cmd_vel_topic", cmd_vel_topic);
     ros::Subscriber sub_enable = n->subscribe("/hri/human_following/start_follow", 1, callback_enable);
-    ros::Subscriber sub_stop   = n->subscribe("/stop", 1, callback_stop);
+    ros::Subscriber sub_stop   = n->subscribe("/hri/human_following/stop", 1, callback_stop);
     listener = new tf::TransformListener();
     pub_cmd_vel   = n->advertise<geometry_msgs::Twist>(cmd_vel_topic, 1);
     ros::Rate loop(30);

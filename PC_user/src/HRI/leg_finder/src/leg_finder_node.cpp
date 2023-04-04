@@ -497,7 +497,7 @@ int main(int argc, char** argv)
     if(ros::param::has("~scan_downsampling"))
         ros::param::get("~scan_downsampling", scan_downsampling);
     ros::Subscriber subEnable = n->subscribe("/hri/leg_finder/enable", 1, callback_enable);
-    ros::Subscriber subStop   = n->subscribe("/stop", 1, callback_stop);
+    //ros::Subscriber subStop   = n->subscribe("/hri/leg_finder/stop", 1, callback_stop);
     pub_legs_hypothesis = n->advertise<visualization_msgs::Marker>("/hri/leg_finder/hypothesis", 1);
     pub_legs_pose       = n->advertise<geometry_msgs::PointStamped>("/hri/leg_finder/leg_pose", 1);
     pub_legs_found      = n->advertise<std_msgs::Bool>("/hri/leg_finder/legs_found", 1);            
