@@ -14,11 +14,18 @@ bool FestinoHRI::_legsFound;
 ros::Publisher FestinoHRI::pubHumanFollowerEnable;
 ros::Publisher FestinoHRI::pubHumanFollowerStop;
 
+//Pocket Sphinx
+ros::Subscriber FestinoHRI::subSprHypothesis;
+ros::Publisher FestinoHRI::pubLoadGrammarPocketSphinx;
+ros::Publisher FestinoHRI::pubEnableSpeechPocketSphinx;
+ros::Publisher FestinoHRI::pubEnableGrammarPocketSphinx;
+
+
 //Variables for speech
-/*std::string FestinoHRI::_lastRecoSpeech = "";
+std::string FestinoHRI::_lastRecoSpeech = "";
 std::vector<std::string> FestinoHRI::_lastSprHypothesis;
 std::vector<float> FestinoHRI::_lastSprConfidences;
-bool FestinoHRI::newSprRecognizedReceived = false;*/
+bool FestinoHRI::newSprRecognizedReceived = false;
 
 //
 //The startSomething functions return inmediately after starting the requested action
@@ -43,6 +50,12 @@ bool FestinoHRI::setNodeHandle(ros::NodeHandle* nh)
     //Human Follower
     pubHumanFollowerEnable = nh->advertise<std_msgs::Bool>("/hri/human_following/start_follow", 1);
     pubHumanFollowerStop = nh->advertise<std_msgs::Empty>("/hri/human_following/stop", 1);
+    
+    //Pocketo Sphinxo
+    subSprHypothesis = nh->subscribe("/recognizedSpeech", 1, &FestinoHRI::callbackSprHypothesis);
+    //pubLoadGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetFile>("/pocketsphinx/set_jsgf", 1);
+    //pubEnableSpeechPocketSphinx = nh->advertise<std_msgs::Bool>("/pocketsphinx/mic", 1);
+    //pubEnableGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetSearch>("/pocketsphinx/set_search", 1);
     return true;
 }
 
@@ -119,6 +132,50 @@ void FestinoHRI::stopHumanFollower(){
     std_msgs::Empty msg;
     FestinoHRI::pubHumanFollowerStop.publish(msg);
 }
+
+//Pocket sphinx
+
+/*
+//Load jsgf file
+void FestinoHRI::loadGrammarSpeechRecognized(std::string id, std::string grammar){
+    hri_msgs::SphinxSetFile msg;
+    msg.id = id;
+    msg.file_path = grammar;
+    pubLoadGrammarPocketSphinx.publish(msg);
+}
+
+//Enable mic
+void FestinoHRI::enableSpeechRecognized(bool enable){
+
+    std::cout << "FestinoHRI.->Enable grammar: " << enable << std::endl;
+    std_msgs::Bool msg;
+    msg.data = enable;
+    pubEnableSpeechPocketSphinx.publish(msg);
+ 
+}
+
+//search topic 
+void FestinoHRI::enableGrammarSpeechRecognized(std::string id, float recognitionTime){
+    hri_msgs::SphinxSetSearch msg;
+    msg.search_id = id;
+    msg.recognitionTime = recognitionTime;
+    pubEnableGrammarPocketSphinx.publish(msg);
+}
+*/
+void FestinoHRI::callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg)
+{
+    if(msg->hypothesis.size() < 1 || msg->confidences.size() < 1)
+    {
+        std::cout << "FestinoHRI.->Invalid speech recog hypothesis: msg is empty" << std::endl;
+        return;
+    }
+    _lastRecoSpeech = msg->hypothesis[0];
+    _lastSprHypothesis = msg->hypothesis;
+    _lastSprConfidences = msg->confidences;
+    std::cout << "FestinoHRI.->Last reco speech: " << _lastRecoSpeech << std::endl;
+    newSprRecognizedReceived = true;
+}
+
 
 /*
 //ESTA SE USA

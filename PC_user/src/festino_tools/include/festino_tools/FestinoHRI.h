@@ -7,6 +7,9 @@
 #include "std_msgs/Empty.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/String.h"
+#include "hri_msgs/RecognizedSpeech.h"
+#include "hri_msgs/SphinxSetFile.h"
+#include "hri_msgs/SphinxSetSearch.h"
 //#include "sound_play/RequestSound.h"
 #include "geometry_msgs/PointStamped.h"
 //#include "boost/date_time/posix_time/posix_time.hpp"
@@ -32,6 +35,17 @@ private:
     //Human Follower
     static ros::Publisher pubHumanFollowerEnable;
     static ros::Publisher pubHumanFollowerStop;
+    
+    //Pocket Sphinx
+    static ros::Subscriber subSprHypothesis;
+    static ros::Publisher pubLoadGrammarPocketSphinx;
+    static ros::Publisher pubEnableSpeechPocketSphinx;
+    static ros::Publisher pubEnableGrammarPocketSphinx; 
+    
+    static std::string _lastRecoSpeech;
+    static std::vector<std::string> _lastSprHypothesis;
+    static std::vector<float> _lastSprConfidences;
+    static bool newSprRecognizedReceived;
 
 
     //static ros::Subscriber subRecognized;
@@ -70,6 +84,12 @@ public:
     static void enableHumanFollower(bool enable);
     static void stopHumanFollower();
 
+    //Pocket Sphinx
+    static void loadGrammarSpeechRecognized(std::string id, std::string grammar);
+    static void enableSpeechRecognized(bool enable);
+    static void enableGrammarSpeechRecognized(std::string id, float recognitionTime);
+    
+    
     //static void playSound(); 
     /*static void FestinoHRI::startFollowHuman();
     static void FestinoHRI::stopFollowHuman();
@@ -84,7 +104,9 @@ public:
     static void FestinoHRI::callbackLegsPoses(const geometry_msgs::PointStamped::ConstPtr& msg);
     static void FestinoHRI::callbackLegsPosesRear(const geometry_msgs::PointStamped::ConstPtr& msg);
     static bool FestinoHRI::waitAfterSay(std::string strToSay, int timeout, int delay);*/
-/*private:
+private:
     //Speech recog and synthesis
-    static void callbackSprRecognized(const hri_msgs::RecognizedSpeech::ConstPtr& msg);*/
+    static void callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg);
+    
+    
 };

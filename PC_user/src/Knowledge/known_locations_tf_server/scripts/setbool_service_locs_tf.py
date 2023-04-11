@@ -12,7 +12,6 @@ import pandas as pd
 from geometry_msgs.msg import TransformStamped
 from copy import deepcopy
 global path 
-path = '/home/takeshi/Codes/known_locations.txt'
 def write_tf(pose, q, child_frame , parent_frame='map'):
     t= TransformStamped()
     t.header.stamp = rospy.Time(0)
@@ -50,7 +49,7 @@ def read_tf(t):
 
 def read_yaml(known_locations_file = '/known_locations.yaml'):
     
-    file_path = '/home/festino/ws_bk/src/config_files' + known_locations_file
+    file_path = '~/FestinoPumas/PC_user/src/Navigation/config_files' + known_locations_file
 
     with open(file_path, 'r') as file:
         content = yaml.safe_load(file)
