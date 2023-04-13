@@ -1,4 +1,4 @@
 #JSGF V1.0;
 grammar final_tmr_grammar;
 public <final_tmr> = (<validCommands>);
-<validCommands> = (pick up the objects | follow me | this is the kitchen table | deliver object to the living room | take it to the kitchen table | stop follow me );
+<validCommands> = (follow me | stop follow me | here is the car | robot yes | robot no);

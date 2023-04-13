@@ -18,14 +18,17 @@ from vision_msgs.msg import Keypoint
 from vision_msgs.msg import HumanCoordinates 
 from vision_msgs.msg import HumanCoordinatesArray
 
+from std_msgs.msg import Bool
+
 class PointingHandsDetector(smach.State):
     
-    def __init__(self,timeout=60.,tfBuffer=None):
+    def __init__(self,timeout=9000.,tfBuffer=None):
         smach.State.__init__(self,
                              outcomes=['success','failure','timeout'],
                              output_keys=['human_coordinate'])
 
         self.human_coordinate = None
+        self.string_hand = False
 
         self.timeout = timeout
 
@@ -200,8 +203,10 @@ class PointingHandsDetector(smach.State):
 
                     if sqrt_r > sqrt_l:
                         print("Pointing by R hand")
+                        self.string_hand = False
                     if sqrt_r < sqrt_l:
                         print("Pointing by L hand")
+                        self.string_hand = True
 
         except KeyError:
             pass
@@ -211,16 +216,26 @@ class PointingHandsDetector(smach.State):
 
     def execute(self,userdata):
         try:
+            pub = rospy.Publisher('/vision/pointing_hand/status', Bool, queue_size=10)
             sub = rospy.Subscriber('/human_coordinates_array', HumanCoordinatesArray, self.callback) 
             start_time = rospy.Time.now()
             while not rospy.is_shutdown():
+                if self.string_hand == False:
+                    #R hand
+                    pub.publish(False)
+                else:
+                    #L hand
+                    pub.publish(True)
+
+
                 if self.human_coordinate:
     
                     userdata.human_coordinate = self.human_coordinate
                     print("to userdata variable ->> ",self.human_coordinate)
                     sub.unregister()
                     return 'success'
-    
+
+                
                 if (rospy.Time.now() - start_time).to_sec() > self.timeout:
                     sub.unregister()
                     return 'timeout'
@@ -230,6 +245,7 @@ class PointingHandsDetector(smach.State):
             return 'failure'
 
 if __name__ == '__main__':
+
         rospy.init_node('pointing_hand_detection_state')
         sm = smach.StateMachine(outcomes=['success','failure'])
 

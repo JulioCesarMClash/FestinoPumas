@@ -3,7 +3,7 @@
 	<arg name="_lm" value="_lm:=/usr/share/pocketsphinx/model/en-us/en-us"/>
 	<arg name="_dict" value="_dict:=/usr/local/lib/python3.8/dist-packages/pocketsphinx/model/cmudict-en-us.dict"/>
 	<arg name="_kws" value="_kws:=/home/robocup/Downloads/Pochetsphinx_packages/pocketsphinx/knowledge_base/kwlist/voice_cmd.kwlist"/>
-	<arg name="_jsgf" value="_jsgf:=/home/robocup/Downloads/Pochetsphinx_packages/pocketsphinx/grammars/final_tmr.jsgf"/>
+	<arg name="_jsgf" value="_jsgf:=/home/robocup/FestinoPumas/PC_user/src/HRI/pocketsphinx/grammars/final_tmr.jsgf"/>
 	<arg name="_stream" value="_stream:=true"/>
 	<arg name="_wavpath" value="_wavpath:=none"/>
 	<arg name="_output" value="_output:=/sphinx_result"/>

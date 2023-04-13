@@ -1,0 +1,36 @@
+#pragma once
+#include <iostream>
+#include <string>
+#include <vector>
+#include "ros/ros.h"
+#include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Bool.h"
+#include "std_msgs/Float32.h"
+#include "std_msgs/String.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/PoseStamped.h"
+
+class FestinoKnowledge
+{
+private:
+	static bool is_node_set;
+
+	//know_locations_parser
+	static std::vector<float> _position;
+    static std::vector<float> _orientation;
+    static std::vector<float> _location;
+	static ros::Publisher pubLocationParser;
+	static ros::Subscriber subLocationPose;
+
+public:
+	static bool setNodeHandle(ros::NodeHandle* nh);
+
+	//know_locations_parser
+	static void GoToLocation(std::string location);
+	static std::vector<float> CoordenatesLoc();
+
+private:
+	static void callbackLocPose(const geometry_msgs::PoseStamped::ConstPtr& msg);
+
+};

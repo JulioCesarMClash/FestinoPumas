@@ -24,6 +24,7 @@ add_message_files(
   HumanCoordinatesArray.msg
   VisionObject.msg
   VisionObjects.msg
+
 )
 
 

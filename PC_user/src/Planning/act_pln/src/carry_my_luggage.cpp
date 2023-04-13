@@ -16,10 +16,13 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 #include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoVision.h"
 
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
+	SM_WAIT_FOR_BAG,
+	SM_FIND_BAG,
 	SM_FIND_PERSON,
 	SM_WAIT_FOR_ZONES,
 	SM_CALC_EU_DIST,
@@ -30,14 +33,15 @@ enum SMState {
 bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
-bool flag_zones = false;
+/*bool flag_zones = false;
 std::vector<std_msgs::String> target_zones;
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
-int simple_move_status_id = 0;
+int simple_move_status_id = 0;*/
 
 
+/*
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
     new_zone = *msg;
@@ -54,7 +58,7 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
     std::stringstream ss;
     ss << msg->goal_id.id;
     ss >> simple_move_status_id;
-}
+}*/
 
 /*void wait_conformation(msg)
 {
@@ -67,7 +71,7 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
     return 0;
 }*/
 
-void transform_zones()
+/*void transform_zones()
 {
 
 	tf::TransformListener listener;
@@ -88,7 +92,7 @@ void transform_zones()
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
     }
-}
+}*/
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -97,30 +101,14 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
     FestinoHRI::setNodeHandle(&n);
-
-    //Subscribers and Publishers
-    ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
-    ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    //ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
-    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    FestinoVision::setNodeHandle(&n);
 
     ros::Rate loop(30);
 
+    //Speaker
     std::string voice;
-
-    int min_indx;
-
-    //TF related stuff 
-	for(int i=0; i<target_zones.size(); i++){
-    	tf_target_zones.at(i).header.frame_id = "/map";
-	    tf_target_zones.at(i).pose.position.x = 0.0;
-	    tf_target_zones.at(i).pose.position.y = 0.0;
-	    tf_target_zones.at(i).pose.position.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.x = 0.0;
-	    tf_target_zones.at(i).pose.orientation.y = 0.0;
-	    tf_target_zones.at(i).pose.orientation.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.w = 0.0;
-    }
+    //Open Pose
+    bool pointing_hand;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -129,26 +117,83 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            //voice = "I am ready for the navigation challenge";
 	            ros::Duration(2, 0).sleep();
+	            FestinoHRI::enableSpeechRecognized(false);
 	            voice = "I am ready for the navigation challenge";
 	            FestinoHRI::say(voice, 5);
-	    		state = SM_FIND_PERSON;
+	    		state = SM_FIND_BAG;
 	    		break;
-	    	case SM_FIND_PERSON:
-	    		std::cout << "State machine: SM_FIND_PESON" << std::endl;	
-	    		//Leg finder
-	    		//Una vez encontrada que se presente Festino e indique al operador que señale la bolsa 
-	    		voice = "Do you want me to carry a bag for you?, tell me Festino yes or Festino no";
-	    		FestinoHRI::enableLegFinder(true);
+	    	case SM_FIND_BAG:{
+	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;
+	    		voice = "Please point at the object that you want me to carry";
+	    		FestinoHRI::say(voice, 5);
+				voice = "Are you already pointing at the object? tell me Robot yes or Robot no";
+				FestinoHRI::say(voice, 5);
 
-	    		if(!FestinoHRI::frontalLegsFound()){
-	    			std::cout << "Not foun" << std::endl;
-	    			FestinoHRI::enableHumanFollower(false);
-	    			state = SM_FIND_PERSON;
+				//Enable speech recognition 
+				FestinoHRI::enableSpeechRecognized(true);
+	    		ros::Duration(2, 0).sleep();
+
+	    		//Waiting for the operator to confirm
+	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
+	    			pointing_hand = FestinoVision::PointingHand();
+	    			if (pointing_hand){
+		    			voice = "Please put the left bag on the platform";
+		            	FestinoHRI::say(voice, 5);
+	    			}
+	    			else{
+		    			voice = "Please put the right bag on the platform";
+		            	FestinoHRI::say(voice, 5);
+	    			}
+	    			FestinoHRI::enableLegFinder(true);
+	    			FestinoHRI::enableSpeechRecognized(false);
+	    			state=SM_WAIT_FOR_BAG;
+	    		}
+
+	            //FestinoHRI::say(voice, 5);
+	    		//Open pose 
+	    		//pointing_hand = FestinoVision::PointingHand();
+	    		//ros::Duration(2, 0).sleep();
+	    		/*if (pointing_hand){
+	    			voice = "Put the left bag on the platform";
+	            	FestinoHRI::say(voice, 5);
 	    		}
 	    		else{
-	    			FestinoHRI::enableHumanFollower(true);
-	    			state = SM_FINAL_STATE;
+	    			voice = "Put the right bag on the platform";
+	            	FestinoHRI::say(voice, 5);
+	    		}*/
+
+	    		//state = SM_FIND_PERSON;
+	    		break;
+	        }
+	    	case SM_WAIT_FOR_BAG:
+	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;	
+	    		//Leg finder
+	    		//Una vez encontrada que se presente Festino e indique al operador que señale la bolsa 
+	    		/*voice = "Do you want me to carry a bag for you?, tell me Robot yes or Robot no";
+	    		FestinoHRI::say(voice, 5);
+	    		FestinoHRI::enableSpeechRecognized(true);
+	    		ros::Duration(2, 0).sleep();
+
+	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000))
+                    std::cout << "yes" << std::endl;
+                else 	
+                	std::cout << "no" << std::endl;
+	    		*/
+
+
+	    		voice = "Have you already put the bag? tell me Robot yes or Robot no";
+				FestinoHRI::say(voice, 5);
+
+
+				FestinoHRI::enableSpeechRecognized(true);
+				ros::Duration(2, 0).sleep();
+
+				//Waiting for the operator to confirm
+	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
+	    			FestinoHRI::enableSpeechRecognized(false);
+					state = SM_FIND_PERSON;
 	    		}
+
 	    		
 	            /*if(wait_conformation(msg)){
 	            	state = SM_FIND_BAG;
@@ -157,6 +202,20 @@ int main(int argc, char** argv){
 	            {
 	            	state = SM_FIND_PESON;
 	            }*/
+	            //state = SM_FINAL_STATE;
+	    		break;
+	    	case SM_FIND_PERSON:
+				std::cout << "State machine: SM_FIND_PESON" << std::endl;	
+    			if(!FestinoHRI::frontalLegsFound()){
+	    			std::cout << "Not foun" << std::endl;
+	    			FestinoHRI::enableHumanFollower(false);
+	    			state = SM_FIND_PERSON;
+	    		}
+    			else{
+	    			FestinoHRI::enableHumanFollower(true);
+	    			state = SM_FINAL_STATE;
+	    		}
+
 	    		break;
 	    	/*case SM_FIND_BAG:{
 	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;

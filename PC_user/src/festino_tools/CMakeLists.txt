@@ -239,6 +239,8 @@ add_library(festino_tools
 #  src/JustinaVision.cpp
   src/FestinoNavigation.cpp
   src/FestinoHRI.cpp
+  src/FestinoKnowledge.cpp
+  src/FestinoVision.cpp
 )
 
 add_dependencies(festino_tools ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

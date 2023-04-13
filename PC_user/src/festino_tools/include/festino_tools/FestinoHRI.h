@@ -21,9 +21,7 @@ class FestinoHRI
 {
 private:
     static bool is_node_set;
-    //Members for operating speech synthesis and recognition. (Assuming that blackboard modules are used)
-    //static ros::Publisher pubSay;
-
+    
     //Speaker  
     static ros::Publisher pubSpeaker;
 
@@ -61,17 +59,6 @@ private:
 public:
     
     static bool setNodeHandle(ros::NodeHandle* nh);
-    //Methods for speech synthesis and recognition
-    /*static bool waitForSpeechRecognized(std::string& recognizedSentence, int timeOut_ms);
-    static bool waitForSpeechHypothesis(std::vector<std::string>& sentences, std::vector<float>& confidences, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string expectedSentence, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3,
-                                        std::string& recog, int timeOut_ms);
-    static bool waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms);
-    static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
-    static std::string lastRecogSpeech();*/
-    //static void startSay(std::string strToSay);
     //Speaker
     static void say(std::string strToSay, int timeout);
 
@@ -88,22 +75,18 @@ public:
     static void loadGrammarSpeechRecognized(std::string id, std::string grammar);
     static void enableSpeechRecognized(bool enable);
     static void enableGrammarSpeechRecognized(std::string id, float recognitionTime);
-    
-    
-    //static void playSound(); 
-    /*static void FestinoHRI::startFollowHuman();
-    static void FestinoHRI::stopFollowHuman();
-    static void FestinoHRI::enableLegFinder(bool enable);
-    static void FestinoHRI::enableLegFinderRear(bool enable);
-    static bool FestinoHRI::frontalLegsFound();
-    static bool FestinoHRI::rearLegsFound();
-    static void FestinoHRI::getLatestLegsPoses(float &x, float &y);
-    static void FestinoHRI::getLatestLegsPosesRear(float &x, float &y);
-    static void FestinoHRI::callbackLegsFound(const std_msgs::Bool::ConstPtr& msg);
-    static void FestinoHRI::callbackLegsRearFound(const std_msgs::Bool::ConstPtr& msg);
-    static void FestinoHRI::callbackLegsPoses(const geometry_msgs::PointStamped::ConstPtr& msg);
-    static void FestinoHRI::callbackLegsPosesRear(const geometry_msgs::PointStamped::ConstPtr& msg);
-    static bool FestinoHRI::waitAfterSay(std::string strToSay, int timeout, int delay);*/
+    static bool waitForSpeechRecognized(std::string& recognizedSentence, int timeOut_ms);
+    static bool waitForSpeechHypothesis(std::vector<std::string>& sentences, std::vector<float>& confidences, int timeOut_ms);
+    static bool waitForSpecificSentence(std::string expectedSentence, int timeOut_ms);
+    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms);
+    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3,
+                                        std::string& recog, int timeOut_ms);
+    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3, std::string option4,
+                                        std::string& recog, int timeOut_ms);
+    static bool waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms);
+    static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
+    static std::string lastRecogSpeech();
+
 private:
     //Speech recog and synthesis
     static void callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg);
