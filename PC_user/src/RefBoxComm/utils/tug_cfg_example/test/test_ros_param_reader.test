@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <test test-name="test_ros_param_reader" pkg="tug_cfg_example" type="tug_cfg_example_test_ros_param_reader" time-limit="10.0">
+    <rosparam param="example1" file="$(find tug_cfg_example)/test/example1.yaml"/>
+  </test>
+</launch>

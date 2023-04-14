@@ -1,0 +1,9 @@
+insane_mode: { type: bool, default: false, description: "Only switch this on if you're absolutely sure what you're doing", dynamic: true }
+decay_rate: { type: double, unit: "1/s", default: 0.3, min: 1.e-9, max: 1.0, description: "Rate of software decay", dynamic: true }
+num_engineers: { type: int, default: 3, description: "How many software engineers are needed to change a light bulb", dynamic: true }
+engineer_names: { type: "str[int]", description: "Name of each engineer (1..num_engineer) (optional)" }
+var_name: { type: str, default: foo, choices: [foo, bar, baz], description: "Choosing a proper name is often hard", dynamic: true }
+pseudo_random_numbers: { type: "int[]", description: "Please make sure these are very random" }
+max_speed: { type: double, unit: "m/s", default: 0.1, description: "Put the pedal to the metal" }
+covariance: { type: "int[][]", description: "Covariance between enigineers (1..num_engineers) and pseudo_random_numbers" }
+extra_params: { type: "str[str]", description: "Whatever you'd like to add" }
