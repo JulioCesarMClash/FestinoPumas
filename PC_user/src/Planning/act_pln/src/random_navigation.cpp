@@ -5,25 +5,33 @@
 #include "std_msgs/Float64.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoKnowledge.h"
 
 
 geometry_msgs::PoseStamped position;
+std::vector<float> goal_vec(3);
+std::string location = "nuevito";
+
 int main (int argc, char** argv)
 {
     std::cout << "Moving arms and base practice"<< std::endl;
     ros::init(argc, argv, "moving_practice");
     ros::NodeHandle n("~");
     FestinoNavigation::setNodeHandle(&n);
+    FestinoKnowledge::setNodeHandle(&n);
     
     ros::Rate loop(10);
     loop.sleep();
     while(ros::ok())
     {
-        float goal_x = (rand()%1000)/100.0;
-        float goal_y = (rand()%1000)/100.0-1.0;
-        float goal_a = (rand()%628)/100.0-3.14;
-        std::cout <<"Moving to:"<< goal_x <<" "<< goal_y << " " << goal_a << std::endl;
-        if(FestinoNavigation::getClose(goal_x, goal_y, goal_a, 30000))
+        //float goal_x = (rand()%1000)/100.0;
+        //float goal_y = (rand()%1000)/100.0-1.0;
+        //float goal_a = (rand()%628)/100.0-3.14;
+        goal_vec = FestinoKnowledge::CoordenatesLocSrv(location);
+        std::cout <<"Moving to:"<< goal_vec[0] <<" "<< goal_vec[1] << " " << goal_vec[2] << std::endl;
+        //std::cout <<"Moving to:"<< goal_x <<" "<< goal_y << " " << goal_a << std::endl;
+        //if(FestinoNavigation::getClose(goal_x, goal_y, goal_a, 30000))
+        if(FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 30000))
             std::cout << "Global goal reached" << std::endl;
         else
             std::cout << "Cannnot navigate to goal pose" << std::endl;

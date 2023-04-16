@@ -10,6 +10,9 @@
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "act_pln/Locate_server.h"
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
 
 class FestinoKnowledge
 {
@@ -22,6 +25,7 @@ private:
     static std::vector<float> _location;
 	static ros::Publisher pubLocationParser;
 	static ros::Subscriber subLocationPose;
+	static ros::ServiceClient cltLocSrv;
 
 public:
 	static bool setNodeHandle(ros::NodeHandle* nh);
@@ -29,6 +33,7 @@ public:
 	//know_locations_parser
 	static void GoToLocation(std::string location);
 	static std::vector<float> CoordenatesLoc();
+	static std::vector<float> CoordenatesLocSrv(std::string location);
 
 private:
 	static void callbackLocPose(const geometry_msgs::PoseStamped::ConstPtr& msg);
