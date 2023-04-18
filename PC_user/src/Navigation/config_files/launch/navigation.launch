@@ -1,6 +1,6 @@
 <launch>  
-  <arg name="static_map_file"  default="$(find config_files)/maps/Lab_arena_hor_clean.yaml"/>
-  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/Lab_arena_hor_blocked.yaml"/>
+  <arg name="static_map_file"  default="$(find config_files)/maps/map.yaml"/>
+  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/map.yaml"/>
   <arg name="initial_pose_x" default="1.8"/>
   <arg name="initial_pose_y" default="-4.5"/>
   <arg name="initial_pose_a" default="0.0"/>

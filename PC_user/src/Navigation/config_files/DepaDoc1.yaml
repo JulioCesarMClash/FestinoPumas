@@ -1,0 +1,24 @@
+exit_prueba:
+- x: -0.57
+- y: 0.435
+- theta: 1.282
+- qx: 0.0
+- qy: 0.0
+- qz: 0.598
+- qw: 0.801
+inspection_point:
+- x: -0.779
+- y: -0.703
+- theta: -1.279
+- qx: 0.0
+- qy: 0.0
+- qz: -0.596
+- qw: 0.802
+start_ponit_1:
+- x: -6.412
+- y: 1.511
+- theta: 2.01
+- qx: 0.0
+- qy: 0.0
+- qz: 0.844
+- qw: 0.535
