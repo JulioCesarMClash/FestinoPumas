@@ -63,13 +63,13 @@ int main(int argc, char** argv)
         {
             case SM_INIT:
                 std::cout << "State machine: SM_INIT" << std::endl;
-                arr_values.values = {1,1,1,0,0,0};
+                arr_values.values = {0,0,0,1,1,1};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
                 arr_values.values = {0,0,0,0,0,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
-                arr_values.values = {1,1,1,0,0,0};
+                arr_values.values = {0,0,0,1,1,1};
                 pub_digital.publish(arr_values);
                 
                 FestinoHRI::say("I am ready for robot inspection",3);
@@ -78,13 +78,13 @@ int main(int argc, char** argv)
 
             case SM_WAIT_FOR_DOOR:
                 std::cout << "State machine: SM_WAIT_FOR_DOOR" << std::endl;
-                arr_values.values = {0,1,0,0,0,0};
+                arr_values.values = {0,0,0,0,1,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
                 arr_values.values = {0,0,0,0,0,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();
-                arr_values.values = {0,1,0,0,0,0};
+                arr_values.values = {0,0,0,0,1,0};
                 pub_digital.publish(arr_values);
                 FestinoHRI::say("I am waiting for the door to be open",3);
                 //if(!FestinoNavigation::obstacleInFront())
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
                 //FestinoNavigation::moveDist(1.0, 4000);
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv("inspection_point");
                 std::cout <<"Coordenates of inspection_point:"<<std::endl;
-                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::enl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
                     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
                     	std::cout << "Cannot move to inspection point" << std::endl;
@@ -233,11 +233,11 @@ int main(int argc, char** argv)
                 //FestinoNavigation::moveDist(1.0, 4000);
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv("exit");
                 std::cout <<"Coordenates of exit:"<<std::endl;
-                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::enl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                
-                if(!JustinaNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
-                    if(!JustinaNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
-                        if(!JustinaNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
+                        if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
                         success = true;
                 break;
         }

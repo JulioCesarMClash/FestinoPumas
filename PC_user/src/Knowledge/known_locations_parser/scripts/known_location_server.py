@@ -9,7 +9,7 @@ from geometry_msgs.msg import PoseStamped
 import tf as tf
 from known_locations_parser.srv import *
 
-def read_yaml(known_locations_file = '/known_locations.yaml'):
+def read_yaml(known_locations_file = '/DepaDoc1.yaml'):
 	rospack = rospkg.RosPack()
 	file_path = rospack.get_path('config_files') + known_locations_file
 
