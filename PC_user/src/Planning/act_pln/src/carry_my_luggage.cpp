@@ -16,6 +16,7 @@
 #include "festino_tools/FestinoHRI.h"
 #include "festino_tools/FestinoVision.h"
 #include "festino_tools/FestinoNavigation.h"
+#include "robotino_msgs/DigitalReadings.h"
 
 
 enum SMState {
@@ -46,6 +47,8 @@ int main(int argc, char** argv){
     FestinoVision::setNodeHandle(&n);
     FestinoNavigation::setNodeHandle(&n);
 
+    ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
+
     ros::Rate loop(30);
 
     //Speaker
@@ -56,11 +59,21 @@ int main(int argc, char** argv){
     //False - Right
     bool pointing_hand;
 
+    //Robotino Lights
+    robotino_msgs::DigitalReadings arr_values;
+    arr_values.stamp.sec = 0;
+    arr_values.stamp.nsec = 0;
+    arr_values.values = {0,0,0,0,0,0};
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
+	    		
+	    		arr_values.values = {0,0,0,1,1,1};
+                pub_digital.publish(arr_values);
+
 	            ros::Duration(2, 0).sleep();
 	            FestinoHRI::enableSpeechRecognized(false);
 	            voice = "I am ready for the carry my luggage challenge";
@@ -227,7 +240,7 @@ int main(int argc, char** argv){
 	    		FestinoHRI::enableHumanFollower(false);
 
 	    		state = SM_FINAL_STATE;
-	    		
+
 	    		break;
 	    	case SM_FINAL_STATE:
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
