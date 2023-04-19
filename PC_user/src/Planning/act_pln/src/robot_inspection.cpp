@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 
                 
                 //FestinoNavigation::moveDist(1.0, 4000);
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("start_ponit_1");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("exit");
                 std::cout <<"Coordenates of exit:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                
