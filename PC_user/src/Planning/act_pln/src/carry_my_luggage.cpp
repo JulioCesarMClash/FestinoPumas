@@ -26,6 +26,8 @@ enum SMState {
 	SM_FOLLOW_OPERATOR,
 	SM_WAIT_CONF_CAR,
 	SM_LEAVE_BAG,
+	SM_FIND_QUEUE,
+	SM_FOLLOW_QUEUE,
     SM_FINAL_STATE
 };
 
@@ -198,8 +200,34 @@ int main(int argc, char** argv){
 
 				if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
 	    			FestinoHRI::enableSpeechRecognized(false);
-					state = SM_FINAL_STATE;
+					state = SM_FIND_QUEUE;
 	    		}
+	    		break;
+	    	case SM_FIND_QUEUE:
+	    		std::cout << "State machine: SM_FIND_QUEUE" << std::endl;
+
+	    		//ros::Duration(2, 0).sleep();
+	    		FestinoNavigation::moveDistAngle(0.0, 3.1415, 10000);
+
+
+    			if(!FestinoHRI::frontalLegsFound()){
+	    			std::cout << "Not found" << std::endl;
+
+	    			FestinoHRI::enableHumanFollower(false);
+	    		}
+    			else{
+	    			state = SM_FOLLOW_QUEUE;
+	    		}
+	    		break;
+	    	case SM_FOLLOW_QUEUE:
+	    		std::cout << "State machine: SM_FOLLOW_QUEUE" << std::endl;
+
+	    		FestinoHRI::enableHumanFollower(true);
+	    		ros::Duration(20, 0).sleep();
+	    		FestinoHRI::enableHumanFollower(false);
+
+	    		state = SM_FINAL_STATE;
+	    		
 	    		break;
 	    	case SM_FINAL_STATE:
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
