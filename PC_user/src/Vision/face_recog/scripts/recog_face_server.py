@@ -59,8 +59,15 @@ class FaceRecognitionNode:
 
         self.face_names_recog = face_names
 
-        print(self.face_names_recog)
-        print(type(self.face_names_recog))
+        for (top, right, bottom , left), name in zip(face_locations, face_names):
+            cv.rectangle(cv_image, (left, top), (right, bottom), (0, 255, 0), 2)
+            cv.putText(cv_image, name, (left, top - 10), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+
+        cv.imshow("Image Window", cv_image)
+        #cv.waitKey(3)
+
+        #print(self.face_names_recog)
+        #print(type(self.face_names_recog))
 
     def recognize_face(self, request):
         
