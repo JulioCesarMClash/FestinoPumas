@@ -1,7 +1,0 @@
-#JSGF V1.0;
-grammar names;
-public <names> = (<person_m>);
-
-<person_m>     = (LUIS |MIGUEL | JESUS |OSCAR | RUBEN);
-
-

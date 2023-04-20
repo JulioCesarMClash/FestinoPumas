@@ -302,7 +302,7 @@ int main(int argc, char** argv)
                 ros::Duration(1, 0).sleep();
 
                 std::cout << "State machine: SM_FINAL_STATE" << std::endl;
-                FestinoHRI::say("i have finish the test",3);
+                FestinoHRI::say("i have finish the test",3);    
                 arr_values.values = {0,0,0,0,0,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(1, 0).sleep();

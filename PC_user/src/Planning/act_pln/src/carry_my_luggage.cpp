@@ -19,6 +19,8 @@
 #include "robotino_msgs/DigitalReadings.h"
 
 
+#define GRAMMAR_POCKET_COMMANDS "grammars/carryMyLuggage.jsgf"
+
 enum SMState {
 	SM_INIT,
 	SM_FIND_BAG,
@@ -35,6 +37,7 @@ enum SMState {
 bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
+std::string grammarCommandsID = "carryMyLuggageCommands";
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -71,9 +74,10 @@ int main(int argc, char** argv){
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	    		
-	    		arr_values.values = {0,0,0,1,1,1};
+	    		arr_values.values = {0,0,0,0,1,1};
                 pub_digital.publish(arr_values);
 
+                FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID, GRAMMAR_POCKET_COMMANDS);
 	            ros::Duration(2, 0).sleep();
 	            FestinoHRI::enableSpeechRecognized(false);
 	            voice = "I am ready for the carry my luggage challenge";
@@ -95,12 +99,12 @@ int main(int argc, char** argv){
 	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
 	    			pointing_hand = FestinoVision::PointingHand();
 	    			if (pointing_hand){
-	    				FestinoNavigation::moveDistAngle(0.0, -0.7853, 10000);
+	    				FestinoNavigation::moveDistAngle(0.0, -0.5853, 10000);
 		    			voice = "Please put the left bag on the platform";
 		            	FestinoHRI::say(voice, 10);
 	    			}
 	    			else{
-	    				FestinoNavigation::moveDistAngle(0.0, 0.7853, 10000);
+	    				FestinoNavigation::moveDistAngle(0.0, 0.5853, 10000);
 		    			voice = "Please put the right bag on the platform";
 		            	FestinoHRI::say(voice, 10);
 	    			}
