@@ -1,0 +1,4 @@
+#JSGF V1.0;
+grammar drinks;
+public <drinks> = (<validDrinks>);
+<validDrinks> = (i want ) (coke | tea | beer | water | milk | orange juice);

@@ -1,0 +1,4 @@
+#JSGF V1.0;
+grammar commands;
+public <commands> = (<validCommands>);
+<validCommands> = (robot yes | robot no);

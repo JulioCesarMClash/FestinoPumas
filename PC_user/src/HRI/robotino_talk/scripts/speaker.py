@@ -8,7 +8,7 @@ from std_msgs.msg import String
 def speakcall(data):
     rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
     text = data.data
-    subprocess.Popen(["espeak", "-v", "mb-us2","-s", "120", text])
+    subprocess.Popen(["espeak", "-v", "mb-us1","-s", "125", text])
 
     
 def listener():

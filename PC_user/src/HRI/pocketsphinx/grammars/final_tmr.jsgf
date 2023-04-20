@@ -1,4 +1,4 @@
 #JSGF V1.0;
-grammar final_tmr_grammar;
-public <final_tmr> = (<validCommands>);
-<validCommands> = (follow me | stop follow me | here is the car | robot yes | robot no);
+grammar carryMyLuggage;
+public <carryMyLuggage> = (<validCommands>);
+<validCommands> = (robot yes | robot no | here is the car| follow me | robot stop);

@@ -242,3 +242,12 @@ target_link_libraries(navigation_challenge_track ${catkin_LIBRARIES})
 add_executable(robot_inspection src/robot_inspection.cpp)
 add_dependencies(robot_inspection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(robot_inspection ${catkin_LIBRARIES})
+
+add_executable(receptionist src/receptionist.cpp)
+add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(receptionist ${catkin_LIBRARIES})
+
+add_executable(testPocket src/test.cpp)
+add_dependencies(testPocket ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(testPocket ${catkin_LIBRARIES})
+
