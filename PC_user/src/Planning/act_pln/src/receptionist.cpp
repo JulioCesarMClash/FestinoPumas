@@ -203,7 +203,7 @@ int main(int argc, char **argv)
     arr_values.stamp.sec = 0;
     arr_values.stamp.nsec = 0;
     arr_values.values = {0,0,0,0,0,0};
-    FestinoHRI::say(" ",1);
+    FestinoHRI::say(" ",2);
     recogName = true;
 
     while(ros::ok() && !success)
@@ -236,12 +236,12 @@ int main(int argc, char **argv)
                 FestinoHRI::enableSpeechRecognized(false);
 
                 FestinoHRI::say("I will navigate to the entrance door",4);
-                //goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
                 std::cout <<"Coordenates of entrance_door"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                //if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-                //        std::cout << "Cannot move to inspection point" << std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                        std::cout << "Cannot move to inspection point" << std::endl;
                 
                 FestinoHRI::say("I have reached the entrance door", 4);
                 doorOpenFlag = true;
@@ -361,6 +361,8 @@ int main(int argc, char **argv)
                     FestinoHRI::say("Hello, my name is Festino, please tell me, what is your name",5);
                     FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
                     FestinoHRI::enableSpeechRecognized(true);
+                    arr_values.values = {0,0,0,1,0,0};
+                    pub_digital.publish(arr_values);
                     sleep(2);
                 }
                 else
@@ -368,6 +370,8 @@ int main(int argc, char **argv)
                     FestinoHRI::say("Please tell me, what is your favorite drink", 5);
                     FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID,GRAMMAR_POCKET_DRINKS);
                     FestinoHRI::enableSpeechRecognized(true);
+                    arr_values.values = {0,0,0,1,0,0};
+                    pub_digital.publish(arr_values);
                     sleep(2);
                 }
                 
@@ -383,7 +387,10 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
 
                 tokens.clear();
+                
+                sleep(2);
                 lastRecoSpeech = FestinoHRI::lastRecogSpeech();
+
                 std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                 if(recogName)
                 {
@@ -424,8 +431,14 @@ int main(int argc, char **argv)
                             //names.push_back(ss2.str());
                             ss << ", tell me robot yes or robot no";
                             FestinoHRI::say(ss.str(), 10);
+                            arr_values.values = {0,0,0,0,1,0};
+                            pub_digital.publish(arr_values);
+
                             FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
                             FestinoHRI::enableSpeechRecognized(true);
+                            arr_values.values = {0,0,0,1,0,0};
+                            pub_digital.publish(arr_values);
+
                             state = SM_PRESENTATION_CONFIRM;
                             break;
                         }
@@ -466,9 +479,13 @@ int main(int argc, char **argv)
 
                                 //names.push_backack(ss2.str());
                                 ss << ", tell me robot yes or robot no";
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
                                 FestinoHRI::say(ss.str(), 10);
                                 FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
                                 FestinoHRI::enableSpeechRecognized(true);
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
                                 state = SM_PRESENTATION_CONFIRM;
                             }
                             break;
@@ -493,11 +510,18 @@ int main(int argc, char **argv)
                         }
                         attemptsSpeechReco++;
                         FestinoHRI::enableSpeechRecognized(true);
+                        arr_values.values = {0,0,0,0,1,0};
+                        pub_digital.publish(arr_values);
+
                         sleep(2);
                     }
                     else
                     {
                         FestinoHRI::enableSpeechRecognized(false);
+                        FestinoHRI::clean_lastRecogSpeech();
+                        arr_values.values = {0,0,0,0,1,0};
+                        pub_digital.publish(arr_values);
+
                         attemptsSpeechReco = 0;
                         attemptsSpeechInt = 0;
                         if(recogName)
@@ -524,7 +548,7 @@ int main(int argc, char **argv)
 
             case SM_PRESENTATION_CONFIRM:
                 std::cout << test << ".-> State SM_PRESENTATION_CONFIRM. Wait for robot yes or robot no" << std::endl;
-                arr_values.values = {0,0,0,1,0,0};
+                arr_values.values = {0,0,0,0,1,0};
                 pub_digital.publish(arr_values);
 
                 attemptsSpeechReco = 0;
@@ -560,18 +584,36 @@ int main(int argc, char **argv)
                             if(recogName)
                             {
                                 //names.erase(names.end()- 1);
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
+
                                 FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name", 7);
                                 FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
                                 sleep(0.5);
-                                FestinoHRI::enableSpeechRecognized(true);                            
+                                FestinoHRI::clean_lastRecogSpeech();
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
+
+                                FestinoHRI::enableSpeechRecognized(true);
+                                sleep(1);
+                                lastRecoSpeech = "";
+                                
+                                //lastRecoSpeech = FestinoHRI::lastRecogSpeech();
                             }
                             else
                             {
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
                                 //drinks.erase(names.end() - 1);
                                 FestinoHRI::say("Sorry I did not understand you, Please tell me what is your favorite drink", 7);
                                 FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
                                 sleep(0.5);
+                                FestinoHRI::clean_lastRecogSpeech();
+                                arr_values.values = {0,0,0,1,0,0};
+                                pub_digital.publish(arr_values);
+
                                 FestinoHRI::enableSpeechRecognized(true);
+                                sleep(1);
                             }
                             state = SM_WAIT_FOR_PRESENTATION;
                         }
@@ -580,11 +622,16 @@ int main(int argc, char **argv)
                             FestinoHRI::enableSpeechRecognized(false);
                             if(recogName)
                             {
+                                arr_values.values = {0,0,0,0,1,0};
+                                pub_digital.publish(arr_values);
+
                                 names.push_back(lastName);
                                 ss2.str("");
                                 ss2 << "Ok, your name is " << names[names.size() - 1];
                                 FestinoHRI::say(ss2.str(), 6);
                                 FestinoHRI::enableSpeechRecognized(true);
+                                arr_values.values = {0,0,0,1,0,0};
+                                pub_digital.publish(arr_values);
                                 recogName = false;
                                 state = SM_INTRO_GUEST;
                             }
@@ -647,14 +694,14 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);            
                 FestinoHRI::say("I'm going to find a empty seat for you, please follow me", 5); 
 
-                //goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                 std::cout <<"Coordenates of sofa"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 attemptsMemorizing = 0;
                 findSeatCount = 0;
-                //if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-                //        std::cout << "Cannot move to inspection point" << std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                        std::cout << "Cannot move to inspection point" << std::endl;
                 
                 state = SM_FIND_EMPTY_SEAT;
                 break;
@@ -673,13 +720,25 @@ int main(int argc, char **argv)
                     {
                         findSeatCount++;
                         FestinoHRI::say("I'm going to find a empty seat for you again", 5);
-                        //goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair");
+                        goal_vec = FestinoKnowledge::CoordenatesLocSrv("chairA");
                         std::cout <<"Coordenates of entrance_door"<<std::endl;
                         std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                        //if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                        //     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-                        //        std::cout << "Cannot move to inspection point" << std::endl;
-                        
+                        if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                                std::cout << "Cannot move to inspection point" << std::endl;
+                        //---Va el reconocedor otra vez---
+                        findSeat = true;
+                        if(!findSeat)
+                        {
+                            FestinoHRI::say("I'm going to find a empty seat for you again", 5);
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("chairB");
+                            std::cout <<"Coordenates of entrance_door"<<std::endl;
+                            std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                            if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                                    std::cout << "Cannot move to inspection point" << std::endl;   
+                        }
+                        //if(findSeart)
                         //JustinaHRI::insertAsyncSpeech("I'm going to find a empty seat for you again", 5000, ros::Time::now().sec, 10);
                         break;
                     }
@@ -753,12 +812,12 @@ int main(int argc, char **argv)
                 findPersonAttemps = 0;
                 findPersonRestart = 0;
 
-                //goal_vec = FestinoKnowledge::CoordenatesLocSrv("john");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("john_location");
                 std::cout <<"Coordenates of John"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                //if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-                //        std::cout << "Cannot move to inspection point" << std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                        std::cout << "Cannot move to inspection point" << std::endl;
                 state = SM_FIND_TO_HOST;
                 break;
 
