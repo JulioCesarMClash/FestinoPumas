@@ -52,3 +52,11 @@ target_link_libraries(streaming_keypoints
 	${OpenCV_LIBS}
 	${catkin_LIBRARIES}
 	)
+	
+add_executable(human_detector src/human_detector.cpp)
+add_dependencies(human_detector ${catkin_EXPORTED_TARGETS})
+target_link_libraries(human_detector 
+	${PCL_LIBRARIES}
+	${OpenCV_LIBS}
+	${catkin_LIBRARIES}
+	)
