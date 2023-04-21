@@ -86,6 +86,7 @@ public:
     static bool waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms);
     static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
     static std::string lastRecogSpeech();
+    static void clean_lastRecogSpeech();
 
 private:
     //Speech recog and synthesis
