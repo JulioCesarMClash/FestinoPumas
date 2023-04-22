@@ -48,7 +48,11 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
 
     if (cltFindPersons.call(srv))
     {   
-        //std::cout << srv.response.names <<std::endl;
+        for (int i = 0; i < srv.response.names.size(); i++)
+        {
+            //std::cout << "entre_3" <<std::endl;
+            std::cout << srv.response.names[i] << " ";
+        }
         _nameRecog = srv.response.names;
         //std::cout << "lleno" <<std::endl;
         return _nameRecog;
@@ -58,6 +62,7 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
     {
         std::vector<std::string> vector_vacio;
         //std::cout << "vacio" <<std::endl;
+        vector_vacio = srv.response.names;
         return vector_vacio;
     }
    

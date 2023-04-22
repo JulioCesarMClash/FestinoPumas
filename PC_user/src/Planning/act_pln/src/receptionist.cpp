@@ -267,17 +267,20 @@ int main(int argc, char **argv)
                 FestinoHRI::enableSpeechRecognized(false);
                 if(findPersonAttemps < MAX_FIND_PERSON_COUNT)
                 {
-                    //findPerson = true;
+                    findPerson = true;
                     findPersonDetect = FestinoVision::enableRecogFacesName(true);
+                    sleep(5);
                     if(findPersonDetect.size() == 1)
                     {
                         findPerson = true;
+                        //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                     }
                     else
                     {
                         if(findPersonDetect.size() == 0)
                         {
                             FestinoHRI::say("Human, i can't find you",3);
+                            //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                         }
                     }
 
@@ -290,7 +293,7 @@ int main(int argc, char **argv)
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
 
-                        recogPersonAux = FestinoVision::enableRecogFacesName(false);
+                        //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                         recogPersonAux.clear();
                         state = SM_INTRO_GUEST;
                     }
@@ -298,7 +301,7 @@ int main(int argc, char **argv)
                     {
                         if(findPersonRestart > MAX_FIND_PERSON_RESTART)
                         {
-                            recogPersonAux = FestinoVision::enableRecogFacesName(false);
+                            //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                             recogPersonAux.clear();
                             findPersonCount = 0;
                             findPersonRestart = 0;
@@ -315,7 +318,7 @@ int main(int argc, char **argv)
                     findPersonAttemps = 0;
                     findPersonRestart = 0;
                     recogName = true;
-                    recogPersonAux = FestinoVision::enableRecogFacesName(false);
+                    //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                     recogPersonAux.clear();
                     state = SM_INTRO_GUEST;
                 }
@@ -323,6 +326,7 @@ int main(int argc, char **argv)
     				
     		case SM_INTRO_GUEST:
     			std::cout << test << ".-> State SM_INTRO_GUEST: Intro Guest." << std::endl;
+                recogPersonAux = FestinoVision::enableRecogFacesName(false);
                 arr_values.values = {0,0,0,1,0,1};
                 pub_digital.publish(arr_values);
 
@@ -338,9 +342,9 @@ int main(int argc, char **argv)
                     FestinoHRI::say("Hello, my name is Festino, please tell me, what is your name",5);
                     FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
                     FestinoHRI::enableSpeechRecognized(true);
-                    sleep(2);
                     arr_values.values = {0,0,0,1,0,0};
                     pub_digital.publish(arr_values);
+                    sleep(2);
                     sleep(2);
                 }
                 else
@@ -348,9 +352,9 @@ int main(int argc, char **argv)
                     FestinoHRI::say("Please tell me, what is your favorite drink", 5);
                     FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID,GRAMMAR_POCKET_DRINKS);
                     FestinoHRI::enableSpeechRecognized(true);
-                    sleep(2);
                     arr_values.values = {0,0,0,1,0,0};
                     pub_digital.publish(arr_values);
+                    sleep(2);
                     sleep(2);
                 }
                 
@@ -362,7 +366,7 @@ int main(int argc, char **argv)
     				
     		case SM_WAIT_FOR_PRESENTATION:
     			std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the names." << std::endl;
-                arr_values.values = {0,0,0,1,0,0};
+                arr_values.values = {0,0,0,0,1,0};
                 pub_digital.publish(arr_values);
 
                 tokens.clear();
@@ -475,16 +479,16 @@ int main(int argc, char **argv)
                         }
                         attemptsSpeechReco++;
                         FestinoHRI::enableSpeechRecognized(true);
-                        sleep(2);
-                        arr_values.values = {0,0,0,0,1,0};
+                        arr_values.values = {0,0,0,1,0,0};
                         pub_digital.publish(arr_values);
+                        sleep(2);
                         sleep(2);
                     }
                     else
                     {
                         FestinoHRI::enableSpeechRecognized(false);
                         FestinoHRI::clean_lastRecogSpeech();
-                        arr_values.values = {0,0,0,0,1,0};
+                        arr_values.values = {0,0,0,1,0,0};
                         pub_digital.publish(arr_values);
 
                         attemptsSpeechReco = 0;
@@ -518,9 +522,9 @@ int main(int argc, char **argv)
 
                 FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
                 FestinoHRI::enableSpeechRecognized(true);
-                sleep(2);
                 arr_values.values = {0,0,0,1,0,0};
                 pub_digital.publish(arr_values);
+                sleep(2);
                 sleep(2);
 
                 if (FestinoHRI::waitForSpecificSentence("robot yes",5000))
@@ -531,6 +535,8 @@ int main(int argc, char **argv)
                         names.push_back(lastName);
                         ss2.str("");
                         ss2 << "Ok, your name is " << names[names.size() - 1];
+                        arr_values.values = {0,0,0,0,1,0};
+                        pub_digital.publish(arr_values);
                         FestinoHRI::say(ss2.str(), 6);
                         recogName = false;
                         state = SM_INTRO_GUEST;
@@ -540,6 +546,8 @@ int main(int argc, char **argv)
                         drinks.push_back(lastDrink);
                         ss2.str("");
                         ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
+                        arr_values.values = {0,0,0,0,1,0};
+                        pub_digital.publish(arr_values);
                         FestinoHRI::say(ss2.str(), 6);
                         attemptsMemorizing = 0;
                         state = SM_MEMORIZING_OPERATOR;
@@ -556,11 +564,12 @@ int main(int argc, char **argv)
                             arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name", 7);
+                            FestinoHRI::clean_lastRecogSpeech();
                             FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
                             FestinoHRI::enableSpeechRecognized(true);
-                            sleep(2);
                             arr_values.values = {0,0,0,1,0,0};
                             pub_digital.publish(arr_values);
+                            sleep(2);
                             sleep(2);
                             lastRecoSpeech = "";
                                 
@@ -571,12 +580,13 @@ int main(int argc, char **argv)
                             arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             //drinks.erase(names.end() - 1);
+                            FestinoHRI::clean_lastRecogSpeech();
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your favorite drink", 7);
                             FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
                             FestinoHRI::enableSpeechRecognized(true);
-                            sleep(2);
                             arr_values.values = {0,0,0,1,0,0};
                             pub_digital.publish(arr_values);
+                            sleep(2);
                             sleep(2);
                         }
                         state = SM_WAIT_FOR_PRESENTATION;
@@ -592,17 +602,19 @@ int main(int argc, char **argv)
                             ss2.str("");
                             ss2 << "Sorry, i don't understand you, your name is unknown";
                             FestinoHRI::say(ss2.str(), 6);
-                            FestinoHRI::enableSpeechRecognized(true);
-                            arr_values.values = {0,0,0,1,0,0};
+                            //FestinoHRI::enableSpeechRecognized(true);
+                            arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             recogName = false;
                             state = SM_INTRO_GUEST;
                         }
                         else
                         {
-                            drinks.push_back("unknown");
+                            drinks.push_back("water");
                             ss2.str("");
-                            ss2 << "Sorry, i don't understand you, your favorite drink is unknown";
+                            ss2 << "Sorry, i don't understand you, your drink by default is water";
+                            arr_values.values = {0,0,0,0,1,0};
+                            pub_digital.publish(arr_values);
                             FestinoHRI::say(ss2.str(), 6);
                             attemptsMemorizing = 0;
                             state = SM_MEMORIZING_OPERATOR;
@@ -668,6 +680,7 @@ int main(int argc, char **argv)
                     {
                         recogPersonAux.clear();
                         recogPersonAux = FestinoVision::enableRecogFacesName(true);
+                        sleep(5);
                         if(recogPersonAux.size() >= 2)
                         {
                             ss.str("");
@@ -697,6 +710,7 @@ int main(int argc, char **argv)
 
                             recogPersonAux.clear();
                             recogPersonAux = FestinoVision::enableRecogFacesName(true);
+                            sleep(5);
 
                             if(recogPersonAux.size() >= 1)
                             {
@@ -725,6 +739,7 @@ int main(int argc, char **argv)
 
                                 recogPersonAux.clear();
                                 recogPersonAux = FestinoVision::enableRecogFacesName(true);
+                                sleep(5);
                                 if(recogPersonAux.size() >= 1)
                                 {
                                     ss.str("");
@@ -832,7 +847,7 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
                 recogPersonAux.clear();
                 recogPersonAux = FestinoVision::enableRecogFacesName(true);
-                sleep(3);
+                sleep(5);
                 if(recogPersonAux.size() > 0)
                 {
                     if(recogPersonAux[0] == "john")//findPerson)
@@ -877,7 +892,7 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
                 recogPersonAux.clear();
                 recogPersonAux = FestinoVision::enableRecogFacesName(true);
-                sleep(3);
+                sleep(5);
                 if(recogPersonAux.size() > 0)
                 {
                     if(recogPersonAux[0] == "john")//findPerson)
@@ -922,7 +937,7 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
                 recogPersonAux.clear();
                 recogPersonAux = FestinoVision::enableRecogFacesName(true);
-                sleep(3);
+                sleep(5);
                 if(recogPersonAux.size() > 0)
                 {
                     if(recogPersonAux[0] == "john")//findPerson)
@@ -967,7 +982,7 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
                 recogPersonAux.clear();
                 recogPersonAux = FestinoVision::enableRecogFacesName(true);
-                sleep(3);
+                sleep(5);
                 if(recogPersonAux.size() > 0)
                 {
                     if(recogPersonAux[0] == "john" || recogPersonAux[1] == "john")//findPerson)
