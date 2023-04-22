@@ -1,3 +1,27 @@
+chairA:
+- x: -1.081
+- y: -0.986
+- theta: -1.865
+- qx: 0.0
+- qy: 0.0
+- qz: -0.803
+- qw: 0.595
+chairB:
+- x: -1.068
+- y: -0.98
+- theta: -2.751
+- qx: 0.0
+- qy: 0.0
+- qz: -0.98
+- qw: 0.194
+entrance_door:
+- x: 1.527
+- y: -2.24
+- theta: -1.068
+- qx: 0.0
+- qy: 0.0
+- qz: -0.509
+- qw: 0.86
 exit_prueba:
 - x: -0.57
 - y: 0.435
@@ -14,6 +38,22 @@ inspection_point:
 - qy: 0.0
 - qz: -0.596
 - qw: 0.802
+john_location:
+- x: -0.496
+- y: 0.16
+- theta: 1.234
+- qx: 0.0
+- qy: 0.0
+- qz: 0.578
+- qw: 0.815
+sofa:
+- x: -0.59
+- y: -0.506
+- theta: -1.182
+- qx: 0.0
+- qy: 0.0
+- qz: -0.557
+- qw: 0.83
 start_ponit_1:
 - x: -6.412
 - y: 1.511
