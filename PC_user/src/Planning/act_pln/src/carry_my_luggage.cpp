@@ -44,8 +44,20 @@ enum SMState {
 
 bool fail = false;
 bool success = false;
+bool human_detector = false;
 SMState state = SM_INIT;
 std::string grammarCommandsID = "carryMyLuggageCommands";
+
+bool HumanDetector()
+{
+    return human_detector;
+}
+
+void humanDetectorCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+    human_detector = msg -> data; 
+}
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -59,6 +71,7 @@ int main(int argc, char** argv){
     FestinoNavigation::setNodeHandle(&n);
 
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
+    ros::Subscriber sub_human = n.subscribe("human_detector_bool", 1000, humanDetectorCallback);
 
     ros::Rate loop(30);
 
@@ -69,6 +82,7 @@ int main(int argc, char** argv){
     //True - Left
     //False - Right
     bool pointing_hand;
+    bool human_detector_bool;
 
     //Robotino Lights
     robotino_msgs::DigitalReadings arr_values;
@@ -210,6 +224,13 @@ int main(int argc, char** argv){
 	                pub_digital.publish(arr_values);
 	                ros::Duration(0.5, 0).sleep();
 
+	                if(pointing_hand){
+						FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
+					}
+					else{
+						FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
+					}
+
 	    			FestinoHRI::enableSpeechRecognized(false);
 					state = SM_FIND_PERSON;
 	    		}
@@ -217,13 +238,7 @@ int main(int argc, char** argv){
 	    	case SM_FIND_PERSON:
 				std::cout << "State machine: SM_FIND_PERSON" << std::endl;	
 
-				if(pointing_hand){
-					FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
-				}
-				else{
-					FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
-				}
-
+				
     			if(!FestinoHRI::frontalLegsFound()){
 	    			std::cout << "Not found" << std::endl;
 
@@ -233,31 +248,41 @@ int main(int argc, char** argv){
 	    			FestinoHRI::enableHumanFollower(false);
 	    		}
     			else{
-    				voice = "Say follow me when you are ready";
-					FestinoHRI::say(voice, 2);
+    				human_detector_bool = HumanDetector();
 
-					//Waiting for command (red light)
-					arr_values.values = {0,0,0,1,0,0};
-                	pub_digital.publish(arr_values);
-                	ros::Duration(0.5, 0).sleep();
+    				if(human_detector_bool){
+    					voice = "Say follow me when you are ready";
+						FestinoHRI::say(voice, 2);
 
-					//Enable speech recognition
-					FestinoHRI::enableSpeechRecognized(true);
-					ros::Duration(2, 0).sleep();
+						//Waiting for command (red light)
+						arr_values.values = {0,0,0,1,0,0};
+	                	pub_digital.publish(arr_values);
+	                	ros::Duration(0.5, 0).sleep();
 
-					//Waiting for the operator to confirm
-	    			if(FestinoHRI::waitForSpecificSentence("follow me", 5000)){
+						//Enable speech recognition
+						FestinoHRI::enableSpeechRecognized(true);
+						ros::Duration(2, 0).sleep();
 
-	    				//Command recognized (green light)
-						arr_values.values = {0,0,0,0,1,0};
-		                pub_digital.publish(arr_values);
-		                ros::Duration(0.5, 0).sleep();
+						//Waiting for the operator to confirm
+		    			if(FestinoHRI::waitForSpecificSentence("follow me", 5000)){
 
-	    				FestinoHRI::enableSpeechRecognized(false);
-	    				voice = "I'm going to follow you, please say here is the car if we reached the final destination";
+		    				//Command recognized (green light)
+							arr_values.values = {0,0,0,0,1,0};
+			                pub_digital.publish(arr_values);
+			                ros::Duration(0.5, 0).sleep();
+
+		    				FestinoHRI::enableSpeechRecognized(false);
+		    				voice = "I'm going to follow you, please say here is the car if we reached the final destination";
+							FestinoHRI::say(voice, 5);
+		    				state = SM_FOLLOW_OPERATOR;
+		    			}
+    				}
+    				else 
+    				{
+		    			voice = "I can't found you, please stand in front of me";
 						FestinoHRI::say(voice, 5);
-	    				state = SM_FOLLOW_OPERATOR;
-	    			}
+    				}
+    				
 	    		}
 	    		break;
 	    	case SM_FOLLOW_OPERATOR:
