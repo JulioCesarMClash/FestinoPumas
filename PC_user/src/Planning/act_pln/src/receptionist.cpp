@@ -289,7 +289,7 @@ int main(int argc, char **argv)
 
                 if(flag_door)
                 {
-                    FestinoHRI::say("Hello human, can you entrance in the house please", 6);
+                    FestinoHRI::say("Hello human, can you entrance in the house please and close the door", 6);
                     //JustinaVision::enableDetectObjsYOLO(true);
                     state = SM_WAIT_FOR_PERSON_ENTRANCE;
                     findPersonCount = 0;
@@ -324,6 +324,9 @@ int main(int argc, char **argv)
                             FestinoHRI::say("Human, i can't find you",3);
                             //recogPersonAux = FestinoVision::enableRecogFacesName(false);
                         }
+                        if(findPersonDetect.size() > 1)
+                           FestinoHRI::say("Human, i see more people",3); 
+
                     }
 
                     if(findPerson)
