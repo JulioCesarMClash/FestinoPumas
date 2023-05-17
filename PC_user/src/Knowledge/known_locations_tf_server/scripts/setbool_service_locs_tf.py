@@ -47,7 +47,7 @@ def read_tf(t):
     
     return pose, quat
 
-def read_yaml(known_locations_file = '/DepaDoc1.yaml'):
+def read_yaml(known_locations_file = '/LogisticsArena.yaml'):
     
     file_path = '/home/robocup/FestinoPumas/PC_user/src/Navigation/config_files' + known_locations_file
 
@@ -55,7 +55,7 @@ def read_yaml(known_locations_file = '/DepaDoc1.yaml'):
         content = yaml.safe_load(file)
     return content
 
-def write_yaml(trans,req, known_locations_file = '/DepaDoc1.yaml'):
+def write_yaml(trans,req, known_locations_file = '/LogisticsArena.yaml'):
     trans,quat=read_tf(trans)
     con= read_yaml()
     data=deepcopy(con[list(con.keys())[-1]])

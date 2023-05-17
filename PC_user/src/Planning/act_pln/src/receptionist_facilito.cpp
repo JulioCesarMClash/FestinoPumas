@@ -291,7 +291,7 @@ int main(int argc, char **argv)
                 if(flag_door)
                 //if(true)
                 {
-                    FestinoHRI::say("Hello human, can you entrance in the house", 6);
+                    FestinoHRI::say("Hello human, can you entrance in the house please and close the door", 6);
                     //JustinaVision::enableDetectObjsYOLO(true);
                     state = SM_WAIT_FOR_PERSON_ENTRANCE;
                     findPersonCount = 0;
@@ -396,7 +396,7 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    FestinoHRI::say("Please tell me, i want and after that your favorite drink", 5);
+                    FestinoHRI::say("Please tell me, what is your favorite drink", 5);
                     FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID,GRAMMAR_POCKET_DRINKS);
                     FestinoHRI::enableSpeechRecognized(true);
                     arr_values.values = {0,0,0,1,0,0};
@@ -520,7 +520,7 @@ int main(int argc, char **argv)
                         }
                         else
                         {
-                            FestinoHRI::say("Please tell me, i want and after that your favorite drink", 4);
+                            FestinoHRI::say("Please tell me what is your favorite drink", 4);
                             FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
                             sleep(2);
                         }
@@ -628,7 +628,7 @@ int main(int argc, char **argv)
                             pub_digital.publish(arr_values);
                             //drinks.erase(names.end() - 1);
                             FestinoHRI::clean_lastRecogSpeech();
-                            FestinoHRI::say("Sorry I did not understand you, Please tell me, i want and after that your favorite drink", 8);
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your favorite drink", 7);
                             FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
                             FestinoHRI::enableSpeechRecognized(true);
                             arr_values.values = {0,0,0,1,0,0};

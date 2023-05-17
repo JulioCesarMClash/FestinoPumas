@@ -68,7 +68,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
         }
     }
     //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
-    if(laser_l/cont_laser > 0.35)
+    if(laser_l/cont_laser > 0.50)
     {
         flag_door = true;
         //std::cout<<"door open"<<std::endl;
@@ -126,13 +126,13 @@ int main(int argc, char** argv)
 
             case SM_WAIT_FOR_DOOR:
                 std::cout << "State machine: SM_WAIT_FOR_DOOR" << std::endl;
-                arr_values.values = {0,0,0,1,0,0};
+                arr_values.values = {0,0,0,0,1,1};
                 pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
                 arr_values.values = {0,0,0,0,0,0};
                 pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
-                arr_values.values = {0,0,0,1,0,0};
+                arr_values.values = {0,0,0,0,1,1};
                 pub_digital.publish(arr_values);
                 FestinoHRI::say("I am waiting for the door to be open",3);
                 //flag_door = false;
@@ -293,6 +293,8 @@ int main(int argc, char** argv)
                             FestinoHRI::say("Cannot move to exit point",3);
                             state = SM_NAVIGATE_TO_EXIT;
                         }
+
+                FestinoNavigation::moveDist(0.75, 5000);
                 state = SM_FINAL_STATE;
                 break;
 

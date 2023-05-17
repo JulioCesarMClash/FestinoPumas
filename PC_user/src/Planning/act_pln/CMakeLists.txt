@@ -246,3 +246,15 @@ target_link_libraries(robot_inspection ${catkin_LIBRARIES})
 add_executable(receptionist src/receptionist.cpp)
 add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(receptionist ${catkin_LIBRARIES})
+
+add_executable(GPSR src/GPSR.cpp)
+add_dependencies(GPSR ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(GPSR ${catkin_LIBRARIES})
+
+add_executable(DemoTMR2023 src/DemoTMR2023.cpp)
+add_dependencies(DemoTMR2023 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(DemoTMR2023 ${catkin_LIBRARIES})
+
+add_executable(demo_follow src/demo_follow.cpp)
+add_dependencies(demo_follow ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(demo_follow ${catkin_LIBRARIES})

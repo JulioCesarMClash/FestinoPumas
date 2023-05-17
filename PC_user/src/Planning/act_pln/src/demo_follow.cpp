@@ -191,138 +191,12 @@ int main(int argc, char** argv){
 	            FestinoHRI::enableSpeechRecognized(false);
 	            voice = "I am ready for the carry my luggage test";
 	            FestinoHRI::say(voice, 5);
-	            voice = "Please point at the bag that you want me to carry";
+	            voice = "Please put the bag that you want me to carry";
 	    		FestinoHRI::say(voice, 5);
-	    		state = SM_FIND_BAG;
-	    		//state = SM_LEAVE_BAG;
-	    		break;
-	    	case SM_FIND_BAG:{
-	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;
-	    		
-				voice = "Tell me, robot yes, when you are pointing at the bag";
-				FestinoHRI::say(voice, 5);
 
-				//Waiting for command (red light)
-				arr_values.values = {0,0,0,1,0,0};
-                pub_digital.publish(arr_values);
-                ros::Duration(0.5, 0).sleep();
+	    		FestinoHRI::enableLegFinder(true);
 
-				//Enable speech recognition 
-				FestinoHRI::enableSpeechRecognized(true);
-	    		ros::Duration(2, 0).sleep();
-
-	    		//Waiting for the operator to confirm
-	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
-	    			//Disable speech recognition 
-	    			FestinoHRI::enableSpeechRecognized(false);
-					ros::Duration(2, 0).sleep();
-
-	    			//Command recognized (green light)
-					arr_values.values = {0,0,0,0,1,0};
-                	pub_digital.publish(arr_values);
-                	ros::Duration(0.5, 0).sleep();
-
-	    			state = SM_CONF_POINTING_HAND;
-	    		}
-	    		
-	    		break;
-	        }
-
-	    	case SM_CONF_POINTING_HAND:
-	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
-
-	    		pointing_hand = FestinoVision::PointingHand();
-
-	    		if (pointing_hand){
-    				voice = "Are you pointing at the left bag? tell me Robot yes or Robot no";
-    				FestinoHRI::say(voice, 5);
-
-    				//Waiting for command (red light)
-					arr_values.values = {0,0,0,1,0,0};
-	                pub_digital.publish(arr_values);
-	                ros::Duration(0.5, 0).sleep();
-
-	                //Enable speech recognition 
-					FestinoHRI::enableSpeechRecognized(true);
-		    		ros::Duration(2, 0).sleep();
-
-    				if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
-    					FestinoHRI::enableSpeechRecognized(false);
-
-    					//Command recognized (green light)
-						arr_values.values = {0,0,0,0,1,0};
-	                	pub_digital.publish(arr_values);
-	                	ros::Duration(0.5, 0).sleep();
-
-    					FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
-		    			voice = "Please put the left bag on the gripper";
-		            	FestinoHRI::say(voice, 10);
-		            	FestinoHRI::enableLegFinder(true);
-		    			state = SM_WAIT_FOR_BAG;
-    				}
-	    		}
-	    		else{
-    				voice = "Are you pointing at the right bag? tell me Robot yes or Robot no";
-    				FestinoHRI::say(voice, 5);
-
-					//Waiting for command (red light)
-					arr_values.values = {0,0,0,1,0,0};
-	                pub_digital.publish(arr_values);
-	                ros::Duration(0.5, 0).sleep();
-
-	                //Enable speech recognition 
-					FestinoHRI::enableSpeechRecognized(true);
-		    		ros::Duration(2, 0).sleep();
-
-    				if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
-    					FestinoHRI::enableSpeechRecognized(false);
-    					//Command recognized (green light)
-						arr_values.values = {0,0,0,0,1,0};
-	                	pub_digital.publish(arr_values);
-	                	ros::Duration(0.5, 0).sleep();
-
-    					FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
-		    			voice = "Please put the right bag on the gripper";
-		            	FestinoHRI::say(voice, 10);
-		            	FestinoHRI::enableLegFinder(true);
-		    			state = SM_WAIT_FOR_BAG;
-    				}
-	    		}
-	    		break;
-	    	case SM_WAIT_FOR_BAG:
-	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;	
-
-	    		voice = "Tell me, robot yes, when you put the bag";
-				FestinoHRI::say(voice, 5);
-
-				//Waiting for command (red light)
-				arr_values.values = {0,0,0,1,0,0};
-                pub_digital.publish(arr_values);
-                ros::Duration(0.5, 0).sleep();
-
-				//Enable speech recognition
-				FestinoHRI::enableSpeechRecognized(true);
-				ros::Duration(2, 0).sleep();
-
-				//Waiting for the operator to confirm
-	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
-	    			FestinoHRI::enableSpeechRecognized(false);
-
-	    			//Command recognized (green light)
-					arr_values.values = {0,0,0,0,1,0};
-	                pub_digital.publish(arr_values);
-	                ros::Duration(0.5, 0).sleep();
-
-	                if(pointing_hand){
-						FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
-					}
-					else{
-						FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
-					}
-
-	    			
-					state = SM_FIND_PERSON;
-	    		}
+	    		state = SM_FIND_PERSON;
 	    		break;
 	    	case SM_FIND_PERSON:
 				std::cout << "State machine: SM_FIND_PERSON" << std::endl;	
@@ -337,43 +211,32 @@ int main(int argc, char** argv){
 	    			FestinoHRI::enableHumanFollower(false);
 	    		}
     			else{
-    				human_detector_bool = HumanDetector();
 
-    				std::cout << human_detector_bool << std::endl;
+					voice = "Say follow me when you are ready";
+					FestinoHRI::say(voice, 2);
 
-    				if(human_detector_bool){
-    					voice = "Say follow me when you are ready";
-						FestinoHRI::say(voice, 2);
+					//Waiting for command (red light)
+					arr_values.values = {0,0,0,1,0,0};
+                	pub_digital.publish(arr_values);
+                	ros::Duration(0.5, 0).sleep();
 
-						//Waiting for command (red light)
-						arr_values.values = {0,0,0,1,0,0};
-	                	pub_digital.publish(arr_values);
-	                	ros::Duration(0.5, 0).sleep();
+					//Enable speech recognition
+					FestinoHRI::enableSpeechRecognized(true);
+					ros::Duration(2, 0).sleep();
 
-						//Enable speech recognition
-						FestinoHRI::enableSpeechRecognized(true);
-						ros::Duration(2, 0).sleep();
+					//Waiting for the operator to confirm
+	    			if(FestinoHRI::waitForSpecificSentence("follow me", 5000)){
+	    				FestinoHRI::enableSpeechRecognized(false);
 
-						//Waiting for the operator to confirm
-		    			if(FestinoHRI::waitForSpecificSentence("follow me", 5000)){
-		    				FestinoHRI::enableSpeechRecognized(false);
+	    				//Command recognized (green light)
+						arr_values.values = {0,0,0,0,1,0};
+		                pub_digital.publish(arr_values);
+		                ros::Duration(0.5, 0).sleep();
 
-		    				//Command recognized (green light)
-							arr_values.values = {0,0,0,0,1,0};
-			                pub_digital.publish(arr_values);
-			                ros::Duration(0.5, 0).sleep();
-
-		    				voice = "I'm going to follow you, please say here is the car if we reached the final destination";
-							FestinoHRI::say(voice, 5);
-		    				state = SM_FOLLOW_OPERATOR;
-		    			}
-    				}
-    				else 
-    				{
-    					std::cout << "Not found person" << std::endl;
-		    			voice = "I can't found you, please stand in front of me";
+	    				voice = "I'm going to follow you, please say here is the car if we reached the final destination";
 						FestinoHRI::say(voice, 5);
-    				}
+	    				state = SM_FOLLOW_OPERATOR;
+	    			}
     				
 	    		}
 	    		break;
@@ -471,65 +334,8 @@ int main(int argc, char** argv){
 	                pub_digital.publish(arr_values);
 	                ros::Duration(0.5, 0).sleep();
 
-
-	    			//Turn 180 degree
-	    			FestinoNavigation::moveDistAngle(0.0, 3.12, 20000);
-	    			FestinoNavigation::moveDist(3, 30000);
-
-					//state = SM_FIND_QUEUE;
 					state = SM_FINAL_STATE;
 	    		}
-	    		break;
-	    	case SM_FIND_QUEUE:
-	    		std::cout << "State machine: SM_FIND_QUEUE" << std::endl;
-	    		ros::Duration(2, 0).sleep();
-
-	    		/*transform_human_coordinates();
-	    		pub_goal.publish(tf_human_coordinates);
-	    		
-	    		state = SM_NAV_QUEUE;*/
-
-	    		FestinoHRI::enableLegFinder(true);
-
-    			if(!FestinoHRI::frontalLegsFound()){
-	    			std::cout << "Not found" << std::endl;
-
-	    			FestinoHRI::enableHumanFollower(false);
-	    		}
-    			else{
-    				voice = "Im going to follow the queue";
-	            	FestinoHRI::say(voice, 2);
-
-	    			state = SM_FOLLOW_QUEUE;
-	    		}
-
-	    		break;
-	    	case SM_NAV_QUEUE:{
-            	//Wait for finished navigation
-	            std::cout << "State machine: SM_NAV_QUEUE" << std::endl;
-	            voice = "Navigating to queue";
-	    		FestinoHRI::say(voice, 2);
-
-	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-	                voice = "Goal location reached";
-	                FestinoHRI::say(voice, 2);
-
-	                FestinoHRI::enableLegFinder(true);
-					FestinoHRI::enableHumanFollower(true);
-
-	               state = SM_FOLLOW_QUEUE;
-	            }
-	            break;
-	        }
-	    	case SM_FOLLOW_QUEUE:
-	    		std::cout << "State machine: SM_FOLLOW_QUEUE" << std::endl;
-
-	    		FestinoHRI::enableHumanFollower(true);
-	    		ros::Duration(200, 0).sleep();
-	    		FestinoHRI::enableHumanFollower(false);
-
-	    		state = SM_FINAL_STATE;
-
 	    		break;
 	    	case SM_FINAL_STATE:
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	

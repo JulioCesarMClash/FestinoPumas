@@ -30,16 +30,16 @@ int main (int argc, char** argv)
     while(ros::ok())
     {
         //std::cout << "entre" <<std::endl;
-        std::string name = "Alana";
-        FestinoVision::TrainingPerson(name);
-        std::cout << "Success " << std::endl;
+        //std::string name = "Alana";
+        //FestinoVision::TrainingPerson(name);
+        //std::cout << "Success " << std::endl;
         
         //namesRecog = FestinoVision::enableRecogFacesName(true);
         //std::cout << "entre_2" <<std::endl;
         //std::cout << namesRecog <<std::endl;
         /*for (int i = 0; i < namesRecog.size(); i++)
         {
-            //std::cout << "entre_3" <<std::endl;
+            std::cout << "entre_3" <<std::endl;
             std::cout << namesRecog[i] << " ";
         }
         std::cout << std::endl;
@@ -55,17 +55,19 @@ int main (int argc, char** argv)
             std::cout << "Global goal reached" << std::endl;
         else
             std::cout << "Cannnot navigate to goal pose" << std::endl;
-        std::cout << "Moving backwards" << std::endl;
-        FestinoNavigation::moveDist(-0.3, 10000);
-        std::cout << "Moving forward" << std::endl;
-        FestinoNavigation::moveDist(0.3, 10000);
-        //std::cout << "Moving left" << std::endl;
-        std::cout << "Turn left" << std::endl;
-        FestinoNavigation::moveDistAngle(0.0, 1.5707, 10000);
-        //std::cout << "Moving right" << std::endl;
-        std::cout << "Turn right" << std::endl;
-        FestinoNavigation::moveDistAngle(0.0, -1.5707, 10000);
         */
+        
+        std::cout << "Moving forward" << std::endl;
+        FestinoNavigation::moveDist(0.5, 10000);
+        std::cout << "Moving backwards" << std::endl;
+        FestinoNavigation::moveDist(-0.5, 10000);
+        //std::cout << "Moving left" << std::endl;
+        //std::cout << "Turn left" << std::endl;
+        //FestinoNavigation::moveDistAngle(0.0, 1.5707, 10000);
+        //std::cout << "Moving right" << std::endl;
+        //std::cout << "Turn right" << std::endl;
+        //FestinoNavigation::moveDistAngle(0.0, -1.5707, 10000);
+        
 
         loop.sleep();
         ros:: spinOnce();
