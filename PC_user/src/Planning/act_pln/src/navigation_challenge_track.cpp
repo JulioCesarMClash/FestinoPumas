@@ -15,6 +15,11 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
+//Librería para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
@@ -31,10 +36,10 @@ bool flag_zones = false;
 //std::vector<std_msgs::String> target_zones;
 std_msgs::String target_zones;
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
+std::vector<std::string> tokens;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
-
 
 //Callback para recibir las 12 zonas una a una
 /*void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
@@ -51,6 +56,9 @@ int simple_move_status_id = 0;
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
     target_zones = *msg;
+    tokens.clear();
+    boost::algorithm::split(tokens, target_zones, boost::algorithm::is_any_of(" "));
+    std::cout << tokens.at(0) << std::endl;	
     flag_zones = true;
 }
 
@@ -69,11 +77,11 @@ void transform_zones()
     tf::StampedTransform transform;
 
     //Transform 12 target zones
-    for(int i=0; i<target_zones.size();i++){
+    for(int i=0; i< tokens.size(); i++){
     	//Obtaining destination point from string 
     	try{
           //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-    		listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
+    		listener.lookupTransform(tokens[i], "/map", ros::Time(0), transform);
         }
         catch (tf::TransformException ex){
           ROS_ERROR("%s",ex.what());
@@ -106,7 +114,7 @@ int main(int argc, char** argv){
     int min_indx;
 
     //TF related stuff 
-	for(int i=0; i<target_zones.size(); i++){
+	for(int i=0; i<tokens.size(); i++){
     	tf_target_zones.at(i).header.frame_id = "/map";
 	    tf_target_zones.at(i).pose.position.x = 0.0;
 	    tf_target_zones.at(i).pose.position.y = 0.0;
