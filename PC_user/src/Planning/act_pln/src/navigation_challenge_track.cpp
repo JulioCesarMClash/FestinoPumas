@@ -28,14 +28,16 @@ bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
 bool flag_zones = false;
-std::vector<std_msgs::String> target_zones;
+//std::vector<std_msgs::String> target_zones;
+std_msgs::String target_zones;
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
 
 
-void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
+//Callback para recibir las 12 zonas una a una
+/*void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
     new_zone = *msg;
     target_zones.push_back(new_zone);
@@ -43,6 +45,13 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
     if(target_zones.size() == 12){
         flag_zones = true;
     }
+}*/
+
+//Callback para recibir las 12 zonas de golpe
+void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
+{
+    target_zones = *msg;
+    flag_zones = true;
 }
 
 void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)

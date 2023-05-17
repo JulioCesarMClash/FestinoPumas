@@ -49,22 +49,32 @@ def main():
     pub_zone = rospy.Publisher('/zone_msg', String, queue_size=10)
 
     used_zones = np.array([])
+    used_zones_indx = np.array([])
     used_indx_order = np.array([])
 
     order_arr = ordergen()
     #mps_state_gen()
 
-    zone_strings = ['M_Z64','M_Z63','M_Z62','M_Z61','M_Z53','M_Z43','M_Z34','M_Z24','M_Z15','C_Z75','C_Z65','C_Z54','C_Z45','C_Z44','C_Z35','C_Z34']
-    
+    zone_strings = ['M_Z64 ','M_Z63 ','M_Z62 ','M_Z61 ','M_Z53 ','M_Z43 ','M_Z34 ','M_Z24 ','M_Z15 ','C_Z75 ','C_Z65 ','C_Z54 ','C_Z45 ','C_Z44 ','C_Z35 ','C_Z34 ']
+    rnd_zones = np.random.choice(zone_strings, 12, replace = False)
+    print("".join(rnd_zones))
 
     while not rospy.is_shutdown():
-        while used_zones.shape[0] < 12:
+    	zone_msg_pub(pub_zone, "".join(rnd_zones))
+    	rate.sleep()
+        
+	'''
+        while used_zones.shape[0] < 12 and not rospy.is_shutdown():
             zone_indx = random.randint(0,len(zone_strings)-1)
-            if not (zone_indx in used_zones) and zone_indx != -1:
-                used_zones = np.append(used_zones, [int(zone_indx)])
-                zone = zone_strings[zone_indx]
-                zone_msg_pub(pub_zone, zone)
+            if not (zone_indx in used_zones_indx) and zone_indx != -1:
+                used_zones_indx = np.append(used_zones_indx, [int(zone_indx)])
+                used_zones = np.append(used_zones, zone_strings[zone_indx])
+                #zone = zone_strings[zone_indx]
+            if(used_zones.shape[0] == 12):
+                zone_msg_pub(pub_zone, used_zones)
                 rate.sleep()
+	rate.sleep() '''
+            
         '''
         order_indx = random.randint(0,order_arr.shape[0]) -1
         if not (order_indx in used_indx_order) and order_indx != -1:
