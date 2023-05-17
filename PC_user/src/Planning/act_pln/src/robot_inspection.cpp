@@ -68,7 +68,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
         }
     }
     //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
-    if(laser_l/cont_laser > 0.5)
+    if(laser_l/cont_laser > 0.35)
     {
         flag_door = true;
         //std::cout<<"door open"<<std::endl;
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 
                 
                 //FestinoNavigation::moveDist(1.0, 4000);
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("start_ponit_1");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("exit");
                 std::cout <<"Coordenates of exit:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                
@@ -290,7 +290,7 @@ int main(int argc, char** argv)
                     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
                         if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
                         {
-                            FestinoHRI::say("Cannot move to inspection point",3);
+                            FestinoHRI::say("Cannot move to exit point",3);
                             state = SM_NAVIGATE_TO_EXIT;
                         }
                 state = SM_FINAL_STATE;

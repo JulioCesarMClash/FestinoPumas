@@ -327,3 +327,8 @@ std::string FestinoHRI::lastRecogSpeech()
     return _lastRecoSpeech;
 }
 
+void FestinoHRI::clean_lastRecogSpeech()
+{
+    _lastRecoSpeech = "";
+}
+
