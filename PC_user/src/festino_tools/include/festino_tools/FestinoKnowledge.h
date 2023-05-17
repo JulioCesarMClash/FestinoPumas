@@ -11,6 +11,7 @@
 #include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "act_pln/Locate_server.h"
+#include "act_pln/Set_location_server.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 
@@ -26,6 +27,7 @@ private:
 	static ros::Publisher pubLocationParser;
 	static ros::Subscriber subLocationPose;
 	static ros::ServiceClient cltLocSrv;
+	static ros::ServiceClient cltSetLocSrv;
 
 public:
 	static bool setNodeHandle(ros::NodeHandle* nh);
@@ -34,6 +36,9 @@ public:
 	static void GoToLocation(std::string location);
 	static std::vector<float> CoordenatesLoc();
 	static std::vector<float> CoordenatesLocSrv(std::string location);
+
+	//set_locations_tf
+	static void SetLocation(std::string location);
 
 private:
 	static void callbackLocPose(const geometry_msgs::PoseStamped::ConstPtr& msg);

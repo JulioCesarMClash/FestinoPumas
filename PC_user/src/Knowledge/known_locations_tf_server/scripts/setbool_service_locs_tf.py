@@ -168,7 +168,7 @@ if len(df)!=0:
 
 
 rospy.loginfo("known locations detection service available")                    # initialize a ROS node
-rospy.Service('/known_location_add', Locations_server, callback         # type, and callback
-)
+rospy.Service('/knowledge/known_location_add', Locations_server, callback)        # type, and callback
+
 
 rospy.spin()   

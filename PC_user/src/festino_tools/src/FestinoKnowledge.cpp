@@ -9,6 +9,7 @@ std::vector<float> FestinoKnowledge::_location(3);
 ros::Publisher FestinoKnowledge::pubLocationParser;
 ros::Subscriber FestinoKnowledge::subLocationPose;
 ros::ServiceClient FestinoKnowledge::cltLocSrv;
+ros::ServiceClient FestinoKnowledge::cltSetLocSrv;
 
 //Aquí se configuran los nodos, el tipo de mensaje, buffer, el topico, etc.
 bool FestinoKnowledge::setNodeHandle(ros::NodeHandle* nh)
@@ -25,6 +26,9 @@ bool FestinoKnowledge::setNodeHandle(ros::NodeHandle* nh)
 
     //Known_location
     cltLocSrv = nh->serviceClient<act_pln::Locate_server>("/knowledge/known_locations_parser_server");
+
+    //Set_location
+    cltSetLocSrv = nh->serviceClient<act_pln::Set_location_server>("/knowledge/known_location_add");
 
     
     return true;
@@ -59,6 +63,25 @@ std::vector<float> FestinoKnowledge::CoordenatesLoc()
 	_location[0] = _position[0];
 	return _location;
 }
+
+
+void FestinoKnowledge::SetLocation(std::string location)
+{
+	act_pln::Set_location_server srv;
+	srv.request.location_name.data = location;
+
+	if (cltSetLocSrv.call(srv))
+	{
+		std_msgs::Bool _flag_status = srv.response.success;
+		std::cout << "Success " << _flag_status << std::endl;
+	}
+
+	else
+	{
+		ROS_ERROR("Failed to call service");
+	}
+}
+
 
 std::vector<float> FestinoKnowledge::CoordenatesLocSrv(std::string location)
 {

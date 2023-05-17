@@ -65,6 +65,7 @@ find_package(catkin REQUIRED COMPONENTS
    Locate_server.srv
    FaceRecogSrv.srv
    FaceTrainSrv.srv
+   Set_location_server.srv
  )
 
 ## Generate actions in the 'action' folder
