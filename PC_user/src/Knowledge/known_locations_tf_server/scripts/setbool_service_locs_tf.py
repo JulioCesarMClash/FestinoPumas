@@ -12,7 +12,6 @@ import pandas as pd
 from geometry_msgs.msg import TransformStamped
 from copy import deepcopy
 global path 
-path = '/home/takeshi/Codes/known_locations.txt'
 def write_tf(pose, q, child_frame , parent_frame='map'):
     t= TransformStamped()
     t.header.stamp = rospy.Time(0)
@@ -48,15 +47,15 @@ def read_tf(t):
     
     return pose, quat
 
-def read_yaml(known_locations_file = '/known_locations.yaml'):
+def read_yaml(known_locations_file = '/LogisticsArena.yaml'):
     
-    file_path = '/home/festino/ws_bk/src/config_files' + known_locations_file
+    file_path = '/home/robocup/FestinoPumas/PC_user/src/Navigation/config_files' + known_locations_file
 
     with open(file_path, 'r') as file:
         content = yaml.safe_load(file)
     return content
 
-def write_yaml(trans,req, known_locations_file = '/known_locations.yaml'):
+def write_yaml(trans,req, known_locations_file = '/LogisticsArena.yaml'):
     trans,quat=read_tf(trans)
     con= read_yaml()
     data=deepcopy(con[list(con.keys())[-1]])
@@ -169,7 +168,7 @@ if len(df)!=0:
 
 
 rospy.loginfo("known locations detection service available")                    # initialize a ROS node
-rospy.Service('/known_location_add', Locations_server, callback         # type, and callback
-)
+rospy.Service('/knowledge/known_location_add', Locations_server, callback)        # type, and callback
+
 
 rospy.spin()   

@@ -14,11 +14,18 @@ bool FestinoHRI::_legsFound;
 ros::Publisher FestinoHRI::pubHumanFollowerEnable;
 ros::Publisher FestinoHRI::pubHumanFollowerStop;
 
+//Pocket Sphinx
+ros::Subscriber FestinoHRI::subSprHypothesis;
+ros::Publisher FestinoHRI::pubLoadGrammarPocketSphinx;
+ros::Publisher FestinoHRI::pubEnableSpeechPocketSphinx;
+ros::Publisher FestinoHRI::pubEnableGrammarPocketSphinx;
+
+
 //Variables for speech
-/*std::string FestinoHRI::_lastRecoSpeech = "";
+std::string FestinoHRI::_lastRecoSpeech = "";
 std::vector<std::string> FestinoHRI::_lastSprHypothesis;
 std::vector<float> FestinoHRI::_lastSprConfidences;
-bool FestinoHRI::newSprRecognizedReceived = false;*/
+bool FestinoHRI::newSprRecognizedReceived = false;
 
 //
 //The startSomething functions return inmediately after starting the requested action
@@ -43,6 +50,12 @@ bool FestinoHRI::setNodeHandle(ros::NodeHandle* nh)
     //Human Follower
     pubHumanFollowerEnable = nh->advertise<std_msgs::Bool>("/hri/human_following/start_follow", 1);
     pubHumanFollowerStop = nh->advertise<std_msgs::Empty>("/hri/human_following/stop", 1);
+    
+    //Pocketo Sphinxo
+    subSprHypothesis = nh->subscribe("/recognizedSpeech", 1, &FestinoHRI::callbackSprHypothesis);
+    pubLoadGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetFile>("/pocketsphinx/set_jsgf", 1);
+    pubEnableSpeechPocketSphinx = nh->advertise<std_msgs::Bool>("/pocketsphinx/mic", 1);
+    pubEnableGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetSearch>("/pocketsphinx/set_search", 1);
     return true;
 }
 
@@ -120,59 +133,202 @@ void FestinoHRI::stopHumanFollower(){
     FestinoHRI::pubHumanFollowerStop.publish(msg);
 }
 
-/*
-//ESTA SE USA
-void FestinoHRI::enableLegFinderRear(bool enable)
-{
-    if(!enable)
-    {
+//Pocket sphinx
 
-        std::cout << "FestinoHRI.->Leg_finder_rear disabled. " << std::endl;
-    }
-    else
-        std::cout << "FestinoHRI.->Leg_finder_rear enabled." << std::endl;
+
+//Load jsgf file
+void FestinoHRI::loadGrammarSpeechRecognized(std::string id, std::string grammar){
+    hri_msgs::SphinxSetFile msg;
+    msg.id = id;
+    msg.file_path = grammar;
+    pubLoadGrammarPocketSphinx.publish(msg);
+}
+
+//Enable mic
+void FestinoHRI::enableSpeechRecognized(bool enable){
+
+    std::cout << "FestinoHRI.->Enable grammar: " << enable << std::endl;
     std_msgs::Bool msg;
     msg.data = enable;
-    FestinoHRI::pubLegsRearEnable.publish(msg);
+    pubEnableSpeechPocketSphinx.publish(msg);
+ 
 }
 
-//ESTA SE USA
-void FestinoHRI::getLatestLegsPoses(float &x, float &y)
-{
-    x = FestinoHRI::lastLegsPoses.point.x;
-    y = FestinoHRI::lastLegsPoses.point.y;
+//search topic 
+void FestinoHRI::enableGrammarSpeechRecognized(std::string id, float recognitionTime){
+    hri_msgs::SphinxSetSearch msg;
+    msg.search_id = id;
+    msg.recognitionTime = recognitionTime;
+    pubEnableGrammarPocketSphinx.publish(msg);
 }
 
-//ESTA SE USA
-void FestinoHRI::getLatestLegsPosesRear(float &x, float &y)
+void FestinoHRI::callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg)
 {
-    x = FestinoHRI::lastLegsPosesRear.point.x;
-    y = FestinoHRI::lastLegsPosesRear.point.y;
+    if(msg->hypothesis.size() < 1 || msg->confidences.size() < 1)
+    {
+        std::cout << "FestinoHRI.->Invalid speech recog hypothesis: msg is empty" << std::endl;
+        return;
+    }
+    _lastRecoSpeech = msg->hypothesis[0];
+    _lastSprHypothesis = msg->hypothesis;
+    _lastSprConfidences = msg->confidences;
+    std::cout << "FestinoHRI.->Last reco speech: " << _lastRecoSpeech << std::endl;
+    newSprRecognizedReceived = true;
 }
 
-//ESTA SE USA
-void FestinoHRI::callbackLegsFound(const std_msgs::Bool::ConstPtr& msg)
+//Methos for speech synthesis and recognition
+bool FestinoHRI::waitForSpeechRecognized(std::string& recognizedSentence, int timeOut_ms)
 {
-    // std::cout << "FestinoHRI.->Legs found signal received!" << std::endl;
-    FestinoHRI::_legsFound = msg->data;
+    newSprRecognizedReceived = false;
+    int attempts = timeOut_ms / 100;
+    ros::Rate loop(10);
+    while(ros::ok() && !newSprRecognizedReceived && --attempts > 0)
+    {
+        ros::spinOnce();
+        loop.sleep();
+    }
+    if(newSprRecognizedReceived)
+    {
+        recognizedSentence = _lastRecoSpeech;
+        return true;
+    }
+    else
+    {
+        recognizedSentence = "";
+        return false;
+    }
 }
 
-//ESTA SE USA
-void FestinoHRI::callbackLegsRearFound(const std_msgs::Bool::ConstPtr& msg)
+bool FestinoHRI::waitForSpeechHypothesis(std::vector<std::string>& sentences, std::vector<float>& confidences, int timeOut_ms)
 {
-    //std::cout << "FestinoHRI.->Legs rear found signal received!" << std::endl;
-    FestinoHRI::_legsRearFound = msg->data;
+    newSprRecognizedReceived = false;
+    int attempts = timeOut_ms / 100;
+    ros::Rate loop(10);
+    while(ros::ok() && !newSprRecognizedReceived && --attempts > 0)
+    {
+        ros::spinOnce();
+        loop.sleep();
+    }
+    if(newSprRecognizedReceived)
+    {
+        sentences = _lastSprHypothesis;
+        confidences = _lastSprConfidences;
+        return true;
+    }
+    else
+    {
+        sentences.clear();
+        confidences.clear();
+        return false;
+    }
 }
 
-//ESTA SE USA
-void FestinoHRI::callbackLegsPoses(const geometry_msgs::PointStamped::ConstPtr& msg)
+bool FestinoHRI::waitForSpecificSentence(std::string expectedSentence, int timeOut_ms)
 {
-    FestinoHRI::lastLegsPoses = *msg;
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+        if(expectedSentence.compare(sentences[i]) == 0)
+            return true;
+    return false;
 }
 
-//ESTA SE USA
-void FestinoHRI::callbackLegsPosesRear(const geometry_msgs::PointStamped::ConstPtr& msg)
+bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms)
 {
-    FestinoHRI::lastLegsPosesRear = *msg;
-}*/
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+        if(option1.compare(sentences[i]) == 0 || option2.compare(sentences[i]) == 0)
+        {
+            recog = sentences[i];
+            return true;
+        }
+    return false;
+}
+
+bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option2, std::string option3,
+        std::string& recog, int timeOut_ms)
+{
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+        if(option1.compare(sentences[i]) == 0 || option2.compare(sentences[i]) == 0 || option3.compare(sentences[i]) == 0)
+        {
+            recog = sentences[i];
+            return true;
+        }
+    return false;
+}
+
+bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option2, std::string option3, std::string option4,
+        std::string& recog, int timeOut_ms)
+{
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+        if(option1.compare(sentences[i]) == 0 || option2.compare(sentences[i]) == 0 ||
+                option3.compare(sentences[i]) == 0 || option4.compare(sentences[i]) == 0)
+        {
+            recog = sentences[i];
+            return true;
+        }
+    return false;
+}
+
+bool FestinoHRI::waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms)
+{
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+        for(size_t j=0; j<options.size(); j++)
+            if(options[j].compare(sentences[i]) == 0)
+            {
+                recognized = sentences[i];
+                return true;
+            }
+    return false;
+}
+
+bool FestinoHRI::waitForUserConfirmation(bool& confirmation, int timeOut_ms)
+{
+    std::vector<std::string> sentences;
+    std::vector<float> confidences;
+    if(!waitForSpeechHypothesis(sentences, confidences, timeOut_ms))
+        return false;
+    for(size_t i=0; i<sentences.size(); i++)
+    {
+        if(sentences[i].compare("robot yes") == 0 || sentences[i].compare("justina yes") == 0)
+        {
+            confirmation = true;
+            return true;
+        }
+        if(sentences[i].compare("robot no") == 0 || sentences[i].compare("justina no") == 0)
+        {
+            confirmation = false;
+     
+       return true;
+        }
+    }
+    return false;
+}
+
+std::string FestinoHRI::lastRecogSpeech()
+{
+    return _lastRecoSpeech;
+}
+
+void FestinoHRI::clean_lastRecogSpeech()
+{
+    _lastRecoSpeech = "";
+}
 
