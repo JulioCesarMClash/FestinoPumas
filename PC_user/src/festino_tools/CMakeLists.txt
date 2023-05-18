@@ -236,7 +236,7 @@ ${catkin_INCLUDE_DIRS}
 
 add_library(festino_tools
 #  src/JustinaTools.cpp
-#  src/JustinaVision.cpp
+  src/FestinoHardware.cpp
   src/FestinoNavigation.cpp
   src/FestinoHRI.cpp
   src/FestinoKnowledge.cpp
