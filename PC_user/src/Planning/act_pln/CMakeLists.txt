@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   robotino_msgs
   festino_tools
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions

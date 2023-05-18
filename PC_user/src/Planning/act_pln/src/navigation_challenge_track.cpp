@@ -15,7 +15,7 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
-//Librería para tokenizar
+//Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -34,8 +34,15 @@ bool success = false;
 SMState state = SM_INIT;
 bool flag_zones = false;
 //std::vector<std_msgs::String> target_zones;
+
+//La funcion que hace la tokenizada no acepta std_msgs
 std_msgs::String target_zones;
+
+//Entonces hay que usar un simple std::string
+//std::string target_zones;
+
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
+geometry_msgs::PoseStamped tf_target_zone;
 std::vector<std::string> tokens;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
@@ -55,10 +62,11 @@ int simple_move_status_id = 0;
 //Callback para recibir las 12 zonas de golpe
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
+	//std::cout << "entró al callback" << std::endl;
     target_zones = *msg;
     tokens.clear();
-    boost::algorithm::split(tokens, target_zones, boost::algorithm::is_any_of(" "));
-    std::cout << tokens.at(0) << std::endl;	
+    boost::algorithm::split(tokens, target_zones.data, boost::algorithm::is_any_of(" "));
+    //std::cout << tokens.at(0) << std::endl;	
     flag_zones = true;
 }
 
@@ -76,21 +84,45 @@ void transform_zones()
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
+
+    //TF related stuff 
+	for(int i=0; i<tokens.size(); i++){
+    	tf_target_zone.header.frame_id = "/map";
+	    tf_target_zone.pose.position.x = 0.0;
+	    tf_target_zone.pose.position.y = 0.0;
+	    tf_target_zone.pose.position.z = 0.0;
+	    tf_target_zone.pose.orientation.x = 0.0;
+	    tf_target_zone.pose.orientation.y = 0.0;
+	    tf_target_zone.pose.orientation.z = 0.0;
+	    tf_target_zone.pose.orientation.w = 0.0;
+	    tf_target_zones.push_back(tf_target_zone);
+    }
+
+    std::cout << "entró al transform zones" << std::endl;
+
     //Transform 12 target zones
-    for(int i=0; i< tokens.size(); i++){
+    for(int i=0; i< tokens.size() -1; i++){
     	//Obtaining destination point from string 
     	try{
+    		std::cout << "entró al try" << std::endl;
           //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-    		listener.lookupTransform(tokens[i], "/map", ros::Time(0), transform);
+    		listener.waitForTransform(tokens.at(i), "/map", ros::Time(0), ros::Duration(1000.0));
+    		listener.lookupTransform(tokens.at(i), "/map", ros::Time(0), transform);
+    		std::cout << tokens.at(i) << std::endl;
         }
         catch (tf::TransformException ex){
           ROS_ERROR("%s",ex.what());
           ros::Duration(1.0).sleep();
         }
 
+        std::cout << "salió del try" << std::endl;
+
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+
+    	std::cout << "pasó las tfs" << std::endl;
     }
+    std::cout << "salió del for" << std::endl;
 }
 
 int main(int argc, char** argv){
@@ -101,7 +133,7 @@ int main(int argc, char** argv){
     ros::NodeHandle n;
 
     //Subscribers and Publishers
-    ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
+    ros::Subscriber subRefbox = n.subscribe("/zone_msg", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
@@ -112,18 +144,6 @@ int main(int argc, char** argv){
     std::string msg;
 
     int min_indx;
-
-    //TF related stuff 
-	for(int i=0; i<tokens.size(); i++){
-    	tf_target_zones.at(i).header.frame_id = "/map";
-	    tf_target_zones.at(i).pose.position.x = 0.0;
-	    tf_target_zones.at(i).pose.position.y = 0.0;
-	    tf_target_zones.at(i).pose.position.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.x = 0.0;
-	    tf_target_zones.at(i).pose.orientation.y = 0.0;
-	    tf_target_zones.at(i).pose.orientation.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.w = 0.0;
-    }
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -176,6 +196,8 @@ int main(int argc, char** argv){
 			    tf::StampedTransform transform_rob;
  
 			    try{
+			      listener_rob.waitForTransform("/base_link", "/map",  
+			                                   ros::Time(0), ros::Duration(1000.0));
 		          listener_rob.lookupTransform("/base_link", "/map",  
 			                                   ros::Time(0), transform_rob);
 		        }
@@ -205,6 +227,7 @@ int main(int argc, char** argv){
     			ros::Duration(2, 0).sleep();
                 
                 pub_goal.publish(tf_target_zones.at(min_indx));
+                std::cout << tokens[min_indx] << std::endl;
 
 	    		state = SM_NAV_NEAREST_ZONE;
 	    		break;
@@ -218,6 +241,7 @@ int main(int argc, char** argv){
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();
 
+//TODO Cambiar por Festino::Tools
 	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
 	                msg = "Goal location reached";
 	                std::cout << msg << std::endl;
@@ -228,7 +252,7 @@ int main(int argc, char** argv){
 	               	ros::Duration(5, 0).sleep();
 
 	            	//Send location to refbox
-	            	std::cout << "I'm at this zone" << std::endl;
+	            	std::cout << "Yo ya estoy" << std::endl;
 
 	            	//Delete location from zones vector
 	            	tf_target_zones.erase(tf_target_zones.begin() + min_indx);
