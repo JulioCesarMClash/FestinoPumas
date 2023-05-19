@@ -33,11 +33,11 @@
 #include <thread>
 
 //#define HOST "localhost"
-#define HOST "192.168.0.182"
+#define HOST "192.168.0.100"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
-#define CRYPTO_KEY "misuperllave"
+#define CRYPTO_KEY "randomkey"
 
 #define PUBLIC_PORT 4444
 #define CYAN_PORT 4441
@@ -252,9 +252,13 @@ class Handler
             );
             */
 
+
+           
             m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
             //try{
-            
+
+
+           //Mit Comment Si se usa este metodo, no se recibe nada. 
             //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_send_port, m_recv_port, m_mr);
 
                         //ROS_INFO_STREAM("Test 2");
