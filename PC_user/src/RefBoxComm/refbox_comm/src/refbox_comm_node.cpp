@@ -26,6 +26,10 @@
 #include <refbox_protobuf_msgs/WorkpieceInfo.pb.h>
 #include <refbox_protobuf_msgs/Zone.pb.h>
 
+//Biblioteca para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -573,6 +577,13 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                     ROS_INFO_STREAM(""<< navigation_routes->ShortDebugString());
                     ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / Route--------- ");
                     
+
+//                                        ROS_INFO_STREAM(""<< navigation_routes->;);
+  //                  ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / RouteASSTRING--------- ");
+                    //std::vector<std::string> tokens;
+                    //boost::algorithm::split(tokens, (navigation_routes->Utf8DebugString()), boost::algorithm::is_any_of(" "));
+
+
                     break;
                 }
                 case 45://ORDER INFO / Unconfirmed Delivery
