@@ -62,7 +62,7 @@ int simple_move_status_id = 0;
 //Callback para recibir las 12 zonas de golpe
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
-	//std::cout << "entró al callback" << std::endl;
+	std::cout << "entró al callback " << *msg << std::endl;
     target_zones = *msg;
     tokens.clear();
     boost::algorithm::split(tokens, target_zones.data, boost::algorithm::is_any_of(" "));
