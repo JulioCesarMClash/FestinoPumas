@@ -241,7 +241,7 @@ int main(int argc, char** argv){
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();
 
-//TODO Cambiar por Festino::Tools
+				//TODO Cambiar por Festino::Tools
 	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
 	                msg = "Goal location reached";
 	                std::cout << msg << std::endl;
