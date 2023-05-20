@@ -18,8 +18,27 @@ from sensor_msgs.msg import *
 from geometry_msgs.msg import *
 from cv_bridge import CvBridge, CvBridgeError
 from vision_msgs.srv import RecognizeObjects
+from img_proc.srv import *
+
 
 bridge = CvBridge()
+
+def handle_service_req(req):
+  print("Returning [%s + %s = %s]"%(req.a, req.b, (req.a + req.b)))
+  det_flag = False
+  if req.ask_zone:
+    print('Recibi solicitud')
+    det_flag = True
+  else:
+    print('No Recibi')
+    det_flag = False
+  return AddTwoIntsResponse(req.a + req.b, det_flag)
+
+def add_two_ints_server():
+  #rospy.init_node('add_two_ints_server')
+  s = rospy.Service('add_two_ints', AddTwoInts, handle_service_req)
+  print("Ready to add two ints.")
+  rospy.spin()
 
 def handle_add_two_ints(req):
   print("IDKWID")
@@ -94,7 +113,7 @@ def callback_depth_points(data):
       last_corner = (corners[(0,2,0)],corners[(0,2,1)])
           
       image = cv2.rectangle(img_bgr, first_corner, last_corner, color, thickness)
-      if markerIds[i] == 101:
+      if markerIds[i] == 122:
         print("Found MPS")
         max_x = np.max([last_corner[0],first_corner[0]])
         min_x = np.min([last_corner[0],first_corner[0]])
@@ -119,16 +138,6 @@ def callback_depth_points(data):
 
         Masked_red = np.zeros((480, 640))
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
-
-        # --Listo-- utilizar la funcion para obtener las medias (en vez de tanto bloque de texto) 
-        # --Listo-- (puede ser dentro del callback de la nube de puntos)
-        # definir un archivo (yaml o txt o algo) donde se definan los parametros que se usaran por objeto (en este caso las medias de color)
-        # imprimor cuatos pixeles entran en cada intervalo de color y buscar el umbral minimo que corresponderia a la pieza
-        # eliminar pixeles sueltos si estan fuera de la mancha (con erode)
-        # quitar el medianBlur - erode
-        # migrar a Juskeshino 
-        # atiende a servicio que pasa la informacion necesaria y me devuelve coordenada de la pieza
-
         loc = cv2.findNonZero(Red_mask)
 
         #loc[i,0,0] : Points_i
@@ -159,7 +168,8 @@ def callback_depth_points(data):
         mean_B_l1 = (73.37954475229168, 93.521268925739, 0.0, 0.0)
         Fil_B_l1 = segment_color(img_bgr,arr,mean_B_l1)
       else:
-        print('Unable to find Tapita')
+        voidvar = 0
+        #print('Unable to find Tapita')
   cv2.imshow("Aruco Tags", img_bgr)
   cv2.imshow("Red Piece Mask", Red_mask)
   cv2.waitKey(3)
@@ -177,11 +187,13 @@ def main(args):
 
   position_pub      = rospy.Publisher("/redpiece_pos",PointStamped,queue_size=10)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
+  
   s = rospy.Service('point_cloud_srv',RecognizeObjects,handle_add_two_ints)
-  print('I should be printing something')
   
   cv_depth = np.zeros((480, 640))
   arr = np.zeros((480, 640))
+
+  add_two_ints_server()
 
   try:
     rospy.spin()

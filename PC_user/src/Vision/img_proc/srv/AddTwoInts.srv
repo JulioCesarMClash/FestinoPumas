@@ -1,0 +1,7 @@
+int64 a
+int64 b
+bool ask_zone
+---
+int64 sum
+bool det_flag
+string[] codes
