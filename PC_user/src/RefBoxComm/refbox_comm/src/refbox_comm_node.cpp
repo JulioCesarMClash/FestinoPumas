@@ -43,7 +43,7 @@
 #include <thread>
 
 //#define HOST "localhost"
-#define HOST "192.168.0.103"
+#define HOST "192.168.0.100"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
