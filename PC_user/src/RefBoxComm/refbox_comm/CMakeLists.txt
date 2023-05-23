@@ -10,6 +10,7 @@ project(refbox_comm)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   protobuf_comm
+  geometry_msgs
   refbox_protobuf_msgs
 )
 
@@ -69,10 +70,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+#generate_messages(
+# DEPENDENCIES
+# std_msgs  # Or other packages containing msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -132,8 +133,6 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/refbox_comm_node.cpp)
-
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -147,11 +146,11 @@ add_executable(${PROJECT_NAME}_node src/refbox_comm_node.cpp)
 
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}_node
-  ${catkin_LIBRARIES}
-  protobuf
-  refbox_protobuf_msgs_proto
-)
+##target_link_libraries(${PROJECT_NAME}_node_dnl
+##  ${catkin_LIBRARIES}
+##  protobuf
+##  refbox_protobuf_msgs_proto
+##)
 
 #############
 ## Install ##
@@ -207,3 +206,25 @@ target_link_libraries(${PROJECT_NAME}_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(refbox_comm_node_dnl src/refbox_comm_node_dnl.cpp)
+target_link_libraries(${PROJECT_NAME}_node_dnl
+  ${catkin_LIBRARIES}
+  protobuf
+  refbox_protobuf_msgs_proto
+)
+
+
+add_executable(refbox_comm_node_austria src/refbox_comm_node_austria.cpp src/comm_twr.cpp src/refbox_comm.cpp)
+target_link_libraries(${PROJECT_NAME}_node_austria
+  ${catkin_LIBRARIES}
+  protobuf
+  refbox_protobuf_msgs_proto
+)
+
+add_executable(refbox_comm_node src/refbox_comm_node.cpp)
+target_link_libraries(${PROJECT_NAME}_node
+  ${catkin_LIBRARIES}
+  protobuf
+  refbox_protobuf_msgs_proto
+)

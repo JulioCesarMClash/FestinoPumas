@@ -170,11 +170,11 @@ def callback_depth_points(data):
             rate = rospy.Rate(10)
 
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
-                aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_x, pos_y, pos_z
+                aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                 br_ar = tf.TransformBroadcaster()
-                br_ar.sendTransform((aruco_pose.point.z, -aruco_pose.point.x, aruco_pose.point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, "camera_link")
+                br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, "camera_link")
                 #br_ar.sendTransform((tag_msg.mps_tags[0].point.z, -tag_msg.mps_tags[0].point.x, -tag_msg.mps_tags[0].point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, "camera_link")
-                print(pos_z, -pos_x, -pos_y, '\n')
+                print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                 rate = rospy.Rate(10)
           except IndexError:
             print('Not identified')
