@@ -42,13 +42,13 @@
 #include <memory>
 #include <thread>
 
-#define HOST "localhost"
-//#define HOST "192.168.0.103"
+
+//#define HOST "localhost"
+#define HOST "192.168.0.101"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
 #define CRYPTO_KEY "randomkey"
-
 #define PUBLIC_PORT 4444
 #define CYAN_PORT 4441
 #define MAGENTA_PORT 4442

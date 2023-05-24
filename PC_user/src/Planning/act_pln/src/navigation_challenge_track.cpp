@@ -194,6 +194,7 @@ void nearest_neighbour()
 	    //Quita del vector las zonas que ya son recorridas
 	    //Delete location from zones vector
 	    tf_target_zones.erase(tf_target_zones.begin() + min_indx);
+		tokens.erase(tokens.begin() + min_indx);
 
 	    //Ahora la nueva posición del robot es la zona más cercana
 		tf_robot_pose.pose.position.x = tf_nearest_zone.pose.position.x;
