@@ -24,7 +24,6 @@
 enum SMState {
 	SM_INIT,
 	SM_WAIT_FOR_ZONES,
-	SM_CALC_EU_DIST,
 	SM_NAV_NEAREST_ZONE,
     SM_FINAL_STATE
 };
@@ -43,6 +42,7 @@ std_msgs::String target_zones;
 
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 geometry_msgs::PoseStamped tf_target_zone;
+std::vector<geometry_msgs::PoseStamped> zones_path;
 std::vector<std::string> tokens;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
@@ -122,7 +122,74 @@ void transform_zones()
 
     	std::cout << "pasó las tfs" << std::endl;
     }
+
     std::cout << "salió del for" << std::endl;
+}
+
+void nearest_neighbour()
+{
+	//Inicialización de variables
+	double min_dist;
+	int min_indx;
+	geometry_msgs::PoseStamped tf_nearest_zone;
+	geometry_msgs::PoseStamped tf_zone;
+
+	//Vector of euclidean distances
+	std::vector<double> euc_dist;
+
+	//Obtaining robot location
+	geometry_msgs::PoseStamped tf_robot_pose;
+	tf::TransformListener listener_rob;
+    tf::StampedTransform transform_rob;
+
+    try{
+      listener_rob.waitForTransform("/base_link", "/map",  
+                                   ros::Time(0), ros::Duration(1000.0));
+      listener_rob.lookupTransform("/base_link", "/map",  
+                                   ros::Time(0), transform_rob);
+    }
+    catch (tf::TransformException ex){
+      ROS_ERROR("%s",ex.what());
+      ros::Duration(1.0).sleep();
+    }
+
+    tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();
+	tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
+
+	//Mientras el tamaño del vector de zonas sea mayor a cero seguirá recorriendo
+	while(tf_target_zones.size() > 0){
+
+		//Inicializa la distancia mínima como infinito
+		min_dist = std::numeric_limits<double>::infinity();
+
+		//Calculating Euclidean distance to every zone
+	    for(int i=0; i<tf_target_zones.size(); i++){
+	    	tf_zone = tf_target_zones.at(i);
+
+	    	double diff_x =  tf_robot_pose.pose.position.x - tf_zone.pose.position.x;
+	    	double diff_y =  tf_robot_pose.pose.position.y - tf_zone.pose.position.y;
+
+	    	double dist = pow(diff_x, 2) + pow(diff_y, 2);
+
+			//Finding the min distance 
+	    	if(dist < min_dist){
+	    		min_dist = dist;
+	    		tf_nearest_zone = tf_zone;
+	    		min_indx = i;
+	    	}
+	    }
+
+	    //Agregar la zona más cercana al vector que representa el camino a seguir
+	    zones_path.push_back(tf_nearest_zone);
+
+	    //Quita del vector las zonas que ya son recorridas
+	    //Delete location from zones vector
+	    tf_target_zones.erase(tf_target_zones.begin() + min_indx);
+
+	    //Ahora la nueva posición del robot es la zona más cercana
+		tf_robot_pose.pose.position.x = tf_nearest_zone.pose.position.x;
+		tf_robot_pose.pose.position.y = tf_nearest_zone.pose.position.y;
+	}
 }
 
 int main(int argc, char** argv){
@@ -174,64 +241,10 @@ int main(int argc, char** argv){
 	    		}	
 	    		else{
 	    			transform_zones();
+	    			nearest_neighbour();
 	    			state = SM_CALC_EU_DIST;	
 	    		}
 	    		break;
-
-	    	case SM_CALC_EU_DIST:{
-	    		//Computing euclidean distance case
-	    		std::cout << "State machine: SM_CALC_EU_DIST" << std::endl;
-	            msg = "Computing euclidean distance";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
-
-	            //Vector of euclidean distances
-				std::vector<double> euc_dist;
-
-				//Obtaining robot location
-				geometry_msgs::PoseStamped tf_robot_pose;
-				tf::TransformListener listener_rob;
-			    tf::StampedTransform transform_rob;
- 
-			    try{
-			      listener_rob.waitForTransform("/base_link", "/map",  
-			                                   ros::Time(0), ros::Duration(1000.0));
-		          listener_rob.lookupTransform("/base_link", "/map",  
-			                                   ros::Time(0), transform_rob);
-		        }
-		        catch (tf::TransformException ex){
-		          ROS_ERROR("%s",ex.what());
-		          ros::Duration(1.0).sleep();
-		        }
-
-		        tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();
-		    	tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
-			   
-
-	            //Calculating Euclidean distance to every zone
-	            for(int i=0; i<tf_target_zones.size(); i++){
-	            	double diff_x =  tf_robot_pose.pose.position.x - tf_target_zones.at(i).pose.position.x;
-	            	double diff_y =  tf_robot_pose.pose.position.y - tf_target_zones.at(i).pose.position.y;
-
-	            	double dist = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-
-	            	euc_dist.push_back(dist);
-	            }
-
-	            //Finding the min distance 
-	            auto min_dist = std::min_element(euc_dist.begin(), euc_dist.end());
-    			min_indx = std::distance(euc_dist.begin(), min_dist);
-
-    			ros::Duration(2, 0).sleep();
-                
-                pub_goal.publish(tf_target_zones.at(min_indx));
-                std::cout << tokens[min_indx] << std::endl;
-
-	    		state = SM_NAV_NEAREST_ZONE;
-	    		break;
-	        }
 	    	case SM_NAV_NEAREST_ZONE:{
             	//Wait for finished navigation
 	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
