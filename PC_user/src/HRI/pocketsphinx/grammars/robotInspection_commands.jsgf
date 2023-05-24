@@ -1,0 +1,4 @@
+#JSGF V1.0;
+grammar final_tmr_grammar;
+public <final_tmr> = (<validCommands>);
+<validCommands> = (robot yes | robot no | continue);

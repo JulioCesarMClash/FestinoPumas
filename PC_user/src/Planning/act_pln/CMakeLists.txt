@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   robotino_msgs
   festino_tools
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -59,11 +60,13 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   Locate_server.srv
+   FaceRecogSrv.srv
+   FaceTrainSrv.srv
+   Set_location_server.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -73,10 +76,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   sensor_msgs#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+   geometry_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,7 +114,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES act_pln
-#  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs robotino_msgs
+  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs robotino_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -227,6 +231,31 @@ add_executable(random_navigation src/random_navigation.cpp)
 add_dependencies(random_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(random_navigation ${catkin_LIBRARIES})
 
+
+add_executable(carry_my_luggage src/carry_my_luggage.cpp)
+add_dependencies(carry_my_luggage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(carry_my_luggage ${catkin_LIBRARIES})
+
 add_executable(navigation_challenge_track src/navigation_challenge_track.cpp)
 add_dependencies(navigation_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(navigation_challenge_track ${catkin_LIBRARIES})
+
+add_executable(robot_inspection src/robot_inspection.cpp)
+add_dependencies(robot_inspection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robot_inspection ${catkin_LIBRARIES})
+
+add_executable(receptionist src/receptionist.cpp)
+add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(receptionist ${catkin_LIBRARIES})
+
+add_executable(GPSR src/GPSR.cpp)
+add_dependencies(GPSR ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(GPSR ${catkin_LIBRARIES})
+
+add_executable(DemoTMR2023 src/DemoTMR2023.cpp)
+add_dependencies(DemoTMR2023 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(DemoTMR2023 ${catkin_LIBRARIES})
+
+add_executable(demo_follow src/demo_follow.cpp)
+add_dependencies(demo_follow ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(demo_follow ${catkin_LIBRARIES})

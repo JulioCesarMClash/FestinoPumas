@@ -38,6 +38,17 @@ entrance:
 - qy: 0.0
 - qz: -0.01
 - qw: -1.0
+<<<<<<< HEAD
+=======
+exit_prueba:
+- x: -0.57
+- y: 0.435
+- theta: 1.282
+- qx: 0.0
+- qy: 0.0
+- qz: 0.598
+- qw: 0.801
+>>>>>>> 1ada5179c760c920b47f6ece57ac31a041c63e32
 kitchen:
 - x: 7.3
 - y: -2.6

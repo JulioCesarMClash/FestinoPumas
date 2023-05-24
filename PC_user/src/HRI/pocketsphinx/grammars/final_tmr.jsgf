@@ -1,0 +1,4 @@
+#JSGF V1.0;
+grammar carryMyLuggage;
+public <carryMyLuggage> = (<validCommands>);
+<validCommands> = (robot yes | robot no | here is the car| follow me | robot stop);

@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   #manip_msgs
   message_generation
   nav_msgs
+  hri_msgs
   #pcl_conversions
   roscpp
   roslib
@@ -235,8 +236,11 @@ ${catkin_INCLUDE_DIRS}
 
 add_library(festino_tools
 #  src/JustinaTools.cpp
-#  src/JustinaVision.cpp
+  src/FestinoHardware.cpp
   src/FestinoNavigation.cpp
+  src/FestinoHRI.cpp
+  src/FestinoKnowledge.cpp
+  src/FestinoVision.cpp
 )
 
 add_dependencies(festino_tools ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

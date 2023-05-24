@@ -1,0 +1,4 @@
+#JSGF V1.0;
+grammar names;
+public <names> = (<validNames>);
+<validNames> = (my name is | i am | i'm )(jamie | morgan | michael | jordan | taylor | tracy | robin | alex);
