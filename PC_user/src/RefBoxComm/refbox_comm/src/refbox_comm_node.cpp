@@ -44,9 +44,9 @@
 
 //#define HOST "localhost"
 #define HOST "192.168.0.103"
-#define TEAM_COLOR "MAGENTA"
-#define TEAM_NAME "Pumas"
-#define ROBOT_NAME "Festino"
+#define TEAM_COLOR "CYAN"
+#define TEAM_NAME "GRIPS"
+#define ROBOT_NAME "Takeshi"
 #define CRYPTO_KEY "randomkey"
 
 #define PUBLIC_PORT 4444
