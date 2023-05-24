@@ -19,6 +19,12 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+//Festino Tools
+#include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoVision.h"
+#include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoKnowledge.h"
+
 
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
@@ -182,6 +188,9 @@ void nearest_neighbour()
 	    //Agregar la zona más cercana al vector que representa el camino a seguir
 	    zones_path.push_back(tf_nearest_zone);
 
+	    //DEBUGGING BORRAR DESPUES
+	    std::cout << "La siguiente zona es: " << tokens.at(min_indx) << std::endl;
+
 	    //Quita del vector las zonas que ya son recorridas
 	    //Delete location from zones vector
 	    tf_target_zones.erase(tf_target_zones.begin() + min_indx);
@@ -189,8 +198,22 @@ void nearest_neighbour()
 	    //Ahora la nueva posición del robot es la zona más cercana
 		tf_robot_pose.pose.position.x = tf_nearest_zone.pose.position.x;
 		tf_robot_pose.pose.position.y = tf_nearest_zone.pose.position.y;
+
 	}
+
 }
+
+void navigate_to_location(geometry_msgs::PoseStamped location)
+{
+    std::cout << "Navigate to location" << std::endl;
+    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,120000)){
+        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 120000)){
+         	std::cout << "Cannot move to " << std::endl;
+                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
+        }
+    }
+}
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -210,7 +233,7 @@ int main(int argc, char** argv){
     std_msgs::String voice;
     std::string msg;
 
-    int min_indx;
+    int cont = 0;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -242,7 +265,7 @@ int main(int argc, char** argv){
 	    		else{
 	    			transform_zones();
 	    			nearest_neighbour();
-	    			state = SM_CALC_EU_DIST;	
+	    			state = SM_NAV_NEAREST_ZONE;	
 	    		}
 	    		break;
 	    	case SM_NAV_NEAREST_ZONE:{
@@ -254,31 +277,13 @@ int main(int argc, char** argv){
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();
 
-				//TODO Cambiar por Festino::Tools
-	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-	                msg = "Goal location reached";
-	                std::cout << msg << std::endl;
-	                voice.data = msg;
-	                pub_speaker.publish(voice);
+	            navigate_to_location(zones_path.at(cont));
+	            cont++;
 
-	               	//Stay at zone for 5 seconds
-	               	ros::Duration(5, 0).sleep();
+				if(cont == 12){
+					state = SM_FINAL_STATE;
+				}
 
-	            	//Send location to refbox
-	            	std::cout << "Yo ya estoy" << std::endl;
-
-	            	//Delete location from zones vector
-	            	tf_target_zones.erase(tf_target_zones.begin() + min_indx);
-
-	            	//If all zones have been visited then go to final state 
-	            	//otherwise calculate the euclidean distance again from the new zone
-		            if(tf_target_zones.size() == 0){
-		            	state = SM_FINAL_STATE;
-		            }
-		            else{
-						state = SM_CALC_EU_DIST;
-		            }
-	            }
 	            break;
 	        }
 	    	case SM_FINAL_STATE:
