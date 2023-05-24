@@ -35,6 +35,7 @@ std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
 std_msgs::Bool mps_flag;
+bool jelp = false;
 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
@@ -49,8 +50,12 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 
 void callback_mps_flag(const std_msgs::Bool::ConstPtr& msg)
 {
-    mps_flag = *msg;
-    std::cout << "Found Tag" << std::endl;		
+    //mps_flag = *msg;
+	jelp = true;
+	/*if(mps_flag)
+	{
+		std::cout << "Found Tag" << std::endl;		
+	}*/
 }
 
 void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)
@@ -94,7 +99,7 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Subscriber sub_mps_names 			= n.subscribe("/mps_names", 1, callback_mps_flag);
+    ros::Subscriber sub_mps_flag 			= n.subscribe("/aruco_det", 1, callback_mps_flag);
 	ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 
@@ -206,6 +211,14 @@ int main(int argc, char** argv){
 	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
 	            msg = "Navigating to destination point";
 	            std::cout << msg << std::endl;
+				if(jelp == true)
+				{
+					std::cout << "TagFound" << std::endl;
+				}
+				else
+				{
+					std::cout << "Tag   NOT   Found" << std::endl;
+				}
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();
