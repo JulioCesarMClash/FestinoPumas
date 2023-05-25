@@ -16,12 +16,19 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
+//Festino Tools
+#include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoVision.h"
+#include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoKnowledge.h"
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
-	SM_WAIT_FOR_ZONES,
-	SM_CALC_EU_DIST,
-	SM_NAV_NEAREST_ZONE,
+	SM_NAV_FWD,
+	SM_NAV_AROUND_OBST,
+	SM_TAG_SEARCH,
+	SM_TAG_DETECTED,
     SM_FINAL_STATE
 };
 
@@ -32,11 +39,13 @@ bool flag_zones = false;
 std::vector<std_msgs::String> target_zones;
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 std_msgs::String new_zone;
+std_msgs::String mps_name;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
-std_msgs::Bool mps_flag;
-bool jelp = false;
-
+bool mps_flag;
+std::vector<std_msgs::String> zones_names;
+bool flag_names = false;
+std::string zone;
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -48,14 +57,24 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
     }
 }
 
-void callback_mps_flag(const std_msgs::Bool::ConstPtr& msg)
-{
-    //mps_flag = *msg;
-	jelp = true;
-	/*if(mps_flag)
+//Arreglo con los nombres de las estaciones
+void callback_mps_name(const std_msgs::String::ConstPtr& msg){
+    mps_name = *msg;
+	if(zones_names.size() == 0){
+		zones_names.push_back(mps_name);
+	}
+	else if(!(std::count(zones_names.begin(), zones_names.end(), mps_name))){
+		zones_names.push_back(mps_name);
+	}
+	if(zones_names.size() == 4)
 	{
-		std::cout << "Found Tag" << std::endl;		
-	}*/
+		flag_names = true;
+	}
+}
+
+//Encontro un TAG
+void callback_mps_flag(const std_msgs::Bool::ConstPtr& msg){
+    mps_flag = msg->data;
 }
 
 void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)
@@ -66,27 +85,30 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
     ss >> simple_move_status_id;
 }
 
-void transform_zones()
+void transform_zones(std::string zone)
 {
-
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
-    //Transform 12 target zones
-    for(int i=0; i<target_zones.size();i++){
-    	//Obtaining destination point from string 
-    	try{
-          //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-    		listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
-        }
-        catch (tf::TransformException ex){
-          ROS_ERROR("%s",ex.what());
-          ros::Duration(1.0).sleep();
-        }
+    //TF related stuff 
+    tf_target_zone.header.frame_id = "/map";
+	tf_target_zone.pose.position.x = 0.0;
+	tf_target_zone.pose.position.y = 0.0;
+	tf_target_zone.pose.position.z = 0.0;
+	tf_target_zone.pose.orientation.x = 0.0;
+	tf_target_zone.pose.orientation.y = 0.0;
+	tf_target_zone.pose.orientation.z = 0.0;
+	tf_target_zone.pose.orientation.w = 0.0;
 
-        tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
-    	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+   	try{
+   		listener.lookupTransform(zone, "/map", ros::Time(0), transform);
     }
+    catch(tf::TransformException ex){
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+    }
+    tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
+    tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
 }
 
 int main(int argc, char** argv){
@@ -96,10 +118,14 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
 
+	FestinoNavigation::setNodeHandle(&n);
+	FestinoHRI::setNodeHandle(&n);
+
     //Subscribers and Publishers
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Subscriber sub_mps_flag 			= n.subscribe("/aruco_det", 1, callback_mps_flag);
+    ros::Subscriber sub_mps_flag     = n.subscribe("/aruco_det", 10, callback_mps_flag);
+	ros::Subscriber sub_mps_name     = n.subscribe("/mps_name", 10, callback_mps_name);
 	ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 
@@ -108,150 +134,104 @@ int main(int argc, char** argv){
     std_msgs::String voice;
     std::string msg;
 
-    int min_indx;
-
-    //TF related stuff 
-	for(int i=0; i<target_zones.size(); i++){
-    	tf_target_zones.at(i).header.frame_id = "/map";
-	    tf_target_zones.at(i).pose.position.x = 0.0;
-	    tf_target_zones.at(i).pose.position.y = 0.0;
-	    tf_target_zones.at(i).pose.position.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.x = 0.0;
-	    tf_target_zones.at(i).pose.orientation.y = 0.0;
-	    tf_target_zones.at(i).pose.orientation.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.w = 0.0;
-    }
-
 	while(ros::ok() && !fail && !success){
 	    switch(state){
-			case SM_INIT:
+			case SM_INIT:{
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            msg = "I am ready for the navigation challenge";
+	            msg = "I am ready for the exploration challenge";
 	            std::cout << msg << std::endl;
-	            /*voice.data = msg;
+	            voice.data = msg;
 	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();*/
-	    		state = SM_WAIT_FOR_ZONES;
+	            ros::Duration(2, 0).sleep();
+	    		state = SM_NAV_FWD;
 	    		break;
+			}
 
-	    	case SM_WAIT_FOR_ZONES:
-	    		//Wating for zone case
-	    		std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
-	            msg = "Wating for target zones";
+	    	case SM_NAV_FWD:{
+	    		//Looking for Obstacles
+	    		std::cout << "State machine: SM_NAV_FWD" << std::endl;
+	            msg = "Looking for Obstacles";
 	            std::cout << msg << std::endl;
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
-	            sleep(1);
-
-	            //Waiting for 12 zones
-	    		if(flag_zones == false){
-	    			state = SM_WAIT_FOR_ZONES;	
-	    		}	
-	    		else{
-	    			transform_zones();
-	    			state = SM_CALC_EU_DIST;	
-	    		}*/
-				state = SM_CALC_EU_DIST;
+	            sleep(1);*/
+				// ----- If obstacle found -> Go around it -----
+				// ----- Else -> Go forward -----
+				state = SM_NAV_AROUND_OBST;
 	    		break;
+			}
 
-	    	case SM_CALC_EU_DIST:{
-	    		//Computing euclidean distance case
-	    		std::cout << "State machine: SM_CALC_EU_DIST" << std::endl;
-	            msg = "Computing euclidean distance";
+	    	case SM_NAV_AROUND_OBST:{
+	    		//Navigate around the obstacle
+	    		std::cout << "State machine: SM_NAV_AROUND_OBST" << std::endl;
+	            msg = "Im going to navigate aroudn the station";
 	            std::cout << msg << std::endl;
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();*/
 
-	            //Vector of euclidean distances
-				/*std::vector<double> euc_dist;
-
-				//Obtaining robot location
-				geometry_msgs::PoseStamped tf_robot_pose;
-				tf::TransformListener listener_rob;
-			    tf::StampedTransform transform_rob;
- 
-			    try{
-		          listener_rob.lookupTransform("/base_link", "/map",  
-			                                   ros::Time(0), transform_rob);
-		        }
-		        catch (tf::TransformException ex){
-		          ROS_ERROR("%s",ex.what());
-		          ros::Duration(1.0).sleep();
-		        }
-
-		        tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();
-		    	tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
-			   
-
-	            //Calculating Euclidean distance to every zone
-	            for(int i=0; i<tf_target_zones.size(); i++){
-	            	double diff_x =  tf_robot_pose.pose.position.x - tf_target_zones.at(i).pose.position.x;
-	            	double diff_y =  tf_robot_pose.pose.position.y - tf_target_zones.at(i).pose.position.y;
-
-	            	double dist = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-
-	            	euc_dist.push_back(dist);
-	            }
-
-	            //Finding the min distance 
-	            auto min_dist = std::min_element(euc_dist.begin(), euc_dist.end());
-    			min_indx = std::distance(euc_dist.begin(), min_dist);
-
-    			ros::Duration(2, 0).sleep();
-                
-                pub_goal.publish(tf_target_zones.at(min_indx));*/
-	    		state = SM_NAV_NEAREST_ZONE;
+				// ----- Go around -----
+				// ----- Align -----
+				// ----- Look for Tag -----
+				// ----- OR Continue to Navigate -----
+	            
+	    		state = SM_TAG_SEARCH;
 	    		break;
 	        }
-	    	case SM_NAV_NEAREST_ZONE:{
-            	//Wait for finished navigation
-	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
-	            msg = "Navigating to destination point";
+
+	    	case SM_TAG_SEARCH:{
+            	//Look for Tag
+	            std::cout << "State machine: SM_TAG_SEARCH" << std::endl;
+	            msg = "Looking or Tag";
 	            std::cout << msg << std::endl;
-				if(jelp == true)
+				if(mps_flag)
 				{
-					std::cout << "TagFound" << std::endl;
+					std::cout << "Tag Found" << std::endl;
+					state = SM_TAG_DETECTED;
 				}
 				else
 				{
-					std::cout << "Tag   NOT   Found" << std::endl;
+					std::cout << "Waiting for Tag" << std::endl;
+					state = SM_NAV_FWD;
 				}
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
-	            ros::Duration(3, 0).sleep();
+	            ros::Duration(3, 0).sleep();*/
 
-	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-	                msg = "Goal location reached";
-	                std::cout << msg << std::endl;
-	                voice.data = msg;
-	                pub_speaker.publish(voice);
-
-	               	//Stay at zone for 5 seconds
-	               	ros::Duration(5, 0).sleep();
-
-	            	//Send location to refbox
-	            	std::cout << "I'm at this zone" << std::endl;
-
-	            	//Delete location from zones vector
-	            	tf_target_zones.erase(tf_target_zones.begin() + min_indx);
-
-	            	//If all zones have been visited then go to final state 
-	            	//otherwise calculate the euclidean distance again from the new zone
-		            if(tf_target_zones.size() == 0){
-		            	state = SM_FINAL_STATE;
-		            }
-		            else{
-						state = SM_CALC_EU_DIST;
-		            }
-	            }*/
-				state = SM_FINAL_STATE;
+				// ----- If Tag Detected -> Send Information and discard as go_to_obstacle -----
+				// ----- Else -> Continue to navigate -----
+				
 	            break;
 	        }
-	    	case SM_FINAL_STATE:
-	    		//Navigate case
+
+			case SM_TAG_DETECTED:{
+	    		//Scan Tag and Send Information
+	    		std::cout << "State machine: SM_TAG_DETECTED" << std::endl;	
+	            msg =  "I have found a Tag";
+	            std::cout << msg << std::endl;
+				std::cout << "Sending information" << std::endl;
+
+	            /*voice.data = msg;
+	            pub_speaker.publish(voice);
+	            ros::Duration(2, 0).sleep();*/
+	    		// ----- Send Information and discard as go_to_obstacle -----
+				// ----- If Tags Detected >= 4 -> Fin -----
+				// ----- Else -> Continue to navigate -----
+				if(flag_names){
+					std::cout << "I found all the Tags" << std::endl;
+					state = SM_FINAL_STATE;
+				}
+				else{
+					std::cout << "Still not all the tags" << std::endl;
+					state = SM_NAV_FWD;
+				}
+	    		break;
+			}
+
+	    	case SM_FINAL_STATE:{
+	    		//Finish
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
 	            msg =  "I have finished test";
 	            std::cout << msg << std::endl;
@@ -261,6 +241,7 @@ int main(int argc, char** argv){
 	    		success = true;
 	    		fail = true;
 	    		break;
+			}
 		}
 	    ros::spinOnce();
 	    loop.sleep();
