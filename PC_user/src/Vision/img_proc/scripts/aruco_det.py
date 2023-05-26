@@ -114,19 +114,11 @@ def callback_depth_points(data):
   r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
   aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
 
-  """tag_msg = TagDetector()
-  tag_msg.header.stamp = rospy.Time.now()
-  tag_msg.header.frame_id = "kinect_link"
-  tag_msg.mps_tags = PointStamped()
-  tag_msg.mps_tags.point.x, tag_msg.mps_tags.point.y, tag_msg.mps_tags.point.z = 0.0,0.0,0.0
-  tag_msg.mps_tags.append([4,0,0])
-  tag_msg.mps_tags.append([8,1,1])
-  print(type(tag_msg.mps_tags[0]))"""
-
-  ######## Filling msg for aruco_pose publisher ########  
+  ######## Filling msg for aruco_pose publisher ########
+  frame_id = "camera_link"
   aruco_pose = PointStamped()
   aruco_pose.header.stamp = rospy.Time.now()
-  aruco_pose.header.frame_id = "kinect_link"
+  aruco_pose.header.frame_id = frame_id
   aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = 0,0,0
 
   ######## Looking for ARUCO TAG ########
@@ -167,13 +159,13 @@ def callback_depth_points(data):
             pos_z = float(arr[cent][2])
             mps_name_arr, mps_name = aruco_mps(markerIds[i])
             print(mps_name, "\n")
+            mps_name_pub.publish(mps_name)
             rate = rospy.Rate(10)
 
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
                 aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                 br_ar = tf.TransformBroadcaster()
-                br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, "camera_link")
-                #br_ar.sendTransform((tag_msg.mps_tags[0].point.z, -tag_msg.mps_tags[0].point.x, -tag_msg.mps_tags[0].point.y), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, "camera_link")
+                br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                 rate = rospy.Rate(10)
           except IndexError:
@@ -184,8 +176,7 @@ def callback_depth_points(data):
   cv2.waitKey(3)
 
   try:
-    mps_name_pub.publish(mps_name)
-    aruco_pos_pub.publish(aruco_pose)
+    #aruco_pos_pub.publish(aruco_pose)
     aruco_flag_pub.publish(aruco_det_flag)
   except CvBridgeError as e:
     print(e)
