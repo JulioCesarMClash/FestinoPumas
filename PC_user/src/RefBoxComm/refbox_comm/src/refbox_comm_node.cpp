@@ -26,6 +26,10 @@
 #include <refbox_protobuf_msgs/WorkpieceInfo.pb.h>
 #include <refbox_protobuf_msgs/Zone.pb.h>
 
+#include "geometry_msgs/PoseStamped.h"
+#include <tf/transform_listener.h>
+
+
 //----------------------------------NAVIGATION CHALLENGE
 //Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
@@ -43,7 +47,6 @@
 #include <thread>
 
 //#define HOST "localhost"
-
 #define HOST "192.168.0.101"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
@@ -52,23 +55,22 @@
 #define PUBLIC_PORT 4444
 #define CYAN_PORT 4441
 #define MAGENTA_PORT 4442
-/*
-#define SENDPORT 4445
-#define RECVPORT 4444
-#define CYAN_SENDPORT 4446
-#define CYAN_RECVPORT 4441
-#define MAGENTA_SENDPORT 4447
-#define MAGENTA_RECVPORT 4442
-*/
+
 
 #include <iostream>
 #include <typeinfo>
-using namespace std;
 
+using namespace std;
 using namespace protobuf_comm;
 
-//--------------------------------NAVIGATION CHALLENGE
+//TODO topic robot position
+//
 
+//--------------------------------NAVIGATION CHALLENGE
+        //ros::Subscriber subRobotPose;
+        float pose_x = 0.0f;
+        float pose_y = 0.0f;
+        float pose_ori = 0.0f;
         ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
 
@@ -1356,10 +1358,19 @@ pub_zone.publish(el_msg);
                 time->set_sec(static_cast<google::protobuf::int64>(seconds.count()));
                 time->set_nsec(static_cast<google::protobuf::int64>(nanoseconds.count()));
 
+                Pose2D *pose = msg->mutable_pose();
+                pose->set_x(pose_x);
+                pose->set_y(pose_y);
+                pose->set_ori(pose_ori);
+                //pose->set_allocated_timestamp(time);
+                
+
                 msg->set_seq(++m_sequence_nr_);
                 msg->set_number(1);
                 msg->set_team_name(m_team_name);
                 msg->set_peer_name(ROBOT_NAME);
+
+
 
                 if("CYAN" == TEAM_COLOR){
                     msg->set_team_color(Team::CYAN);
@@ -1377,8 +1388,10 @@ pub_zone.publish(el_msg);
         }
 
 };
+/*
+void callbackRobotPose(const geometry_msgs::PoseStamped){
 
-
+}*/
 int main(int argc, char** argv) 
 {
 
@@ -1404,12 +1417,33 @@ int main(int argc, char** argv)
 
 //---------------------------------------NAVIGATION CHALLENGE
  pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
- //    ros::Subscriber subRefbox = n.subscribe("/zone_msg", 1, callback_refbox_zones);
+//subRobotPose  = n.subscribe("/TODO_robot_pose", 1, callbackRobotPose);
  //---------------------------------------NAVIGATION CHALLENGE
     Handler p(HOST, PUBLIC_PORT);
 
     ros::Rate r(10);
     while (ros::ok()) {
+
+        //Obtaining robot location
+	geometry_msgs::PoseStamped tf_robot_pose;
+	tf::TransformListener listener_rob;
+    tf::StampedTransform transform_rob;
+
+    try{
+      listener_rob.waitForTransform("/map", "/base_link",  
+                                   ros::Time(0), ros::Duration(1000.0));
+      listener_rob.lookupTransform("/map", "/base_link",  
+                                   ros::Time(0), transform_rob);
+    }
+    catch (tf::TransformException ex){
+      ROS_ERROR("%s",ex.what());
+      ros::Duration(1.0).sleep();
+    }
+
+    pose_x = transform_rob.getOrigin().x();
+	pose_y = transform_rob.getOrigin().y();
+    pose_ori = 0.0f;
+
         ros::spinOnce();
     }
     return 0;
