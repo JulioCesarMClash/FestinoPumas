@@ -1,0 +1,9 @@
+Para hacer funcionar el brazo se debe correr "roslaunch roslaunch Festino_arm_moveit_config Festino_arm.launch". Este launch ya levanta todos los nodos necesarios para el brazo. 
+
+
+Si se desea mover, se debe llamar el servicio con "rosservice call/srv_arm" y sedeben llenar los parámetros. Recibe x, y y el ángulo pitch del efector final y si el robot puede llegar a dicha posición, se moverá.
+
+Errores que puede marcar:
+	- No reconocer el puerto de USB: Para ello se deben dar permisos de escritura y lectura al puerto ttyUSB0 (o al que se allá conectado) mediante chmod /dev7....
+
+	- No reconocer el modelo de robot. Para solucionarlo se debe volver a cargar el modelo mediante moveit Setup assitant. La configuración está en "pincher_arm_moveit_config/" y no se debe mover nada, únicate cargar el modelo e ir al ultimo paso para generar el paquete, después se debe volver a lanzar el launch y debería correr sin problemas 
