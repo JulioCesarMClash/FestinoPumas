@@ -37,15 +37,15 @@ bool success = false;
 SMState state = SM_INIT;
 bool flag_zones = false;
 std::vector<std_msgs::String> target_zones;
-std::vector<geometry_msgs::PoseStamped> tf_target_zones;
+geometry_msgs::PoseStamped det_mps;
 std_msgs::String new_zone;
 std_msgs::String mps_name;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
 bool mps_flag;
-std::vector<std_msgs::String> zones_names;
+std::vector<std_msgs::String> mps_names;
 bool flag_names = false;
-std::string zone;
+std_msgs::String mps_id;
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -60,13 +60,13 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 //Arreglo con los nombres de las estaciones
 void callback_mps_name(const std_msgs::String::ConstPtr& msg){
     mps_name = *msg;
-	if(zones_names.size() == 0){
-		zones_names.push_back(mps_name);
+	if(mps_names.size() == 0){
+		mps_names.push_back(mps_name);
 	}
-	else if(!(std::count(zones_names.begin(), zones_names.end(), mps_name))){
-		zones_names.push_back(mps_name);
+	else if(!(std::count(mps_names.begin(), mps_names.end(), mps_name))){
+		mps_names.push_back(mps_name);
 	}
-	if(zones_names.size() == 4)
+	if(mps_names.size() == 4)
 	{
 		flag_names = true;
 	}
@@ -85,36 +85,45 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
     ss >> simple_move_status_id;
 }
 
-void transform_zones(std::string zone)
+void transform_mps()
 {
-	tf::TransformListener listener;
-    tf::StampedTransform transform;
+	if(mps_names.size() > 0){
+		for(int i = 0; i < mps_names.size(); i++){
+			ros::Duration(0.5, 0).sleep();
+			std::cout << "\n" << mps_names[i].data << "\n" << std::endl;
+			tf::TransformListener listener;
+			tf::StampedTransform transform;
 
-    //TF related stuff 
-    tf_target_zone.header.frame_id = "/map";
-	tf_target_zone.pose.position.x = 0.0;
-	tf_target_zone.pose.position.y = 0.0;
-	tf_target_zone.pose.position.z = 0.0;
-	tf_target_zone.pose.orientation.x = 0.0;
-	tf_target_zone.pose.orientation.y = 0.0;
-	tf_target_zone.pose.orientation.z = 0.0;
-	tf_target_zone.pose.orientation.w = 0.0;
+			//TF related stuff 
+			det_mps.pose.position.x = 0.0;
+			det_mps.pose.position.y = 0.0;
+			det_mps.pose.position.z = 0.0;
+			det_mps.pose.orientation.x = 0.0;
+			det_mps.pose.orientation.y = 0.0;
+			det_mps.pose.orientation.z = 0.0;
+			det_mps.pose.orientation.w = 0.0;
 
-   	try{
-   		listener.lookupTransform(zone, "/map", ros::Time(0), transform);
-    }
-    catch(tf::TransformException ex){
-        ROS_ERROR("%s",ex.what());
-        ros::Duration(1.0).sleep();
-    }
-    tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
-    tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+			try{
+				listener.waitForTransform(mps_names[i].data, "/camera_link", ros::Time(0), ros::Duration(1000.0));
+				listener.lookupTransform(mps_names[i].data, "/camera_link", ros::Time(0), transform);
+			}
+			catch(tf::TransformException ex){
+				ROS_ERROR("%s",ex.what());
+				ros::Duration(1.0).sleep();
+			}
+			det_mps.pose.position.x = -transform.getOrigin().x();
+			det_mps.pose.position.y = -transform.getOrigin().y();
+			det_mps.pose.position.z = -transform.getOrigin().z();
+			
+			std::cout << det_mps.pose.position << std::endl;
+		}
+	}
 }
 
 int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
-	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
+	std::cout << "INITIALIZING EXPLORATION NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
 
@@ -211,8 +220,8 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_TAG_DETECTED" << std::endl;	
 	            msg =  "I have found a Tag";
 	            std::cout << msg << std::endl;
-				std::cout << "Sending information" << std::endl;
-
+				std::cout << "Looking for information" << std::endl;
+				transform_mps();				
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();*/
@@ -225,7 +234,7 @@ int main(int argc, char** argv){
 				}
 				else{
 					std::cout << "Still not all the tags" << std::endl;
-					state = SM_NAV_FWD;
+					state = SM_TAG_SEARCH;
 				}
 	    		break;
 			}
