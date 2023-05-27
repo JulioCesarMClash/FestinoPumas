@@ -214,8 +214,8 @@ void nearest_neighbour()
 void navigate_to_location(geometry_msgs::PoseStamped location)
 {
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
-    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,120000)){
-        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 120000)){
+    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
          	std::cout << "Cannot move to " << std::endl;
                 FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
         }
@@ -286,9 +286,10 @@ int main(int argc, char** argv){
 	            std::cout << msg << std::endl;
 	            voice.data = msg;
 	            pub_speaker.publish(voice);
-	            ros::Duration(3, 0).sleep();
+	            
 
 	            navigate_to_location(zones_path.at(cont));
+				ros::Duration(6, 0).sleep();
 	            cont++;
 
 				if(cont == 12){
