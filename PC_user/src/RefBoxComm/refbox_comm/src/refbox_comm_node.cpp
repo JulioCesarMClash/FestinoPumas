@@ -1359,10 +1359,14 @@ pub_zone.publish(el_msg);
                 time->set_nsec(static_cast<google::protobuf::int64>(nanoseconds.count()));
 
                 Pose2D *pose = msg->mutable_pose();
+                
                 pose->set_x(pose_x);
                 pose->set_y(pose_y);
                 pose->set_ori(pose_ori);
-                //pose->set_allocated_timestamp(time);
+                Time *posetimestamp = pose->mutable_timestamp();
+                posetimestamp->set_sec(time->sec());
+                posetimestamp->set_nsec(time->nsec());
+
                 
 
                 msg->set_seq(++m_sequence_nr_);
@@ -1383,7 +1387,8 @@ pub_zone.publish(el_msg);
                 //m_public_peer->send(2000, BeaconSignal::MSG_TYPE, msg);
                 m_public_peer->send(2000, 1, msg);
                 //m_private_peer->send(2000, 1, msg);
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                ROS_INFO_STREAM("Sending: 2");
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));ROS_INFO_STREAM("Sending: ");
             }
         }
 
