@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   protobuf_comm
   geometry_msgs
   refbox_protobuf_msgs
+  tf
 )
 
 

@@ -72,7 +72,8 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 	std::cout << "entró al callback " << *msg << std::endl;
     target_zones = *msg;
     tokens.clear();
-    boost::algorithm::split(tokens, target_zones.data, boost::algorithm::is_any_of(" "));	
+    boost::algorithm::split(tokens, target_zones.data, boost::algorithm::is_any_of(" "));
+	tokens.erase(tokens.begin() + tokens.size());	
     flag_zones = true;
 }
 
@@ -108,7 +109,7 @@ void transform_zones()
     std::cout << "entró al transform zones" << std::endl;
 
     //Transform 12 target zones
-    for(int i=0; i< tokens.size() -1; i++){
+    for(int i=0; i< tokens.size(); i++){
     	//Obtaining destination point from string 
     	try{
     		std::cout << "entró al try" << std::endl;
@@ -122,10 +123,12 @@ void transform_zones()
           ros::Duration(1.0).sleep();
         }
 
-        std::cout << "salió del try" << std::endl;
+        
 
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+
+std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
 
     	std::cout << "pasó las tfs" << std::endl;
     }
@@ -150,9 +153,9 @@ void nearest_neighbour()
     tf::StampedTransform transform_rob;
 
     try{
-      listener_rob.waitForTransform("/base_link", "/map",  
+      listener_rob.waitForTransform("/map", "/base_link",  
                                    ros::Time(0), ros::Duration(1000.0));
-      listener_rob.lookupTransform("/base_link", "/map",  
+      listener_rob.lookupTransform("/map", "/base_link",  
                                    ros::Time(0), transform_rob);
     }
     catch (tf::TransformException ex){
@@ -160,8 +163,11 @@ void nearest_neighbour()
       ros::Duration(1.0).sleep();
     }
 
-    tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();
-	tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
+    tf_robot_pose.pose.position.x = transform_rob.getOrigin().x();
+	tf_robot_pose.pose.position.y = transform_rob.getOrigin().y();
+
+	std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
+	std::cout << "Coords x: " << tf_robot_pose.pose.position.x << " y:" << tf_robot_pose.pose.position.y << std::endl;
 
 	//Mientras el tamaño del vector de zonas sea mayor a cero seguirá recorriendo
 	while(tf_target_zones.size() > 0){
@@ -191,6 +197,7 @@ void nearest_neighbour()
 
 	    //DEBUGGING BORRAR DESPUES
 	    std::cout << "La siguiente zona es: " << tokens.at(min_indx) << std::endl;
+		std::cout << "Coords x: " << tf_nearest_zone.pose.position.x << " y:" << tf_nearest_zone.pose.position.y << std::endl;
 
 	    //Quita del vector las zonas que ya son recorridas
 	    //Delete location from zones vector
@@ -207,7 +214,7 @@ void nearest_neighbour()
 
 void navigate_to_location(geometry_msgs::PoseStamped location)
 {
-    std::cout << "Navigate to location" << std::endl;
+    std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,120000)){
         if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 120000)){
          	std::cout << "Cannot move to " << std::endl;
@@ -223,6 +230,9 @@ int main(int argc, char** argv){
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
+	
+	FestinoNavigation::setNodeHandle(&n);
+	FestinoHRI::setNodeHandle(&n);
 
     //Subscribers and Publishers
     ros::Subscriber subRefbox = n.subscribe("/zone_msg", 1, callback_refbox_zones);
