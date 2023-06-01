@@ -26,6 +26,20 @@
 #include <refbox_protobuf_msgs/WorkpieceInfo.pb.h>
 #include <refbox_protobuf_msgs/Zone.pb.h>
 
+#include "geometry_msgs/PoseStamped.h"
+#include <tf/transform_listener.h>
+
+
+//----------------------------------NAVIGATION CHALLENGE
+//Biblioteca para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <string>
+#include <map>
+#include "std_msgs/String.h"
+//---------------------------------NAVIGATION CHALLENGE
+
 #include <chrono>
 #include <iomanip>
 #include <sstream>
@@ -33,29 +47,32 @@
 #include <thread>
 
 //#define HOST "localhost"
-#define HOST "192.168.0.182"
+#define HOST "192.168.0.101"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
-#define CRYPTO_KEY "misuperllave"
-
+#define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT 4444
 #define CYAN_PORT 4441
 #define MAGENTA_PORT 4442
-/*
-#define SENDPORT 4445
-#define RECVPORT 4444
-#define CYAN_SENDPORT 4446
-#define CYAN_RECVPORT 4441
-#define MAGENTA_SENDPORT 4447
-#define MAGENTA_RECVPORT 4442
-*/
+
 
 #include <iostream>
 #include <typeinfo>
-using namespace std;
 
+using namespace std;
 using namespace protobuf_comm;
+
+//TODO topic robot position
+//
+
+//--------------------------------NAVIGATION CHALLENGE
+        //ros::Subscriber subRobotPose;
+        float pose_x = 0.0f;
+        float pose_y = 0.0f;
+        float pose_ori = 0.0f;
+        ros::Publisher pub_zone;
+//--------------------------------NAVIGATION CHALLENGE
 
 class Handler 
 {
@@ -171,10 +188,140 @@ class Handler
             ROS_INFO_STREAM("------ORDER INFO / ORDER INFO--------- ");
         }
 */
+
+//--------------------------------NAVIGATION CHALLENGE
+        std::map<Zone, std::string> zones_map;
+        //ros::Publisher pub_zone;
+//--------------------------------NAVIGATION CHALLENGE
     public:
         Handler(std::string host, int port)
             : m_host(host), m_port(port)
             , m_mr(new MessageRegister()) {
+
+
+//--------------------------------NAVIGATION CHALLENGE
+zones_map[Zone::C_Z11] = "C_Z11";
+zones_map[Zone::C_Z12] = "C_Z12";
+zones_map[Zone::C_Z13] = "C_Z13";
+zones_map[Zone::C_Z14] = "C_Z14";
+zones_map[Zone::C_Z15] = "C_Z15";
+zones_map[Zone::C_Z16] = "C_Z16";
+zones_map[Zone::C_Z17] = "C_Z17";
+zones_map[Zone::C_Z18] = "C_Z18";
+
+zones_map[Zone::C_Z21] = "C_Z21";
+zones_map[Zone::C_Z22] = "C_Z22";
+zones_map[Zone::C_Z23] = "C_Z23";
+zones_map[Zone::C_Z24] = "C_Z24";
+zones_map[Zone::C_Z25] = "C_Z25";
+zones_map[Zone::C_Z26] = "C_Z26";
+zones_map[Zone::C_Z27] = "C_Z27";
+zones_map[Zone::C_Z28] = "C_Z28";
+
+zones_map[Zone::C_Z31] = "C_Z31";
+zones_map[Zone::C_Z32] = "C_Z32";
+zones_map[Zone::C_Z33] = "C_Z33";
+zones_map[Zone::C_Z34] = "C_Z34";
+zones_map[Zone::C_Z35] = "C_Z35";
+zones_map[Zone::C_Z36] = "C_Z36";
+zones_map[Zone::C_Z37] = "C_Z37";
+zones_map[Zone::C_Z38] = "C_Z38";
+
+zones_map[Zone::C_Z41] = "C_Z41";
+zones_map[Zone::C_Z42] = "C_Z42";
+zones_map[Zone::C_Z43] = "C_Z43";
+zones_map[Zone::C_Z44] = "C_Z44";
+zones_map[Zone::C_Z45] = "C_Z45";
+zones_map[Zone::C_Z46] = "C_Z46";
+zones_map[Zone::C_Z47] = "C_Z47";
+zones_map[Zone::C_Z48] = "C_Z48";
+
+zones_map[Zone::C_Z52] = "C_Z52";
+zones_map[Zone::C_Z53] = "C_Z53";
+zones_map[Zone::C_Z54] = "C_Z54";
+zones_map[Zone::C_Z55] = "C_Z55";
+zones_map[Zone::C_Z56] = "C_Z56";
+zones_map[Zone::C_Z57] = "C_Z57";
+zones_map[Zone::C_Z58] = "C_Z58";
+
+zones_map[Zone::C_Z62] = "C_Z62";
+zones_map[Zone::C_Z63] = "C_Z63";
+zones_map[Zone::C_Z64] = "C_Z64";
+zones_map[Zone::C_Z65] = "C_Z65";
+zones_map[Zone::C_Z66] = "C_Z66";
+zones_map[Zone::C_Z67] = "C_Z67";
+zones_map[Zone::C_Z68] = "C_Z68";
+
+zones_map[Zone::C_Z72] = "C_Z72";
+zones_map[Zone::C_Z73] = "C_Z73";
+zones_map[Zone::C_Z74] = "C_Z74";
+zones_map[Zone::C_Z75] = "C_Z75";
+zones_map[Zone::C_Z76] = "C_Z76";
+zones_map[Zone::C_Z77] = "C_Z77";
+zones_map[Zone::C_Z78] = "C_Z78";
+
+
+
+zones_map[Zone::M_Z11] = "M_Z11";
+zones_map[Zone::M_Z12] = "M_Z12";
+zones_map[Zone::M_Z13] = "M_Z13";
+zones_map[Zone::M_Z14] = "M_Z14";
+zones_map[Zone::M_Z15] = "M_Z15";
+zones_map[Zone::M_Z16] = "M_Z16";
+zones_map[Zone::M_Z17] = "M_Z17";
+zones_map[Zone::M_Z18] = "M_Z18";
+
+zones_map[Zone::M_Z21] = "M_Z21";
+zones_map[Zone::M_Z22] = "M_Z22";
+zones_map[Zone::M_Z23] = "M_Z23";
+zones_map[Zone::M_Z24] = "M_Z24";
+zones_map[Zone::M_Z25] = "M_Z25";
+zones_map[Zone::M_Z26] = "M_Z26";
+zones_map[Zone::M_Z27] = "M_Z27";
+zones_map[Zone::M_Z28] = "M_Z28";
+
+zones_map[Zone::M_Z31] = "M_Z31";
+zones_map[Zone::M_Z32] = "M_Z32";
+zones_map[Zone::M_Z33] = "M_Z33";
+zones_map[Zone::M_Z34] = "M_Z34";
+zones_map[Zone::M_Z35] = "M_Z35";
+zones_map[Zone::M_Z36] = "M_Z36";
+zones_map[Zone::M_Z37] = "M_Z37";
+zones_map[Zone::M_Z38] = "M_Z38";
+
+zones_map[Zone::M_Z41] = "M_Z41";
+zones_map[Zone::M_Z42] = "M_Z42";
+zones_map[Zone::M_Z43] = "M_Z43";
+zones_map[Zone::M_Z44] = "M_Z44";
+zones_map[Zone::M_Z45] = "M_Z45";
+zones_map[Zone::M_Z46] = "M_Z46";
+zones_map[Zone::M_Z47] = "M_Z47";
+zones_map[Zone::M_Z48] = "M_Z48";
+
+zones_map[Zone::M_Z52] = "M_Z52";
+zones_map[Zone::M_Z53] = "M_Z53";
+zones_map[Zone::M_Z54] = "M_Z54";
+zones_map[Zone::M_Z55] = "M_Z55";
+zones_map[Zone::M_Z56] = "M_Z56";
+zones_map[Zone::M_Z57] = "M_Z57";
+zones_map[Zone::M_Z58] = "M_Z58";
+
+zones_map[Zone::M_Z62] = "M_Z62";
+zones_map[Zone::M_Z63] = "M_Z63";
+zones_map[Zone::M_Z64] = "M_Z64";
+zones_map[Zone::M_Z65] = "M_Z65";
+zones_map[Zone::M_Z66] = "M_Z66";
+zones_map[Zone::M_Z67] = "M_Z67";
+zones_map[Zone::M_Z68] = "M_Z68";
+
+zones_map[Zone::M_Z72] = "M_Z72";
+zones_map[Zone::M_Z73] = "M_Z73";
+zones_map[Zone::M_Z74] = "M_Z74";
+zones_map[Zone::M_Z75] = "M_Z75";
+zones_map[Zone::M_Z76] = "M_Z76";
+zones_map[Zone::M_Z77] = "M_Z77";
+zones_map[Zone::M_Z78] = "M_Z78";
+//--------------------------------NAVIGATION CHALLENGE
 
 
  ROS_INFO_STREAM("------Test print--------- Host: " << m_host << " SendPort:" << m_port);
@@ -252,9 +399,13 @@ class Handler
             );
             */
 
+
+           
             m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
             //try{
-            
+
+
+           //Mit Comment Si se usa este metodo, no se recibe nada. 
             //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_send_port, m_recv_port, m_mr);
 
                         //ROS_INFO_STREAM("Test 2");
@@ -311,7 +462,7 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             //m_beacon_thread.join();
             m_beacon_thread.detach();
             
-                                    ROS_INFO_STREAM("Test 4");
+                                    //ROS_INFO_STREAM("Test 4");
 
             
         }
@@ -567,8 +718,40 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                     std::shared_ptr<NavigationRoutes> navigation_routes = std::dynamic_pointer_cast<NavigationRoutes>(msg);
                     ROS_INFO_STREAM("------1 NAVIGATION CHALLENGE / Route--------- " << comp_id << " : " << msg_type);
                     ROS_INFO_STREAM(""<< navigation_routes->ShortDebugString());
-                    ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / Route--------- ");
+
                     
+//navigation_routes->routes_size
+                                        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
+
+string my_msg = "";
+for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
+   // ROS_INFO_STREAM("UNA ZONA " << i);
+    //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+    my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+}
+
+
+       std_msgs::String el_msg;
+   
+       //std::stringstream ss;
+       //ss << my_msg << count;
+       el_msg.data = my_msg;//ss.str();
+   
+
+ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
+pub_zone.publish(el_msg);
+  /*                                      const char* ch = navigation_routes->ShortDebugString().c_str();
+                                        string s = ch;
+                    ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / RouteASSTRING--------- " << ch << " str " << s);
+                    std::vector<std::string> tokens;
+                    boost::algorithm::split(tokens, s, boost::algorithm::is_any_of(" "));
+
+                    for(std::string token : tokens){
+                        ROS_INFO_STREAM("Un token: " << token);
+                    }
+*/
+                    ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / Route--------- ");
+
                     break;
                 }
                 case 45://ORDER INFO / Unconfirmed Delivery
@@ -1175,10 +1358,23 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                 time->set_sec(static_cast<google::protobuf::int64>(seconds.count()));
                 time->set_nsec(static_cast<google::protobuf::int64>(nanoseconds.count()));
 
+                Pose2D *pose = msg->mutable_pose();
+                
+                pose->set_x(pose_x);
+                pose->set_y(pose_y);
+                pose->set_ori(pose_ori);
+                Time *posetimestamp = pose->mutable_timestamp();
+                posetimestamp->set_sec(time->sec());
+                posetimestamp->set_nsec(time->nsec());
+
+                
+
                 msg->set_seq(++m_sequence_nr_);
                 msg->set_number(1);
                 msg->set_team_name(m_team_name);
                 msg->set_peer_name(ROBOT_NAME);
+
+
 
                 if("CYAN" == TEAM_COLOR){
                     msg->set_team_color(Team::CYAN);
@@ -1191,13 +1387,16 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                 //m_public_peer->send(2000, BeaconSignal::MSG_TYPE, msg);
                 m_public_peer->send(2000, 1, msg);
                 //m_private_peer->send(2000, 1, msg);
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                ROS_INFO_STREAM("Sending: 2");
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));ROS_INFO_STREAM("Sending: ");
             }
         }
 
 };
+/*
+void callbackRobotPose(const geometry_msgs::PoseStamped){
 
-
+}*/
 int main(int argc, char** argv) 
 {
 
@@ -1221,10 +1420,35 @@ int main(int argc, char** argv)
     */
     //Handler p("localhost", 4441, 4444);
 
+//---------------------------------------NAVIGATION CHALLENGE
+ pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
+//subRobotPose  = n.subscribe("/TODO_robot_pose", 1, callbackRobotPose);
+ //---------------------------------------NAVIGATION CHALLENGE
     Handler p(HOST, PUBLIC_PORT);
 
     ros::Rate r(10);
     while (ros::ok()) {
+
+        //Obtaining robot location
+	geometry_msgs::PoseStamped tf_robot_pose;
+	tf::TransformListener listener_rob;
+    tf::StampedTransform transform_rob;
+
+    try{
+      listener_rob.waitForTransform("/map", "/base_link",  
+                                   ros::Time(0), ros::Duration(1000.0));
+      listener_rob.lookupTransform("/map", "/base_link",  
+                                   ros::Time(0), transform_rob);
+    }
+    catch (tf::TransformException ex){
+      ROS_ERROR("%s",ex.what());
+      ros::Duration(1.0).sleep();
+    }
+
+    pose_x = transform_rob.getOrigin().x();
+	pose_y = transform_rob.getOrigin().y();
+    pose_ori = 0.0f;
+
         ros::spinOnce();
     }
     return 0;

@@ -231,7 +231,6 @@ add_executable(random_navigation src/random_navigation.cpp)
 add_dependencies(random_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(random_navigation ${catkin_LIBRARIES})
 
-
 add_executable(carry_my_luggage src/carry_my_luggage.cpp)
 add_dependencies(carry_my_luggage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(carry_my_luggage ${catkin_LIBRARIES})
@@ -240,4 +239,10 @@ add_executable(navigation_challenge_track src/navigation_challenge_track.cpp)
 add_dependencies(navigation_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(navigation_challenge_track ${catkin_LIBRARIES})
 
+add_executable(exploration_challenge_track src/exploration_challenge_track.cpp)
+add_dependencies(exploration_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(exploration_challenge_track ${catkin_LIBRARIES})
 
+add_executable(exploration_challenge_track_MitTest src/exploration_challenge_track_MitTest.cpp)
+add_dependencies(exploration_challenge_track_MitTest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(exploration_challenge_track_MitTest ${catkin_LIBRARIES})

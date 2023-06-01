@@ -15,11 +15,21 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
+//Biblioteca para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+//Festino Tools
+#include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoVision.h"
+#include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoKnowledge.h"
+
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
 	SM_WAIT_FOR_ZONES,
-	SM_CALC_EU_DIST,
 	SM_NAV_NEAREST_ZONE,
     SM_FINAL_STATE
 };
@@ -28,14 +38,24 @@ bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
 bool flag_zones = false;
-std::vector<std_msgs::String> target_zones;
+//std::vector<std_msgs::String> target_zones;
+
+//La funcion que hace la tokenizada no acepta std_msgs
+std_msgs::String target_zones;
+
+//Entonces hay que usar un simple std::string
+//std::string target_zones;
+
 std::vector<geometry_msgs::PoseStamped> tf_target_zones;
+geometry_msgs::PoseStamped tf_target_zone;
+std::vector<geometry_msgs::PoseStamped> zones_path;
+std::vector<std::string> tokens;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
 
-
-void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
+//Callback para recibir las 12 zonas una a una
+/*void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
     new_zone = *msg;
     target_zones.push_back(new_zone);
@@ -43,6 +63,17 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
     if(target_zones.size() == 12){
         flag_zones = true;
     }
+}*/
+
+//Callback para recibir las 12 zonas de golpe
+void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
+{
+	std::cout << "entró al callback " << *msg << std::endl;
+    target_zones = *msg;
+    tokens.clear();
+    boost::algorithm::split(tokens, target_zones.data, boost::algorithm::is_any_of(" "));
+	tokens.erase(tokens.begin() + tokens.size());	
+    flag_zones = true;
 }
 
 void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)
@@ -59,22 +90,138 @@ void transform_zones()
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
+
+    //TF related stuff 
+	for(int i=0; i<tokens.size(); i++){
+		std::cout << tokens[i] << std::endl;
+    	tf_target_zone.header.frame_id = "/map";
+	    tf_target_zone.pose.position.x = 0.0;
+	    tf_target_zone.pose.position.y = 0.0;
+	    tf_target_zone.pose.position.z = 0.0;
+	    tf_target_zone.pose.orientation.x = 0.0;
+	    tf_target_zone.pose.orientation.y = 0.0;
+	    tf_target_zone.pose.orientation.z = 0.0;
+	    tf_target_zone.pose.orientation.w = 0.0;
+	    tf_target_zones.push_back(tf_target_zone);
+    }
+
+    std::cout << "entró al transform zones" << std::endl;
+
     //Transform 12 target zones
-    for(int i=0; i<target_zones.size();i++){
+    for(int i=0; i< tokens.size(); i++){
     	//Obtaining destination point from string 
     	try{
+    		std::cout << "entró al try" << std::endl;
           //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-    		listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
+    		listener.waitForTransform(tokens.at(i), "/map", ros::Time(0), ros::Duration(1000.0));
+    		listener.lookupTransform(tokens.at(i), "/map", ros::Time(0), transform);
+    		std::cout << tokens.at(i) << std::endl;
         }
         catch (tf::TransformException ex){
           ROS_ERROR("%s",ex.what());
           ros::Duration(1.0).sleep();
         }
 
+        
+
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+
+std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
+
+    	std::cout << "pasó las tfs" << std::endl;
+    }
+
+    std::cout << "salió del for" << std::endl;
+}
+
+void nearest_neighbour()
+{
+	//Inicialización de variables
+	double min_dist;
+	int min_indx;
+	geometry_msgs::PoseStamped tf_nearest_zone;
+	geometry_msgs::PoseStamped tf_zone;
+
+	//Vector of euclidean distances
+	std::vector<double> euc_dist;
+
+	//Obtaining robot location
+	geometry_msgs::PoseStamped tf_robot_pose;
+	tf::TransformListener listener_rob;
+    tf::StampedTransform transform_rob;
+
+    try{
+      listener_rob.waitForTransform("/map", "/base_link",  
+                                   ros::Time(0), ros::Duration(1000.0));
+      listener_rob.lookupTransform("/map", "/base_link",  
+                                   ros::Time(0), transform_rob);
+    }
+    catch (tf::TransformException ex){
+      ROS_ERROR("%s",ex.what());
+      ros::Duration(1.0).sleep();
+    }
+
+    tf_robot_pose.pose.position.x = transform_rob.getOrigin().x();
+	tf_robot_pose.pose.position.y = transform_rob.getOrigin().y();
+
+	std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
+	std::cout << "Coords x: " << tf_robot_pose.pose.position.x << " y:" << tf_robot_pose.pose.position.y << std::endl;
+
+	//Mientras el tamaño del vector de zonas sea mayor a cero seguirá recorriendo
+	while(tf_target_zones.size() > 0){
+
+		//Inicializa la distancia mínima como infinito
+		min_dist = std::numeric_limits<double>::infinity();
+
+		//Calculating Euclidean distance to every zone
+	    for(int i=0; i<tf_target_zones.size(); i++){
+	    	tf_zone = tf_target_zones.at(i);
+
+	    	double diff_x =  tf_robot_pose.pose.position.x - tf_zone.pose.position.x;
+	    	double diff_y =  tf_robot_pose.pose.position.y - tf_zone.pose.position.y;
+
+	    	double dist = pow(diff_x, 2) + pow(diff_y, 2);
+
+			//Finding the min distance 
+	    	if(dist < min_dist){
+	    		min_dist = dist;
+	    		tf_nearest_zone = tf_zone;
+	    		min_indx = i;
+	    	}
+	    }
+
+	    //Agregar la zona más cercana al vector que representa el camino a seguir
+	    zones_path.push_back(tf_nearest_zone);
+
+	    //DEBUGGING BORRAR DESPUES
+	    std::cout << "La siguiente zona es: " << tokens.at(min_indx) << std::endl;
+		std::cout << "Coords x: " << tf_nearest_zone.pose.position.x << " y:" << tf_nearest_zone.pose.position.y << std::endl;
+
+	    //Quita del vector las zonas que ya son recorridas
+	    //Delete location from zones vector
+	    tf_target_zones.erase(tf_target_zones.begin() + min_indx);
+		tokens.erase(tokens.begin() + min_indx);
+
+	    //Ahora la nueva posición del robot es la zona más cercana
+		tf_robot_pose.pose.position.x = tf_nearest_zone.pose.position.x;
+		tf_robot_pose.pose.position.y = tf_nearest_zone.pose.position.y;
+
+	}
+
+}
+
+void navigate_to_location(geometry_msgs::PoseStamped location)
+{
+    std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
+    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
+         	std::cout << "Cannot move to " << std::endl;
+                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
+        }
     }
 }
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -82,9 +229,12 @@ int main(int argc, char** argv){
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
+	
+	FestinoNavigation::setNodeHandle(&n);
+	FestinoHRI::setNodeHandle(&n);
 
     //Subscribers and Publishers
-    ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
+    ros::Subscriber subRefbox = n.subscribe("/zone_msg", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
@@ -94,19 +244,7 @@ int main(int argc, char** argv){
     std_msgs::String voice;
     std::string msg;
 
-    int min_indx;
-
-    //TF related stuff 
-	for(int i=0; i<target_zones.size(); i++){
-    	tf_target_zones.at(i).header.frame_id = "/map";
-	    tf_target_zones.at(i).pose.position.x = 0.0;
-	    tf_target_zones.at(i).pose.position.y = 0.0;
-	    tf_target_zones.at(i).pose.position.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.x = 0.0;
-	    tf_target_zones.at(i).pose.orientation.y = 0.0;
-	    tf_target_zones.at(i).pose.orientation.z = 0.0;
-	    tf_target_zones.at(i).pose.orientation.w = 0.0;
-    }
+    int cont = 0;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -137,61 +275,10 @@ int main(int argc, char** argv){
 	    		}	
 	    		else{
 	    			transform_zones();
-	    			state = SM_CALC_EU_DIST;	
+	    			nearest_neighbour();
+	    			state = SM_NAV_NEAREST_ZONE;	
 	    		}
 	    		break;
-
-	    	case SM_CALC_EU_DIST:{
-	    		//Computing euclidean distance case
-	    		std::cout << "State machine: SM_CALC_EU_DIST" << std::endl;
-	            msg = "Computing euclidean distance";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
-
-	            //Vector of euclidean distances
-				std::vector<double> euc_dist;
-
-				//Obtaining robot location
-				geometry_msgs::PoseStamped tf_robot_pose;
-				tf::TransformListener listener_rob;
-			    tf::StampedTransform transform_rob;
- 
-			    try{
-		          listener_rob.lookupTransform("/base_link", "/map",  
-			                                   ros::Time(0), transform_rob);
-		        }
-		        catch (tf::TransformException ex){
-		          ROS_ERROR("%s",ex.what());
-		          ros::Duration(1.0).sleep();
-		        }
-
-		        tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();
-		    	tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
-			   
-
-	            //Calculating Euclidean distance to every zone
-	            for(int i=0; i<tf_target_zones.size(); i++){
-	            	double diff_x =  tf_robot_pose.pose.position.x - tf_target_zones.at(i).pose.position.x;
-	            	double diff_y =  tf_robot_pose.pose.position.y - tf_target_zones.at(i).pose.position.y;
-
-	            	double dist = sqrt(pow(diff_x, 2) + pow(diff_y, 2));
-
-	            	euc_dist.push_back(dist);
-	            }
-
-	            //Finding the min distance 
-	            auto min_dist = std::min_element(euc_dist.begin(), euc_dist.end());
-    			min_indx = std::distance(euc_dist.begin(), min_dist);
-
-    			ros::Duration(2, 0).sleep();
-                
-                pub_goal.publish(tf_target_zones.at(min_indx));
-
-	    		state = SM_NAV_NEAREST_ZONE;
-	    		break;
-	        }
 	    	case SM_NAV_NEAREST_ZONE:{
             	//Wait for finished navigation
 	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
@@ -199,32 +286,16 @@ int main(int argc, char** argv){
 	            std::cout << msg << std::endl;
 	            voice.data = msg;
 	            pub_speaker.publish(voice);
-	            ros::Duration(3, 0).sleep();
+	            
 
-	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-	                msg = "Goal location reached";
-	                std::cout << msg << std::endl;
-	                voice.data = msg;
-	                pub_speaker.publish(voice);
+	            navigate_to_location(zones_path.at(cont));
+				ros::Duration(6, 0).sleep();
+	            cont++;
 
-	               	//Stay at zone for 5 seconds
-	               	ros::Duration(5, 0).sleep();
+				if(cont == 12){
+					state = SM_FINAL_STATE;
+				}
 
-	            	//Send location to refbox
-	            	std::cout << "I'm at this zone" << std::endl;
-
-	            	//Delete location from zones vector
-	            	tf_target_zones.erase(tf_target_zones.begin() + min_indx);
-
-	            	//If all zones have been visited then go to final state 
-	            	//otherwise calculate the euclidean distance again from the new zone
-		            if(tf_target_zones.size() == 0){
-		            	state = SM_FINAL_STATE;
-		            }
-		            else{
-						state = SM_CALC_EU_DIST;
-		            }
-	            }
 	            break;
 	        }
 	    	case SM_FINAL_STATE:

@@ -2,14 +2,16 @@
 
 	<!--Launches-->
 	<include file="$(find config_files)/launch/navigation.launch" />
-	<include file="$(find freenect_launch)/launch/freenect.launch" />
-	<include file="$(find movement_functions)/launch/labZones.launch" />
+	<!--include file="$(find freenect_launch)/launch/freenect.launch" /-->
+	<!--include file="$(find movement_functions)/launch/labZones.launch" /-->
 	<!--include file="$(find movement_functions)/launch/logisticsZones.launch" /-->
+	<include file="$(find movement_functions)/launch/challengeTracks_Zones.launch" />
 
 
-	<node name="image_sub" pkg="img_proc" type="image_sub.py"> </node>
+	<!--node name="image_sub" pkg="img_proc" type="image_sub.py"> </node>
 	<node name="aruco_det" pkg="img_proc" type="aruco_det.py"> </node>
-	<node name="speaker" pkg="robotino_talk" type="speaker.py"> </node>
+	<node name="speaker" pkg="robotino_talk" type="speaker.py"> </node-->
+	<!--node name="fake_refbox" pkg="refbox_msgs" type="fake_refbox.py"> </node-->
 	<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find funcs_config_files)/include/PointC_Imgs.rviz"/-->
 
 </launch>
