@@ -229,3 +229,11 @@ target_link_libraries(${PROJECT_NAME}_node
   protobuf
   refbox_protobuf_msgs_proto
 )
+
+
+add_executable(refbox_comm_node_navigation src/refbox_comm_node_navigation.cpp)
+target_link_libraries(${PROJECT_NAME}_node_navigation
+  ${catkin_LIBRARIES}
+  protobuf
+  refbox_protobuf_msgs_proto
+)
