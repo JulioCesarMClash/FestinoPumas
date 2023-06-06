@@ -25,6 +25,7 @@
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
+	SM_GO_ZONE,
 	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
 	SM_TAG_SEARCH,
@@ -46,6 +47,20 @@ bool mps_flag;
 std::vector<std_msgs::String> mps_names;
 bool flag_names = false;
 std_msgs::String mps_id;
+
+//Logistics zones
+std::vector<geometry_msgs::PoseStamped> zones_poses;
+geometry_msgs::PoseStamped tf_zone;
+
+
+//M_Z53 //M_Z14 //M_Z22 //M_Z21
+//Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
+//Son las coordenadas respecto al mapa que considera solo las zonas dentro del mapa
+
+//Son las x de las zonas de escaneo
+std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
+//Son las y de las zonas de escaneo
+std::vector<float> tf_y {2.5, 3.5, 4.5, 3.5}; 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -120,6 +135,17 @@ void transform_mps()
 	}
 }
 
+void navigate_to_location(geometry_msgs::PoseStamped location)
+{
+    std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
+    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
+         	std::cout << "Cannot move to " << std::endl;
+                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
+        }
+    }
+}
+
 int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
@@ -143,6 +169,22 @@ int main(int argc, char** argv){
     std_msgs::String voice;
     std::string msg;
 
+	 //TF related stuff 
+	 //Se tiene que a fuerza inicializar las poseStamped porque marca error si no se hace
+	for(int i=0; i<zones_poses.size(); i++){
+    	tf_zone.header.frame_id = "/map";
+	    tf_zone.pose.position.x = tf_x.at(i);
+	    tf_zone.pose.position.y = tf_y.at(i);
+	    tf_zone.pose.position.z = 0.0;
+	    tf_zone.pose.orientation.x = 0.0;
+	    tf_zone.pose.orientation.y = 0.0;
+	    tf_zone.pose.orientation.z = 0.0;
+	    tf_zone.pose.orientation.w = 0.0;
+	    zones_poses.push_back(tf_zone);
+    }
+
+	int cont = 0;
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
@@ -156,7 +198,17 @@ int main(int argc, char** argv){
 	    		state = SM_NAV_FWD;
 	    		break;
 			}
+			case SM_GO_ZONE:{
+				navigate_to_location(zones_poses.at(cont));
+				ros::Duration(6, 0).sleep();
+	            cont++;
 
+				if(cont == 12){
+					state = SM_FINAL_STATE;
+				}
+
+				break;
+			}
 	    	case SM_NAV_FWD:{
 	    		//Looking for Obstacles
 	    		std::cout << "State machine: SM_NAV_FWD" << std::endl;

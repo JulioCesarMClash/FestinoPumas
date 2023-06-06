@@ -22,7 +22,7 @@ class robot:
         bridge = CvBridge()
         img = bridge.imgmsg_to_cv2(data, "bgr8")
         self.image = img
-        self.crop_image()
+        #self.crop_image()
         self.line_detector()
         #print(slope)
         self.alling()
@@ -71,11 +71,15 @@ class robot:
     
     def alling(self):
         error = self.slope
-        Kp = -1
+        Kp = -0.1
         vel = Twist()
-        if abs(error) > 0.005:
-            vel.linear.y = Kp*error
-            vel.angular.z = Kp*error
+        if abs(error) > 0.01:
+            #vel.linear.y = Kp*error
+            if(error > 0):
+                vel.angular.z = Kp*error
+            if(error < 0):
+                vel.angular.z = -Kp*error
+            vel.linear.y = 0
             self.pub_vel.publish(vel)
             rospy.sleep(0.03)
             error= self.slope
@@ -85,6 +89,7 @@ class robot:
             vel.linear.y = 0
             vel.angular.z = 0
             self.pub_vel.publish(vel)
+            print("Creo que estoy alineado")
         return True
         
 rospy.init_node("Alling")

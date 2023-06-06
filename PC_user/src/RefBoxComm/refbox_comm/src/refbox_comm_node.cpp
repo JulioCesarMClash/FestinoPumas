@@ -68,8 +68,8 @@ using namespace protobuf_comm;
 
 //--------------------------------NAVIGATION CHALLENGE
         //ros::Subscriber subRobotPose;
-        float pose_x = 0.0f;
-        float pose_y = 0.0f;
+        float pose_x = -0.5f;
+        float pose_y = 1.5f;
         float pose_ori = 0.0f;
         ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
@@ -1435,9 +1435,9 @@ int main(int argc, char** argv)
     tf::StampedTransform transform_rob;
 
     try{
-      listener_rob.waitForTransform("/map", "/base_link",  
+      listener_rob.waitForTransform("/Log_origin", "/base_link",  
                                    ros::Time(0), ros::Duration(1000.0));
-      listener_rob.lookupTransform("/map", "/base_link",  
+      listener_rob.lookupTransform("/Log_origin", "/base_link",  
                                    ros::Time(0), transform_rob);
     }
     catch (tf::TransformException ex){
