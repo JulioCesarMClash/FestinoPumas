@@ -147,7 +147,7 @@ int main(int argc, char** argv){
 	    		state = SM_WAIT_FOR_ZONES;
 	    		break;
 
-	    	case SM_WAIT_FOR_ZONES:
+	    	case SM_GO_TO:
 	    		//Wating for zone case
 	    		std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
 	            msg = "Wating for target zones";

@@ -52,10 +52,10 @@ std_msgs::String mps_id;
 std::vector<geometry_msgs::PoseStamped> zones_poses;
 geometry_msgs::PoseStamped tf_zone;
 
-
+//Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
 //Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
-//Son las coordenadas respecto al mapa que considera solo las zonas dentro del mapa
+//Son las coordenadas respecto al mapa que considera solo las zonas disponibles
 
 //Son las x de las zonas de escaneo
 std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
@@ -139,6 +139,7 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 {
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+		//La función espera a que llegue a la localidad
         if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
          	std::cout << "Cannot move to " << std::endl;
                 FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
@@ -183,6 +184,7 @@ int main(int argc, char** argv){
 	    zones_poses.push_back(tf_zone);
     }
 
+	//Contador que lleva el número de zonas que se han recorrido
 	int cont = 0;
 
 	while(ros::ok() && !fail && !success){
@@ -195,15 +197,19 @@ int main(int argc, char** argv){
 	            voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
-	    		state = SM_NAV_FWD;
+	    		state = SM_GO_ZONE;
 	    		break;
 			}
 			case SM_GO_ZONE:{
+				//Se navega a las zonas recorriendo el arreglo zones_poses
+				//El contador es el índice que recorre el arreglo
 				navigate_to_location(zones_poses.at(cont));
 				ros::Duration(6, 0).sleep();
 	            cont++;
 
-				if(cont == 12){
+				
+				//Cuando se hayan recorrido las 4 zonas ya terminó
+				if(cont == 4){
 					state = SM_FINAL_STATE;
 				}
 
