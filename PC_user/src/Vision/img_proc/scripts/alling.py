@@ -76,24 +76,25 @@ class robot:
     def alling(self):
         error = self.slope
         Kp = -0.1
+        Kp_m = 0.1
         vel = Twist()
-        if abs(error) > 0.015:
-            #vel.linear.y = Kp*error
-            if(error > 0):
-                vel.angular.z = Kp*error
-            if(error < 0):
-                vel.angular.z = -Kp*error
-            vel.linear.y = 0
-            self.pub_vel.publish(vel)
-            rospy.sleep(0.05)
-            error= self.slope
-            print(error)
-        else:
+        print(error)
+        #if abs(error) > 0.015:
+        if error < 0:
+            vel.angular.z = Kp_m*abs(error)
+            error = self.slope
+        elif error > 0:
+            vel.angular.z = Kp*abs(error)
+            error = self.slope
+        elif error == 0:
             vel.linear.x = 0
             vel.linear.y = 0
             vel.angular.z = 0
-            self.pub_vel.publish(vel)
             print("Lined up")
+
+        self.pub_vel.publish(vel)
+        rospy.sleep(0.05)
+            
         return True
         
 rospy.init_node("Alling")
