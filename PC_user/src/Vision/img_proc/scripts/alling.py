@@ -15,7 +15,7 @@ class robot:
     def __init__(self):
         self.image = None
         self.sub_img = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
-        self.pub_vel = rospy.Publisher("/cmd_vel",Twist,queue_size=1)
+        self.pub_vel = rospy.Publisher("/hardware/mobile_base/cmd_vel",Twist,queue_size=1)
         self.slope = 0
     
     def callback(self,data):
@@ -53,7 +53,8 @@ class robot:
                 cont = cont + 1
                 rho, theta = line[0]
                 deg_theta = 90 - np.rad2deg(theta)
-                if(deg_theta < 30) or (deg_theta > 150):
+                if(abs(deg_theta) < 70) or (abs(deg_theta) > 110):
+                    print("ANGulo", deg_theta)
                     a = np.cos(theta)
                     b = np.sin(theta)
                     x0 = a * rho
@@ -75,18 +76,20 @@ class robot:
     
     def alling(self):
         error = self.slope
-        Kp = -0.1
-        Kp_m = 0.1
+        Kp = -6.0
+        Kp_m = 6.0
         vel = Twist()
         print(error)
-        #if abs(error) > 0.015:
-        if error < 0:
-            vel.angular.z = Kp_m*abs(error)
-            error = self.slope
-        elif error > 0:
-            vel.angular.z = Kp*abs(error)
-            error = self.slope
-        elif error == 0:
+        if abs(error) > 0.02:
+            if (error < 0) and (error != 1) :
+                vel.angular.z = Kp_m*abs(error)
+                error = self.slope
+                print("Derechaaaaa")
+            elif error > 0 and (error != 1) :
+                vel.angular.z = Kp*abs(error)
+                error = self.slope
+                print("------------------------------------------Izquierdaaaa")
+        else: #error == 0:
             vel.linear.x = 0
             vel.linear.y = 0
             vel.angular.z = 0
