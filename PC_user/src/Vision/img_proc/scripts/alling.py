@@ -47,22 +47,26 @@ class robot:
         slopes=[]
         edges = cv.Canny(img,150,150)
         lines = cv.HoughLines(edges, 1, np.pi/180, 200)
+        cont = 0
         if lines is not None:
             for line in lines:
+                cont = cont + 1
                 rho, theta = line[0]
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a * rho
-                y0 = b * rho
-                x1 = int(x0 + 1000 * (-b))
-                y1 = int(y0 + 1000 * (a))
-                x2 = int(x0 - 1000 * (-b))
-                y2 = int(y0 - 1000 * (a))
-                slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
-                if slope < 0.2 and slope > -0.2:
-                    slopes.append(slope)
-                    detected_lines.append([x1,y1,x2,y2,slope])
-                    cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 4)
+                deg_theta = 90 - np.rad2deg(theta)
+                if(deg_theta < 30) or (deg_theta > 150):
+                    a = np.cos(theta)
+                    b = np.sin(theta)
+                    x0 = a * rho
+                    y0 = b * rho
+                    x1 = int(x0 + 1000 * (-b))
+                    y1 = int(y0 + 1000 * (a))
+                    x2 = int(x0 - 1000 * (-b))
+                    y2 = int(y0 - 1000 * (a))
+                    slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
+                    if slope < 0.2 and slope > -0.2:
+                        slopes.append(slope)
+                        detected_lines.append([x1,y1,x2,y2,slope])
+                        cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 4)
         else:
             print("No line detected") 
         if len(slopes) != 0:
@@ -73,7 +77,7 @@ class robot:
         error = self.slope
         Kp = -0.1
         vel = Twist()
-        if abs(error) > 0.01:
+        if abs(error) > 0.015:
             #vel.linear.y = Kp*error
             if(error > 0):
                 vel.angular.z = Kp*error
@@ -81,7 +85,7 @@ class robot:
                 vel.angular.z = -Kp*error
             vel.linear.y = 0
             self.pub_vel.publish(vel)
-            rospy.sleep(0.03)
+            rospy.sleep(0.05)
             error= self.slope
             print(error)
         else:
@@ -89,7 +93,7 @@ class robot:
             vel.linear.y = 0
             vel.angular.z = 0
             self.pub_vel.publish(vel)
-            print("Creo que estoy alineado")
+            print("Lined up")
         return True
         
 rospy.init_node("Alling")
