@@ -207,7 +207,11 @@ int main(int argc, char** argv){
 				ros::Duration(6, 0).sleep();
 	            cont++;
 
-				
+				//Da un giro de 360 grados (2pi) para escanear todo
+				FestinoNavigation::moveDistAngle(0.0, 6.2832, 10000);
+
+				std::cout << "Estoy escaneando zzz" << std::endl;
+
 				//Cuando se hayan recorrido las 4 zonas ya terminó
 				if(cont == 4){
 					state = SM_FINAL_STATE;
