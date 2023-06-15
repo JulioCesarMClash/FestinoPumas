@@ -60,7 +60,7 @@ add_message_files(
 add_service_files(
  FILES
  AddTwoInts.srv
-#   Service2.srv
+ Find_piece_Srv.srv
 )
 
 ## Generate actions in the 'action' folder

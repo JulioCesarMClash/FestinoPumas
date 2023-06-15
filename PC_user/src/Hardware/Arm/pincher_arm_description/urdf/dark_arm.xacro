@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<robot name="justina" xmlns:xacro="http://www.ros.org/wiki/xacro">
+	<xacro:include filename="$(find knowledge)/hardware/justina.gazebo" />
+	<!-- Import Rviz colors -->
+	<xacro:include filename="$(find knowledge)/hardware/materials.xacro" />
+	<xacro:include filename="$(find knowledge)/hardware/macros.xacro" />
+	<xacro:include filename="$(find pincher_arm_description)/urdf/arm_hardware.xacro"/>
+
+	<material name="White">
+    	<color rgba="0.87 0.90 0.87 1.0"/>
+  	</material>
+  	<material name="Black">
+    	<color rgba="0.08 0.08 0.08 1.0"/>
+  	</material>
+  	<material name="Gray">
+    	<color rgba="0.2 0.2 0.21 1.0"/>
+  	</material>
+  	<material name="Green">
+    	<color rgba="0.22 0.32 0.14 1.0"/>
+  	</material>
+
+	<xacro:property name="base_radius" value="0.21"/>
+	<xacro:property name="base_height" value="0.2156"/>
+	<xacro:property name="base_mass" value="2.0"/>
+	<xacro:property name="wheel_radius" value="0.075"/>
+	<xacro:property name="wheel_height" value="0.04"/>
+	<xacro:property name="wheel_mass" value="0.52098"/>
+
+	<link name="base_link"/>
+
+
+	<joint name="hex_base_connect" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+		<parent link="base_link"/>
+		<child link="hex_base_link" />
+	</joint>
+
+	<link name="hex_base_link">
+		<visual>
+			<origin xyz="0.0 0.0 0.075" rpy="0.0 0 1.5708"/>
+			<!-- origin xyz="0 0 0.1828" rpy="0 0 0"/ -->
+			<geometry> 
+				<mesh filename="package://knowledge/hardware/stl/base/baseHex.dae"/>
+				<!-- cylinder length="${base_height}" radius="${base_radius}"/ -->
+			</geometry>
+			<material name="grey"/>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.1828" rpy="0 0 0"/>
+			<geometry><cylinder length="${base_height}" radius="${base_radius}"/></geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0.1828" rpy="0 0 0"/>
+			<mass value="${base_mass}"/>
+			<xacro:cylinder_inertia m="${base_mass}" r="${base_radius}" h="${base_height}"/>
+		</inertial>
+	</link>
+	<joint name="wheel_front_left_connect" type="continuous">
+		<origin xyz="0.1091 0.189 0.075" rpy="1.57078 0 -3.67"/>
+		<parent link="hex_base_link"/>
+		<child link="wheel_front_left"/>
+		<axis xyz="0 0 1"/>
+	</joint>
+
+	<link name="wheel_front_left">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 3.1416 0"/>
+			<geometry>
+				<mesh filename="package://knowledge/hardware/stl/base/rueda.dae"/>
+				<!-- cylinder length="${wheel_height}" radius="${wheel_radius}"/ -->
+			</geometry>
+			<material name="grey"/>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry><cylinder length="${wheel_height}" radius="${wheel_radius}"/></geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0"/>
+			<mass value="${wheel_mass}"/>
+			<xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_height}"/>
+		</inertial>
+	</link>
+
+	<joint name="wheel_back_connect" type="continuous">
+		<origin xyz="-0.2182 0 0.075" rpy="1.57078 0 -1.5708"/>
+		<parent link="hex_base_link"/>		
+		<child link="wheel_back"/>
+		<axis xyz="0 0 1"/>
+	</joint>
+
+	<link name="wheel_back">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 3.1416 0"/>
+			<geometry>
+				<mesh filename="package://knowledge/hardware/stl/base/rueda.dae"/>
+				<!-- cylinder length="${wheel_height}" radius="${wheel_radius}"/ -->
+			</geometry>
+			<material name="grey"/>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry><cylinder length="${wheel_height}" radius="${wheel_radius}"/></geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<mass value="${wheel_mass}"/>
+			<xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_height}"/>
+		</inertial>
+	</link>
+
+	<joint name="wheel_front_right_connect" type="continuous">
+		<origin xyz="0.1091 -0.189 0.075" rpy="1.57078 0 3.67"/>
+		<parent link="hex_base_link"/>
+		<child link="wheel_front_right"/>
+		<axis xyz="0 0 1"/>
+	</joint>
+
+	<link name="wheel_front_right">
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<mesh filename="package://knowledge/hardware/stl/base/rueda.dae"/>
+				<!-- cylinder length="${wheel_height}" radius="${wheel_radius}"/ -->
+			</geometry>
+			<material name="grey"/>
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry><cylinder length="${wheel_height}" radius="${wheel_radius}"/></geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<mass value="${wheel_mass}"/>
+			<xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_height}"/>
+		</inertial>
+	</link>
+
+<xacro:macro name="pincher_arm" params="
+      color:=Gray
+      joints_vlimit:=1.571
+      pan_llimit:=-2.617
+      pan_ulimit:=2.617
+      shoulder_llimit:=-2.09
+      shoulder_ulimit:=2.09
+      elbow_llimit:=-2.42
+      elbow_ulimit:=2.42
+      wrist_llimit:=-1.71
+      wrist_ulimit:=1.79
+      gripper_llimit:=-2.6
+      gripper_ulimit:=0.0">
+
+    <link name="arm_base_link"/>
+    <joint name="base_to_arm" type="fixed">
+	    <parent link="hex_base_link"/>
+	    <child link="arm_base_link"/>
+	    <origin rpy="0 0 0" xyz="0.15 0.0 0.97"/>
+  	</joint>
+
+    <!-- shoulder pan joint -->
+    <xacro:dynamixel_AX12_fixed parent="arm_base_link" name="arm_shoulder_pan_servo">
+      <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
+    </xacro:dynamixel_AX12_fixed>
+
+    <xacro:bioloid_F3_revolute parent="arm_shoulder_pan_servo_link" name="arm_shoulder_pan" color="${color}"
+                               vlimit="${joints_vlimit}" llimit="${pan_llimit}" ulimit="${pan_ulimit}">
+      <origin xyz="0 ${AX12_WIDTH/2} 0" rpy="${-pi/2} ${pi/2} ${pi}"/>
+    </xacro:bioloid_F3_revolute>
+
+    <!-- shoulder lift joint -->
+    <xacro:dynamixel_AX12_fixed parent="arm_shoulder_pan_link" name="arm_shoulder_lift_servo">
+      <origin xyz="0 0 ${-AX12_HEIGHT-F10_HEIGHT+0.001}" rpy="0 ${pi} 0"/>
+    </xacro:dynamixel_AX12_fixed>
+
+    <xacro:bioloid_F4_revolute parent="arm_shoulder_lift_servo_link" name="arm_shoulder_lift" color="${color}"
+                               vlimit="${joints_vlimit}" llimit="${shoulder_llimit}" ulimit="${shoulder_ulimit}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:bioloid_F4_revolute>
+
+    <xacro:bioloid_F10_fixed parent="arm_shoulder_lift_link" name="arm_shoulder_F10_0" color="${color}">
+      <origin xyz="0 0 ${F4_HEIGHT+F10_HEIGHT/2}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F10_fixed parent="arm_shoulder_F10_0_link" name="arm_shoulder_F10_1" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F10_fixed parent="arm_shoulder_F10_1_link" name="arm_shoulder_F10_2" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F3_fixed parent="arm_shoulder_F10_2_link" name="arm_shoulder_F3_0" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT/2}" rpy="0 ${pi} 0"/>
+    </xacro:bioloid_F3_fixed>
+
+    <!-- elbow joint -->
+    <xacro:dynamixel_AX12_fixed parent="arm_shoulder_F3_0_link" name="arm_elbow_flex_servo">
+      <origin xyz="0 0 ${-AX12_HEIGHT-F10_HEIGHT+0.001}" rpy="0 ${pi} 0"/>
+    </xacro:dynamixel_AX12_fixed>
+
+    <xacro:bioloid_F4_revolute parent="arm_elbow_flex_servo_link" name="arm_elbow_flex" color="${color}"
+                               vlimit="${joints_vlimit}" llimit="${elbow_llimit}" ulimit="${elbow_ulimit}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:bioloid_F4_revolute>
+
+    <xacro:bioloid_F10_fixed parent="arm_elbow_flex_link" name="arm_elbow_F10_0" color="${color}">
+      <origin xyz="0 0 ${F4_HEIGHT+F10_HEIGHT/2}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F10_fixed parent="arm_elbow_F10_0_link" name="arm_elbow_F10_1" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F10_fixed parent="arm_elbow_F10_1_link" name="arm_elbow_F10_2" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT}" rpy="0 0 0"/>
+    </xacro:bioloid_F10_fixed>
+
+    <xacro:bioloid_F3_fixed parent="arm_elbow_F10_2_link" name="arm_elbow_F3_0" color="${color}">
+      <origin xyz="0 0 ${F10_HEIGHT/2}" rpy="0 ${pi} 0"/>
+    </xacro:bioloid_F3_fixed>
+
+    <!-- wrist joint -->
+    <xacro:dynamixel_AX12_fixed parent="arm_elbow_F3_0_link" name="arm_wrist_flex_servo">
+      <origin xyz="0 0 ${-AX12_HEIGHT-F10_HEIGHT+0.001}" rpy="0 ${pi} 0"/>
+    </xacro:dynamixel_AX12_fixed>
+
+    <xacro:bioloid_F2_revolute parent="arm_wrist_flex_servo_link" name="arm_wrist_flex" color="${color}"
+                               vlimit="${joints_vlimit}" llimit="${wrist_llimit}" ulimit="${wrist_ulimit}">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:bioloid_F2_revolute>
+
+    <xacro:bioloid_F3_fixed parent="arm_wrist_flex_link" name="arm_wrist_F3_0" color="${color}">
+      <origin xyz="0 0 ${F2_HEIGHT}" rpy="0 ${pi} ${-pi}"/>
+    </xacro:bioloid_F3_fixed>
+    
+    <!-- gripper joint -->
+    <xacro:dynamixel_AX12_fixed parent="arm_wrist_F3_0_link" name="gripper_servo" >
+      <origin xyz="0 0 ${-AX12_WIDTH/2}" rpy="${pi/2} ${pi} ${pi/2}"/>
+    </xacro:dynamixel_AX12_fixed>
+    
+    <xacro:gripper_finger_base parent="gripper_servo_link" name="gripper_finger_base" color="${color}">
+      <origin xyz="0  ${AX12_WIDTH/2} 0" rpy="${pi} 0 ${pi/2}"/>
+    </xacro:gripper_finger_base>
+
+    <link name="gripper_active_link"/>
+    <joint name="gripper_joint" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="30" velocity="${joints_vlimit}" lower="${gripper_llimit}" upper="${gripper_ulimit}"/>
+      <parent link="gripper_finger_base_link"/>
+      <child link="gripper_active_link"/>
+    </joint>
+
+    <!-- Finger 1 --> 
+    <xacro:pincher_finger name="gripper_finger1" color="${color}" >
+      <origin xyz="0 0.0115 0" rpy="${pi/2} 0 ${pi/2}"/>
+    </xacro:pincher_finger>
+
+    <joint name="gripper_finger1_joint" type="prismatic">
+      <origin xyz="0.019 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="30" velocity="0.01" lower="0.001" upper="0.0158"/>
+      <parent link="gripper_finger_base_link"/>
+      <child link="gripper_finger1_link"/>
+    </joint> 
+      
+    <!-- Finger 2 -->
+    <xacro:pincher_finger name="gripper_finger2" color="${color}" >
+      <origin xyz="0 0.0115 0" rpy="${pi/2} 0 ${pi/2}"/>
+    </xacro:pincher_finger>
+
+    <joint name="gripper_finger2_joint" type="prismatic">
+      <origin xyz="0.019 0 0" rpy="${pi} 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="30" velocity="0.01" lower="0.001" upper="0.0158"/>
+      <parent link="gripper_finger_base_link"/>
+      <child link="gripper_finger2_link"/>
+      <!-- <mimic joint="gripper_finger1_joint"/> -->
+    </joint>
+
+    <!-- fake gripper joint -->
+    <link name="gripper_fake_link"/>
+    <joint name="gripper_fake_joint" type="revolute">
+      <origin xyz="0.02 0 0" rpy="0 0 0"/>
+      <parent link="gripper_finger_base_link"/>
+      <child link="gripper_fake_link"/>
+      <limit effort="30" velocity="1" lower="-3.14" upper="3.14"/>
+      <axis xyz="1 0 0"/>
+    </joint>
+
+  </xacro:macro>
+
+
+</robot>
