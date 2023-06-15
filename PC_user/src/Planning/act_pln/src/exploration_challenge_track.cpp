@@ -54,13 +54,20 @@ geometry_msgs::PoseStamped tf_zone;
 
 //Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
-//Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
-//Son las coordenadas respecto al mapa que considera solo las zonas disponibles
 
-//Son las x de las zonas de escaneo
-std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
-//Son las y de las zonas de escaneo
-std::vector<float> tf_y {2.5, 3.5, 4.5, 3.5}; 
+//Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
+//Son las x de las zonas de escaneo respecto al origen de logistics
+//std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
+//Son las y de las zonas de escaneo respecto al origen de logistics
+//std::vector<float> tf_y {2.5, 3.5, 4.5, 3.5}; 
+
+
+//Son las coordenadas respecto al mapa que considera solo las zonas disponibles
+//Estas coordenadas se obtuvieron contando los cuadritos en el rviz respecto al origen del mapa
+//Son las x de las zonas de escaneo respecto al mapa
+std::vector<float> tf_x {0.5, 4.5, 6.5, 9.5};
+//Son las y de las zonas de escaneo respecto al mapa
+std::vector<float> tf_y {-4.5, -3.5, -2.5, -3.5}; 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -137,6 +144,7 @@ void transform_mps()
 
 void navigate_to_location(geometry_msgs::PoseStamped location)
 {
+	std::cout << "Hola" << std::endl;
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
 		//La función espera a que llegue a la localidad
@@ -172,7 +180,7 @@ int main(int argc, char** argv){
 
 	 //TF related stuff 
 	 //Se tiene que a fuerza inicializar las poseStamped porque marca error si no se hace
-	for(int i=0; i<zones_poses.size(); i++){
+	for(int i=0; i<tf_x.size(); i++){
     	tf_zone.header.frame_id = "/map";
 	    tf_zone.pose.position.x = tf_x.at(i);
 	    tf_zone.pose.position.y = tf_y.at(i);
@@ -194,21 +202,27 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            msg = "I am ready for the exploration challenge";
 	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
+	            //voice.data = msg;
+	            //pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
 	    		state = SM_GO_ZONE;
 	    		break;
 			}
 			case SM_GO_ZONE:{
+				std::cout << "State machine: SM_GO_ZONE" << std::endl;	
 				//Se navega a las zonas recorriendo el arreglo zones_poses
 				//El contador es el índice que recorre el arreglo
+				std::cout << cont << std::endl;	
 				navigate_to_location(zones_poses.at(cont));
-				ros::Duration(6, 0).sleep();
+				//ros::Duration(6, 0).sleep();
 	            cont++;
+				std::cout << "Holi" << std::endl;	
 
 				//Da un giro de 360 grados (2pi) para escanear todo
-				FestinoNavigation::moveDistAngle(0.0, 6.2832, 10000);
+				//Le puse un ángulo de 6.2832 pero no funciona así
+				FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
+				FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
+				ros::Duration(6, 0).sleep();
 
 				std::cout << "Estoy escaneando zzz" << std::endl;
 
