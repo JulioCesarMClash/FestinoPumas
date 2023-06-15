@@ -24,7 +24,6 @@ class robot:
         self.image = img
         #self.crop_image()
         self.line_detector()
-        #print(slope)
         self.alling()
         cv.imshow("Kinect_image",self.image)
         cv.waitKey(1)
@@ -54,7 +53,6 @@ class robot:
                 rho, theta = line[0]
                 deg_theta = 90 - np.rad2deg(theta)
                 if(abs(deg_theta) < 70) or (abs(deg_theta) > 110):
-                    print("ANGulo", deg_theta)
                     a = np.cos(theta)
                     b = np.sin(theta)
                     x0 = a * rho
@@ -84,11 +82,9 @@ class robot:
             if (error < 0) and (error != 1) :
                 vel.angular.z = Kp_m*abs(error)
                 error = self.slope
-                print("Derechaaaaa")
             elif error > 0 and (error != 1) :
                 vel.angular.z = Kp*abs(error)
                 error = self.slope
-                print("------------------------------------------Izquierdaaaa")
         else: #error == 0:
             vel.linear.x = 0
             vel.linear.y = 0
