@@ -2,8 +2,10 @@
   <arg name="sim" default="false"/>
   <arg name="port" default="/dev/ttyUSB0"/>
 
+  <!--param name="robot_description" 
+         command="xacro $(find pincher_arm_description)/urdf/pincher_arm.urdf.xacro"/-->
   <param name="robot_description" 
-         command="xacro $(find pincher_arm_description)/urdf/pincher_arm.urdf.xacro"/>
+         command="xacro $(find pincher_arm_description)/urdf/miztli_arm.urdf"/>
 
   <node name="robot_state_publisher" 
         pkg="robot_state_publisher" 

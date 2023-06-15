@@ -26,6 +26,7 @@ float pitch = 0;
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "srv_arm_node");
+	std::cout << "pruebaSrv_node INITIALIZING" << std::endl;
 	ros::NodeHandle nh;
 	ros::ServiceServer service = nh.advertiseService("srv_arm", callback_arm);
 	ros::WallDuration(1.0).sleep();

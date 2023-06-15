@@ -1,0 +1,11 @@
+<launch>
+
+	<!--Launches-->
+	<!--include file="$(find config_files)/launch/hexbase_navigation.launch" /-->
+	<!--include file="$(find freenect_launch)/launch/freenect.launch" /-->
+	<include file="$(find pincher_arm_bringup)/launch/driver.launch" />
+	<include file="$(find pincher_arm_moveit_config)/launch/pincher_arm_moveit.launch" />
+
+	<node name="pruebaSrv" pkg="Festino_arm_moveit_demos" type="pruebaSrv"/>
+
+</launch>
