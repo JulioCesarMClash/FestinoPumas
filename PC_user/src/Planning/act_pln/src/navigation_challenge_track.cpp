@@ -50,6 +50,7 @@ std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 geometry_msgs::PoseStamped tf_target_zone;
 std::vector<geometry_msgs::PoseStamped> zones_path;
 std::vector<std::string> tokens;
+std::vector<std::string> real_refbox_names;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
