@@ -160,14 +160,12 @@ def callback_depth_points(data):
             mps_name_arr, mps_name = aruco_mps(markerIds[i])
             print(mps_name, "\n")
             mps_name_pub.publish(mps_name)
-            rate = rospy.Rate(10)
 
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
                 aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                 br_ar = tf.TransformBroadcaster()
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
-                rate = rospy.Rate(10)
           except IndexError:
             print('Not identified')
   except AttributeError:
@@ -186,7 +184,7 @@ def main(args):
 
   global rate, arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, aruco_flag_pub, mps_name_pub
   print("Image Processing Node - Looking for piece")
-  rate = rospy.Rate(0.1)
+  rate = rospy.Rate(10)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
   aruco_pos_pub     = rospy.Publisher("/aruco_pos",PointStamped,queue_size=10)
   aruco_flag_pub    = rospy.Publisher("/aruco_det",Bool,queue_size=10)

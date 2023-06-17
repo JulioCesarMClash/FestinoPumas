@@ -51,7 +51,7 @@ def move_distance(goal_dist, goal_angle, pub_goal_dist):
 
 
 def callback_depth_points(data):
-  global arr, img_bgr, Red_mask
+  global arr, img_bgr, Red_mask, rate
   arr = ros_numpy.point_cloud2.pointcloud2_to_array(data)
   rgb_arr = arr['rgb'].copy()
   rgb_arr.dtype = np.uint32
@@ -117,7 +117,6 @@ def callback_depth_points(data):
       piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = pos_x, pos_y, pos_z
       br = tf.TransformBroadcaster()
       static_br = tf2_ros.StaticTransformBroadcaster()
-      rate = rospy.Rate(0.1)
       br.sendTransform((piece_pose.point.z, -piece_pose.point.x, -piece_pose.point.y),
                        (0.0, 0.0, 0.0, 1.0), rospy.Time.now(), "piece_link", "camera_link")
       static_br.sendTransform(static_transformStamped)
@@ -130,6 +129,7 @@ def callback_depth_points(data):
         cv2.putText(img_bgr, "centroid_Red", (cX - 25, cY - 25),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         Masked_red = cv2.bitwise_and(img_bgr, img_bgr, mask=Red_mask)
+        print('Tapita Found')
       except ZeroDivisionError as e:
         print("Object not found")
 
@@ -149,7 +149,9 @@ def callback_depth_points(data):
 def main(args):
   rospy.init_node('image_sub', anonymous=True)
 
-  global cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, Red_mask
+  global cv_depth, arr, img_bgr, position_pub, image_sub, depth_image_sub, depth_points_sub, Red_mask, rate
+  rate = rospy.Rate(10.0)
+
   print("Image Processing Node - Looking for piece")
 
   position_pub      = rospy.Publisher("/piece_pos",PointStamped,queue_size=10)

@@ -136,6 +136,7 @@ class FindObjectNode:
 						cv2.putText(img_bgr, "centroid_Red", (cX - 25, cY - 25),
 							cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 						Masked_red = cv2.bitwise_and(img_bgr, img_bgr, mask=Red_mask)
+						print('Tapita Found')
 
 					except ZeroDivisionError as e:
 						print("Object not found")
