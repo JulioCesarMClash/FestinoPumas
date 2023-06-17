@@ -15,6 +15,9 @@
 #include "ros/time.h"
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
+#include "img_proc/Find_piece_Srv.h"
+
+
 
 //Festino Tools
 #include "festino_tools/FestinoHRI.h"
@@ -172,6 +175,8 @@ int main(int argc, char** argv){
 	ros::Subscriber sub_mps_name     = n.subscribe("/mps_name", 10, callback_mps_name);
 	ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    ros::ServiceClient client = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+    img_proc::Find_piece_Srv srv;
 
     ros::Rate loop(30);
 
@@ -205,7 +210,7 @@ int main(int argc, char** argv){
 	            //voice.data = msg;
 	            //pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
-	    		state = SM_GO_ZONE;
+	    		state = SM_TAG_SEARCH;
 	    		break;
 			}
 			case SM_GO_ZONE:{
@@ -271,15 +276,31 @@ int main(int argc, char** argv){
 	            std::cout << "State machine: SM_TAG_SEARCH" << std::endl;
 	            msg = "Looking or Tag";
 	            std::cout << msg << std::endl;
+	            srv.request.is_find_piece_enabled = true;
+				bool jelp = false;
+				  if (client.call(srv))
+				  {
+				    while(jelp != true)
+				    {
+				      ROS_INFO("Resultado", srv.response.success);
+				      jelp = srv.response.success;
+				      std::cout << jelp  << std::endl;
+				    }
+				  }
+				  else
+				  {
+				    ROS_ERROR("Failed to call service add_two_ints");
+				    return 1;
+				  }
 				if(mps_flag)
 				{
 					std::cout << "Tag Found" << std::endl;
-					state = SM_TAG_DETECTED;
+					state = SM_FINAL_STATE;
 				}
 				else
 				{
 					std::cout << "Waiting for Tag" << std::endl;
-					state = SM_NAV_FWD;
+					state = SM_FINAL_STATE;
 				}
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
