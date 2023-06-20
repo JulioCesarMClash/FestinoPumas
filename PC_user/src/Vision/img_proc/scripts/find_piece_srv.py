@@ -4,7 +4,6 @@ from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import *
 from sensor_msgs.msg import *
 from std_msgs.msg import *
-from img_proc.srv import *
 
 import cv2
 import tf2_ros
@@ -16,6 +15,9 @@ import ros_numpy
 import rospy
 import sys
 import roslib
+
+#Festino dep
+from img_proc.srv import *
 
 roslib.load_manifest('img_proc')
 
@@ -38,10 +40,11 @@ class FindObjectNode:
 	def __init__(self):
 		global arr
 		rospy.init_node('find_piece_service')
-		self.depth_points_sub = rospy.Subscriber("/camera/depth_registered/points",PointCloud2, self.callback_depth_points)
 		self.bridge = CvBridge()
   		arr = np.zeros((480, 640))
   		self.find_piece_service = rospy.Service('/vision/find_piece/point_stamped', Find_piece_Srv, self.find_piece)
+		self.depth_points_sub = rospy.Subscriber("/camera/depth_registered/points",PointCloud2, self.callback_depth_points)
+		print("Image Processing Srv - Looking for Piece")
 
 
 	def callback_depth_points(self, data):

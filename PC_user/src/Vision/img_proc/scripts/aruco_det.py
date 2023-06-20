@@ -16,8 +16,6 @@ import cv2
 from std_msgs.msg import *
 from sensor_msgs.msg import *
 from geometry_msgs.msg import *
-from img_proc.msg import TagDetector
-
 from cv_bridge import CvBridge, CvBridgeError
 
 tfBuffer = tf2_ros.Buffer()

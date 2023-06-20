@@ -18,15 +18,7 @@ import sys
 import roslib
 roslib.load_manifest('img_proc')
 
-
 bridge = CvBridge()
-
-
-def handle_add_two_ints(req):
-  print("IDKWID")
-  print(req)
-  # return RecognizeObjects(req)
-
 
 def segment_color(img_bgr, img_xyz, hsv_mean):
   img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
@@ -41,14 +33,6 @@ def segment_color(img_bgr, img_xyz, hsv_mean):
   lw = (lw_h, lw_s, lw_v, 0.0)
   Fil = cv2.inRange(img_hsv, lw, up)
   return Fil
-
-
-def move_distance(goal_dist, goal_angle, pub_goal_dist):
-  msg_dist = Float32MultiArray()
-  msg_dist.data = [goal_dist, goal_angle]
-  print(msg_dist)
-  pub_goal_dist.publish(msg_dist)
-
 
 def callback_depth_points(data):
   global arr, img_bgr, Red_mask, rate
@@ -137,7 +121,7 @@ def callback_depth_points(data):
       Fil_B_l1 = segment_color(img_bgr, arr, mean_B_l1)
     else:
       print('Unable to find Tapita')
-  cv2.imshow("Aruco Tags", img_bgr)
+  cv2.imshow("Image", img_bgr)
   cv2.imshow("Red Piece Mask", Red_mask)
   cv2.waitKey(3)
 
@@ -156,7 +140,6 @@ def main(args):
 
   position_pub      = rospy.Publisher("/piece_pos",PointStamped,queue_size=10)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
-  s = rospy.Service('point_cloud_srv',RecognizeObjects,handle_add_two_ints)
   
   cv_depth = np.zeros((480, 640))
   arr = np.zeros((480, 640))
