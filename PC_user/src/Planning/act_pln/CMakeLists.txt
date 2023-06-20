@@ -243,6 +243,3 @@ add_executable(exploration_challenge_track src/exploration_challenge_track.cpp)
 add_dependencies(exploration_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(exploration_challenge_track ${catkin_LIBRARIES})
 
-add_executable(vision_client src/vision_client.cpp)
-add_dependencies(vision_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(vision_client ${catkin_LIBRARIES})
