@@ -31,6 +31,7 @@ enum SMState {
 	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
 	SM_TAG_SEARCH,
+	SM_GIRO,
 	SM_TAG_DETECTED,
     SM_FINAL_STATE,
     SM_SCAN_SPACE
@@ -175,15 +176,13 @@ int main(int argc, char** argv){
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber sub_mps_flag     = n.subscribe("/aruco_det", 10, callback_mps_flag);
 	ros::Subscriber sub_mps_name     = n.subscribe("/mps_name", 10, callback_mps_name);
-	ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
 
     ros::Rate loop(10);
 
-    std_msgs::String voice;
-    std::string msg;
+    std::string voice;
 
     std::string mps_name;
 
@@ -204,16 +203,17 @@ int main(int argc, char** argv){
 	//Contador que lleva el número de zonas que se han recorrido
 	int cont = 0;
 
+	//Contador que lleva el número de giros
+	int cont_giro = 0;
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            msg = "I am ready for the exploration challenge";
-	            std::cout << msg << std::endl;
-	            //voice.data = msg;
-	            //pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
+	            voice = "I am ready for the exploration challenge";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
 	    		state = SM_GO_ZONE;
 	    		break;
 			}
@@ -261,46 +261,27 @@ int main(int argc, char** argv){
 				std::cout << "Estoy escaneando zzz" << std::endl;
 	            srv.request.is_find_tag_enabled = true;
 				tag_flag = false;
-				  if (client.call(srv))
-				  {
-				  	tag_flag = srv.response.success;
-				  	//mps_name = srv.response.mps_name;
-				  	mps_name = "Not Identified";
-				    if(tag_flag and mps_name != srv.response.mps_name)
+				if (client.call(srv))
+				{
+					//tag_flag = srv.response.success;
+					//mps_name = srv.response.mps_name;
+					mps_name = "Not Identified";
+					/*if(tag_flag and mps_name != srv.response.mps_name)
 					{
 						std::cout << "Tag Found" << std::endl;
 						state = SM_TAG_DETECTED;
 						tag_flag = false;
 					}
-					else if (giro)
-					{
-						std::cout << "Tag Not Found - Navigating to New Zone" << std::endl;
-						cont++;
-						state = SM_GO_ZONE;
-						giro = false;
-					}
 					else{
 						std::cout << "Tag Not Found - Turn" << std::endl;
-						std::cout << "Turn arooound" << std::endl;
-						//Da un giro de 360 grados (2pi) para escanear todo
-						//Le puse un ángulo de 6.2832 pero no funciona así
-
-						//TestComment
-						FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
-						// los 360 grados es demasiada vuelta (MitComment)
-						//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
-						//TestComment
-						tag_flag = false;
-						giro = true;
-						state = SM_SCAN_SPACE;
-
-					}
-				  }
-				  else
-				  {
-				    ROS_ERROR("Failed to call service to search Tag");
-				    return 1;
-				  }
+						state = SM_GIRO;
+					}*/
+				}
+				else
+				{
+					ROS_ERROR("Failed to call service to search Tag");
+					return 1;
+				}
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();*/
@@ -310,16 +291,39 @@ int main(int argc, char** argv){
 				
 	            break;
 	        }
+			case SM_GIRO:{
+				std::cout << "State machine: SM_GIRO" << std::endl;
+				if(cont_giro < 3){
+					std::cout << "Turn arooound" << std::endl;
+					//Da un giro de 360 grados (2pi) para escanear todo
+					//Le puse un ángulo de 6.2832 pero no funciona así
 
+					//TestComment
+					FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
+					// los 360 grados es demasiada vuelta (MitComment)
+					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
+					//TestComment
+					tag_flag = false;
+					cont_giro++;
+					state = SM_SCAN_SPACE;
+				}
+				else{
+					std::cout << "Navigating to New Zone" << std::endl;
+					cont++;
+					state = SM_GO_ZONE;
+				}
+			}
 			case SM_TAG_DETECTED:{
 	    		//Scan Tag and Send Information
 	    		std::cout << "State machine: SM_TAG_DETECTED" << std::endl;	
-	            msg =  "Looking for information";
-	            std::cout << msg << std::endl;
+	            voice =  "Looking for information";
+	            std::cout << voice << std::endl;
 	            tag_flag = false;
-	            std::cout << srv.response.mps_name << std::endl;
-	            std::cout << srv.response.point_stamped.point.x << std::endl;
-
+	            //std::cout << srv.response.mps_name << std::endl;
+	            //std::cout << srv.response.point_stamped.point.x << std::endl;
+				//voice = "This is the " + srv.response.mps_name;
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
 				//transform_mps();
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
@@ -334,16 +338,15 @@ int main(int argc, char** argv){
 				else{
 					std::cout << "Still not all the tags" << std::endl;
 					cont++;
-					state = SM_GO_ZONE;
+					state = SM_GIRO;
 				}
 	    		break;
 			}
-
 	    	case SM_FINAL_STATE:{
 	    		//Finish
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
-	            msg =  "I have finished test";
-	            std::cout << msg << std::endl;
+	            voice =  "I have finished test";
+	            std::cout << voice << std::endl;
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();*/

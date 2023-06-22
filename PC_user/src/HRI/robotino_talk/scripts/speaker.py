@@ -1,22 +1,25 @@
 #!/usr/bin/env python
+# python
 
 import rospy
-import pyttsx3
+import subprocess
 from std_msgs.msg import String
 
-class speaker_ros:
-    def __init__(self):
-        self.engine = pyttsx3.init() 
-        self.engine.setProperty('rate', 150)
-        voices = self.engine.getProperty('voices')       
-        self.engine.setProperty('voice', voices[2].id)
-        self.sub = rospy.Subscriber("/speak", String, self.speakcall)
+def speakcall(data):
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    text = data.data
+    subprocess.Popen(["espeak", "-v", "mb-us1","-s", "125", text])
 
-    def speakcall(self, text):
-        self.engine.say(text.data)
-        self.engine.runAndWait()
-        self.engine.stop()
+    
+def listener():
 
-rospy.init_node("speaker_node")
-speaker = speaker_ros()
-rospy.spin()
+    rospy.init_node("speaker_node")
+
+    rospy.Subscriber("/speak", String, speakcall)
+
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()

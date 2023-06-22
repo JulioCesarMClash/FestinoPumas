@@ -337,8 +337,6 @@ int main(int argc, char** argv)
         		fail = true;
         		break;
             }
-
-
         }
         ros::spinOnce();
         loop.sleep();
