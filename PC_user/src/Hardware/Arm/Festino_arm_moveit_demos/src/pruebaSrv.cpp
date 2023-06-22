@@ -42,18 +42,23 @@ void move_effector(float x, float y, float z, float pitch)
 
 	std::cout<<"x = "<<x<<"; y = " <<y<<"; z = "<<z<< "; pitch = " <<pitch<<" ;"<<std::endl;
 	tf2::Quaternion orientation;
-	geometry_msgs::Pose target_pose1;
+	geometry_msgs::PoseStamped target_pose1;
 
 	orientation.setRPY(0, pitch , atan2(y,x));
 
-	target_pose1.position.x = x;
-	target_pose1.position.y = y;
-	target_pose1.position.z = z;
-	target_pose1.orientation = tf2::toMsg(orientation);
+	target_pose1.header.frame_id = "arm_base_link";
+	target_pose1.pose.position.x = x;
+	target_pose1.pose.position.y = y;
+	target_pose1.pose.position.z = z;
+	target_pose1.pose.orientation = tf2::toMsg(orientation);
 
 	group.setPoseTarget(target_pose1);
 
 	group.asyncMove();
+
+	std::cout<<"End Efector Link: "<<group.getEndEffectorLink()<<std::endl;
+	std::cout<<"End Efector: "<<group.getEndEffector()<<std::endl;
+	std::cout<<"Pose Reference Frame: "<<group.getPoseReferenceFrame()<<std::endl;
 }
 
 bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_moveit_demos::arm::Response &res)

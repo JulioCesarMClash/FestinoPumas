@@ -1,7 +1,7 @@
 <launch>
 
   <!-- By default, Don't run in simulation mode -->
-  <arg name="sim" default="false" />
+  <arg name="sim" default="true" />
 
   <!-- specify the planning pipeline -->
   <arg name="pipeline" default="ompl" />
