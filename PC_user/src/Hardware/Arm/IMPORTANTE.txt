@@ -7,3 +7,10 @@ Errores que puede marcar:
 	- No reconocer el puerto de USB: Para ello se deben dar permisos de escritura y lectura al puerto ttyUSB0 (o al que se allá conectado) mediante chmod /dev7....
 
 	- No reconocer el modelo de robot. Para solucionarlo se debe volver a cargar el modelo mediante moveit Setup assitant. La configuración está en "pincher_arm_moveit_config/" y no se debe mover nada, únicate cargar el modelo e ir al ultimo paso para generar el paquete, después se debe volver a lanzar el launch y debería correr sin problemas 
+
+	-Lanzar "roslaunch pincher_arm_bringup driver.launch --screen"
+	-Lanzar "roslaunch pincher_arm_moveit_config pincher_arm_moveit_config.launch"
+	-Lanzar "rosrun Festino_arm_moveit_demos pruebaSrv"
+
+
+Instalar arbotix: "sudo apt-get install ros-melodic-arbotix*"
