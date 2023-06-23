@@ -65,6 +65,7 @@ std_msgs::String mps_id;
 //Logistics zones
 std::vector<geometry_msgs::PoseStamped> zones_poses;
 geometry_msgs::PoseStamped tf_zone;
+geometry_msgs::PoseStamped piece;
 
 //Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
@@ -222,10 +223,35 @@ int main(int argc, char** argv){
 			case SM_INIT:{
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            voice = "I am ready for the exploration challenge";
+	            voice = "I am ready for the grasping challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-	    		state = SM_SCAN_SPACE;
+				tf::TransformListener listener;
+				tf::StampedTransform transform;
+
+				//TF related stuff 
+				piece.pose.position.x = 0.0;
+				piece.pose.position.y = 0.0;
+				piece.pose.position.z = 0.0;
+				piece.pose.orientation.x = 0.0;
+				piece.pose.orientation.y = 0.0;
+				piece.pose.orientation.z = 0.0;
+				piece.pose.orientation.w = 0.0;
+
+				try{
+					listener.waitForTransform("/piece_link", "/base_link", ros::Time(0), ros::Duration(1000.0));
+					listener.lookupTransform("/piece_link", "/base_link", ros::Time(0), transform);
+				}
+				catch(tf::TransformException ex){
+					ROS_ERROR("%s",ex.what());
+					ros::Duration(1.0).sleep();
+				}
+				piece.pose.position.x = -transform.getOrigin().x();
+				piece.pose.position.y = -transform.getOrigin().y();
+				piece.pose.position.z = -transform.getOrigin().z();
+				
+				std::cout << piece.pose.position << std::endl;
+		    	state = SM_FINAL_STATE;
 	    		break;
 			}
 

@@ -1,9 +1,9 @@
 <launch>
 
-	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
-
+	<!--LAUNCHES-->
 	<include file="$(find config_files)/launch/navigation.launch"> </include>	
 
+	<!--NODES-->
 	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
 	
 </launch>
