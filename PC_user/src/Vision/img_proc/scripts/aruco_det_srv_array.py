@@ -80,6 +80,7 @@ class FindTagNode:
       try:
         if(markerIds.shape[0] >= 1):
           for i in range (markerIds.shape[0]):
+            aruco_pose_aux = PointStamped()
             corners = markerCorners[i]
             #shape = 1,4,2
             first_corner = (corners[(0,0,0)],corners[(0,0,1)])
@@ -105,16 +106,20 @@ class FindTagNode:
                 pos_z = float(arr[cent][2])
                 mps_name_arr, mps_name = aruco_mps(markerIds[i])
                 print(mps_name, "\n")
-                name_list.append(mps_name)
                 self.mps_name_pub.publish(mps_name)
 
                 if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
                     aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                     br_ar = tf.TransformBroadcaster()
                     br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
-                    aruco_list.append(aruco_pose)
+                    aruco_pose_aux.point.x = aruco_pose.point.x
+                    aruco_pose_aux.point.y = aruco_pose.point.y
+                    aruco_pose_aux.point.z = aruco_pose.point.z
+                    name_list.append(mps_name)
+                    aruco_list.append(aruco_pose_aux)
                     print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
-                    print(aruco_pose)
+                    #print(aruco_pose)
+                    #print(aruco_pose_aux)
 
                 
               except IndexError:

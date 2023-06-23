@@ -164,6 +164,7 @@ def callback_depth_points(data):
                 br_ar = tf.TransformBroadcaster()
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
+                aruco_pos_pub.publish(aruco_pose)
           except IndexError:
             print('Not identified')
   except AttributeError:
@@ -172,7 +173,7 @@ def callback_depth_points(data):
   cv2.waitKey(3)
 
   try:
-    #aruco_pos_pub.publish(aruco_pose)
+    
     aruco_flag_pub.publish(aruco_det_flag)
   except CvBridgeError as e:
     print(e)

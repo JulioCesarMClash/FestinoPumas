@@ -37,6 +37,16 @@ enum SMState {
     SM_SCAN_SPACE
 };
 
+template <typename T>
+void print_vector(const std::vector<T> & vec, std::string sep=" ")
+{
+    for(auto elem : vec)
+    {
+        std::cout<<elem<< sep;
+    }
+    std::cout<<std::endl;
+}
+
 bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
@@ -184,7 +194,8 @@ int main(int argc, char** argv){
 
     std::string voice;
 
-    std::string mps_name;
+    std::vector<std::string> mps_name;
+    std::vector<geometry_msgs::PointStamped> mps_aruco;
 
 	 //TF related stuff 
 	 //Se tiene que a fuerza inicializar las poseStamped porque marca error si no se hace
@@ -214,7 +225,7 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the exploration challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-	    		state = SM_GO_ZONE;
+	    		state = SM_SCAN_SPACE;
 	    		break;
 			}
 
@@ -227,7 +238,7 @@ int main(int argc, char** argv){
 				if(cont < 4){
 					// TestComment
 					navigate_to_location(zones_poses.at(cont));
-					ros::Duration(6, 0).sleep();
+					ros::Duration(1, 0).sleep();
 		            // TestComment
 					std::cout << "Im in Zone  " << cont << std::endl;	
 					state = SM_SCAN_SPACE;
@@ -263,9 +274,15 @@ int main(int argc, char** argv){
 				tag_flag = false;
 				if (client.call(srv))
 				{
-					//tag_flag = srv.response.success;
-					//mps_name = srv.response.mps_name;
-					mps_name = "Not Identified";
+					tag_flag = srv.response.success;
+					if (tag_flag == true)
+					{
+						mps_name = srv.response.mps_name;
+						mps_aruco = srv.response.point_stamped;
+						print_vector(mps_names,",");
+					}
+					
+					//mps_name = "Not Identified";
 					/*if(tag_flag and mps_name != srv.response.mps_name)
 					{
 						std::cout << "Tag Found" << std::endl;
@@ -299,7 +316,7 @@ int main(int argc, char** argv){
 					//Le puse un ángulo de 6.2832 pero no funciona así
 
 					//TestComment
-					FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
+					//FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
 					// los 360 grados es demasiada vuelta (MitComment)
 					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
 					//TestComment

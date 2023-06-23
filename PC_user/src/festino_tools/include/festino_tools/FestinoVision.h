@@ -9,6 +9,9 @@
 #include "std_msgs/String.h"
 #include "act_pln/FaceRecogSrv.h"
 #include "act_pln/FaceTrainSrv.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/PoseStamped.h"
 
 
 class FestinoVision
@@ -25,6 +28,11 @@ private:
     static ros::ServiceClient cltFindPersons;
     static ros::ServiceClient cltTrainPersons;
 
+    //Aruco detector
+    static std::vector<std::string> _nameArUcoDet;
+    static std::vector<geometry_msgs::PoseStamped> _posArUcoDet;
+    static ros::ServiceClient cltArucoDet;
+
 
 public:
     
@@ -37,6 +45,9 @@ public:
     //Face Recognition
     static std::vector<std::string> enableRecogFacesName(bool flag);
     static void TrainingPerson(std::string person);
+
+    //Aruco detector
+    static void enableArucoDet(bool flag);
 
 
 
