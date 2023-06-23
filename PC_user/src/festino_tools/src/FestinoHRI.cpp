@@ -39,9 +39,10 @@ bool FestinoHRI::setNodeHandle(ros::NodeHandle* nh)
         return true;
     if(nh == 0)
         return false;
+    bool latch;
     std::cout << "FestinoHRI.->Setting ros node..." << std::endl;
     //Speaker
-    pubSpeaker = nh->advertise<std_msgs::String>("/speak", 1000);
+    pubSpeaker = nh->advertise<std_msgs::String>("/speak", 1000, latch = true);
 
     //Leg Finder
     pubLegsFinderEnable = nh->advertise<std_msgs::Bool>("/hri/leg_finder/enable", 1);

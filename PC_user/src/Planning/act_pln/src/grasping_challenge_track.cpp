@@ -15,6 +15,8 @@
 #include "ros/time.h"
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
+#include "img_proc/Find_tag_Srv.h"
+
 
 //Festino Tools
 #include "festino_tools/FestinoHRI.h"
@@ -29,9 +31,21 @@ enum SMState {
 	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
 	SM_TAG_SEARCH,
+	SM_GIRO,
 	SM_TAG_DETECTED,
-    SM_FINAL_STATE
+    SM_FINAL_STATE,
+    SM_SCAN_SPACE
 };
+
+template <typename T>
+void print_vector(const std::vector<T> & vec, std::string sep=" ")
+{
+    for(auto elem : vec)
+    {
+        std::cout<<elem<< sep;
+    }
+    std::cout<<std::endl;
+}
 
 bool fail = false;
 bool success = false;
@@ -52,15 +66,22 @@ std_msgs::String mps_id;
 std::vector<geometry_msgs::PoseStamped> zones_poses;
 geometry_msgs::PoseStamped tf_zone;
 
-
+//Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
-//Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
-//Son las coordenadas respecto al mapa que considera solo las zonas dentro del mapa
 
-//Son las x de las zonas de escaneo
-std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
-//Son las y de las zonas de escaneo
-std::vector<float> tf_y {2.5, 3.5, 4.5, 3.5}; 
+//Estas coordenadas se obtuvieron del archivo "challengeTracks_Zones.launch"
+//Son las x de las zonas de escaneo respecto al origen de logistics
+//std::vector<float> tf_x {-5.5, -1.5, 0.5, 3.5};
+//Son las y de las zonas de escaneo respecto al origen de logistics
+//std::vector<float> tf_y {2.5, 3.5, 4.5, 3.5}; 
+
+
+//Son las coordenadas respecto al mapa que considera solo las zonas disponibles
+//Estas coordenadas se obtuvieron contando los cuadritos en el rviz respecto al origen del mapa
+//Son las x de las zonas de escaneo respecto al mapa
+std::vector<float> tf_x {0.5, 4.5, 6.5, 9.5};
+//Son las y de las zonas de escaneo respecto al mapa
+std::vector<float> tf_y {-4.5, -3.5, -2.5, -3.5}; 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -139,6 +160,7 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 {
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+		//La función espera a que llegue a la localidad
         if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
          	std::cout << "Cannot move to " << std::endl;
                 FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
@@ -149,6 +171,9 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
+	bool tag_flag;
+	bool giro =false;
+
 	std::cout << "INITIALIZING EXPLORATION NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
@@ -161,17 +186,20 @@ int main(int argc, char** argv){
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber sub_mps_flag     = n.subscribe("/aruco_det", 10, callback_mps_flag);
 	ros::Subscriber sub_mps_name     = n.subscribe("/mps_name", 10, callback_mps_name);
-	ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
+    img_proc::Find_tag_Srv srv;
 
-    ros::Rate loop(30);
+    ros::Rate loop(10);
 
-    std_msgs::String voice;
-    std::string msg;
+    std::string voice;
+
+    std::vector<std::string> mps_name;
+    std::vector<geometry_msgs::PointStamped> mps_aruco;
 
 	 //TF related stuff 
 	 //Se tiene que a fuerza inicializar las poseStamped porque marca error si no se hace
-	for(int i=0; i<zones_poses.size(); i++){
+	for(int i=0; i<tf_x.size(); i++){
     	tf_zone.header.frame_id = "/map";
 	    tf_zone.pose.position.x = tf_x.at(i);
 	    tf_zone.pose.position.y = tf_y.at(i);
@@ -183,79 +211,101 @@ int main(int argc, char** argv){
 	    zones_poses.push_back(tf_zone);
     }
 
+	//Contador que lleva el número de zonas que se han recorrido
 	int cont = 0;
+
+	//Contador que lleva el número de giros
+	int cont_giro = 0;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            msg = "I am ready for the exploration challenge";
+	            voice = "I am ready for the exploration challenge";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
+	    		state = SM_SCAN_SPACE;
+	    		break;
+			}
+
+			case SM_GO_ZONE:{
+				std::cout << "State machine: SM_GO_ZONE" << std::endl;	
+				//Se navega a las zonas recorriendo el arreglo zones_poses
+				//El contador es el índice que recorre el arreglo
+
+				//Cuando se hayan recorrido las 4 zonas ya terminó
+				if(cont < 4){
+					// TestComment
+					navigate_to_location(zones_poses.at(cont));
+					ros::Duration(1, 0).sleep();
+		            // TestComment
+					std::cout << "Im in Zone  " << cont << std::endl;	
+					state = SM_SCAN_SPACE;
+				}
+				else{
+					std::cout << "All Zones visited" << std::endl;
+					if(flag_names){
+						std::cout << "I found all the Tags" << std::endl;
+						state = SM_FINAL_STATE;
+					}
+					else{
+						std::cout << "Still not all the tags" << std::endl;
+						std::cout << "En esta vida hay limites, se hizo lo que se pudo" << std::endl;
+						state = SM_FINAL_STATE;
+					}
+				}
+				break;
+			}
+
+	    	case SM_SCAN_SPACE:{
+	    		//Looking for Obstacles
+	    		std::cout << "State machine: SM_SCAN_SPACE" << std::endl;
+	            /*msg = "Turn arooound";
 	            std::cout << msg << std::endl;
 	            voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
-	    		state = SM_NAV_FWD;
-	    		break;
-			}
-			case SM_GO_ZONE:{
-				navigate_to_location(zones_poses.at(cont));
-				ros::Duration(6, 0).sleep();
-	            cont++;
-
-				if(cont == 12){
-					state = SM_FINAL_STATE;
-				}
-
-				break;
-			}
-	    	case SM_NAV_FWD:{
-	    		//Looking for Obstacles
-	    		std::cout << "State machine: SM_NAV_FWD" << std::endl;
-	            msg = "Looking for Obstacles";
-	            std::cout << msg << std::endl;
-	            /*voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
 	            sleep(1);*/
-				// ----- If obstacle found -> Go around it -----
-				// ----- Else -> Go forward -----
-				state = SM_NAV_AROUND_OBST;
-	    		break;
-			}
-
-	    	case SM_NAV_AROUND_OBST:{
-	    		//Navigate around the obstacle
-	    		std::cout << "State machine: SM_NAV_AROUND_OBST" << std::endl;
-	            msg = "Im going to navigate aroudn the station";
-	            std::cout << msg << std::endl;
-	            /*voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();*/
-
-				// ----- Go around -----
-				// ----- Align -----
-				// ----- Look for Tag -----
-				// ----- OR Continue to Navigate -----
-	            
-	    		state = SM_TAG_SEARCH;
-	    		break;
-	        }
-
-	    	case SM_TAG_SEARCH:{
-            	//Look for Tag
-	            std::cout << "State machine: SM_TAG_SEARCH" << std::endl;
-	            msg = "Looking or Tag";
-	            std::cout << msg << std::endl;
-				if(mps_flag)
+				
+				ros::Duration(5, 0).sleep();
+				std::cout << "Estoy escaneando zzz" << std::endl;
+	            srv.request.is_find_tag_enabled = true;
+				tag_flag = false;
+				if (client.call(srv))
 				{
-					std::cout << "Tag Found" << std::endl;
-					state = SM_TAG_DETECTED;
+					tag_flag = srv.response.success;
+					if (tag_flag == true)
+					{
+						mps_name = srv.response.mps_name;
+						mps_aruco = srv.response.point_stamped;
+						print_vector(mps_names,",");
+					}
+					
+					//mps_name = "Not Identified";
+					/*if(tag_flag and mps_name != srv.response.mps_name)
+
+				  if (client.call(srv))
+				  {
+				  	tag_flag = srv.response.success;
+				  	//mps_name = srv.response.mps_name;
+				  	mps_name = "Not Identified";
+				    //if(tag_flag and mps_name != srv.response.mps_name)
+					if(1)
+					{
+						std::cout << "Tag Found" << std::endl;
+						state = SM_TAG_DETECTED;
+						tag_flag = false;
+					}
+					else{
+						std::cout << "Tag Not Found - Turn" << std::endl;
+						state = SM_GIRO;
+					}*/
 				}
 				else
 				{
-					std::cout << "Waiting for Tag" << std::endl;
-					state = SM_NAV_FWD;
+					ROS_ERROR("Failed to call service to search Tag");
+					return 1;
 				}
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
@@ -266,14 +316,42 @@ int main(int argc, char** argv){
 				
 	            break;
 	        }
+			case SM_GIRO:{
+				std::cout << "State machine: SM_GIRO" << std::endl;
+				if(cont_giro < 3){
+					std::cout << "Turn arooound" << std::endl;
+					//Da un giro de 360 grados (2pi) para escanear todo
+					//Le puse un ángulo de 6.2832 pero no funciona así
 
+					//TestComment
+					//FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
+					// los 360 grados es demasiada vuelta (MitComment)
+					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
+					//TestComment
+					tag_flag = false;
+					cont_giro++;
+					state = SM_SCAN_SPACE;
+				}
+				else{
+					std::cout << "Navigating to New Zone" << std::endl;
+					cont++;
+					state = SM_GO_ZONE;
+				}
+			}
 			case SM_TAG_DETECTED:{
 	    		//Scan Tag and Send Information
 	    		std::cout << "State machine: SM_TAG_DETECTED" << std::endl;	
-	            msg =  "I have found a Tag";
-	            std::cout << msg << std::endl;
-				std::cout << "Looking for information" << std::endl;
-				transform_mps();				
+	            voice =  "Looking for information";
+	            std::cout << voice << std::endl;
+	            tag_flag = false;
+	            //std::cout << srv.response.mps_name << std::endl;
+	            //std::cout << srv.response.point_stamped.point.x << std::endl;
+
+				//voice = "This is the " + srv.response.mps_name;
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
+
+				//transform_mps();
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();*/
@@ -286,16 +364,16 @@ int main(int argc, char** argv){
 				}
 				else{
 					std::cout << "Still not all the tags" << std::endl;
-					state = SM_TAG_SEARCH;
+					cont++;
+					state = SM_GIRO;
 				}
 	    		break;
 			}
-
 	    	case SM_FINAL_STATE:{
 	    		//Finish
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
-	            msg =  "I have finished test";
-	            std::cout << msg << std::endl;
+	            voice =  "I have finished test";
+	            std::cout << voice << std::endl;
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();*/

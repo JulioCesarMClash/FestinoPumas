@@ -17,7 +17,7 @@
 
 //Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/split.hpp>	
 
 //Festino Tools
 #include "festino_tools/FestinoHRI.h"
@@ -50,6 +50,7 @@ std::vector<geometry_msgs::PoseStamped> tf_target_zones;
 geometry_msgs::PoseStamped tf_target_zone;
 std::vector<geometry_msgs::PoseStamped> zones_path;
 std::vector<std::string> tokens;
+std::vector<std::string> real_refbox_names;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
@@ -236,13 +237,11 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
     ros::Subscriber subRefbox = n.subscribe("/zone_msg", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 
     ros::Rate loop(30);
 
-    std_msgs::String voice;
-    std::string msg;
+    std::string voice;
 
     int cont = 0;
 
@@ -251,22 +250,18 @@ int main(int argc, char** argv){
 			case SM_INIT:
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            msg = "I am ready for the navigation challenge";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
+	            voice = "I am ready for the navigation challenge";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,5);
 	    		state = SM_WAIT_FOR_ZONES;
 	    		break;
 
 	    	case SM_WAIT_FOR_ZONES:
 	    		//Wating for zone case
 	    		std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
-	            msg = "Wating for target zones";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
+	            voice = "Wating for target zones";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
 	            sleep(1);
 
 	            //Waiting for 12 zones
@@ -282,11 +277,9 @@ int main(int argc, char** argv){
 	    	case SM_NAV_NEAREST_ZONE:{
             	//Wait for finished navigation
 	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
-	            msg = "Navigating to destination point";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            
+	            voice = "Navigating to destination point";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
 
 	            navigate_to_location(zones_path.at(cont));
 				ros::Duration(6, 0).sleep();
@@ -301,11 +294,9 @@ int main(int argc, char** argv){
 	    	case SM_FINAL_STATE:
 	    		//Navigate case
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
-	            msg =  "I have finished test";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
-	            ros::Duration(2, 0).sleep();
+	            voice =  "I have finished test";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
 	    		success = true;
 	    		fail = true;
 	    		break;

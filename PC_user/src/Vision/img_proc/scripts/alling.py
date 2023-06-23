@@ -15,7 +15,7 @@ class robot:
     def __init__(self):
         self.image = None
         self.sub_img = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
-        self.pub_vel = rospy.Publisher("/cmd_vel",Twist,queue_size=1)
+        self.pub_vel = rospy.Publisher("/hardware/mobile_base/cmd_vel",Twist,queue_size=1)
         self.slope = 0
     
     def callback(self,data):
@@ -24,7 +24,6 @@ class robot:
         self.image = img
         #self.crop_image()
         self.line_detector()
-        #print(slope)
         self.alling()
         cv.imshow("Kinect_image",self.image)
         cv.waitKey(1)
@@ -47,22 +46,26 @@ class robot:
         slopes=[]
         edges = cv.Canny(img,150,150)
         lines = cv.HoughLines(edges, 1, np.pi/180, 200)
+        cont = 0
         if lines is not None:
             for line in lines:
+                cont = cont + 1
                 rho, theta = line[0]
-                a = np.cos(theta)
-                b = np.sin(theta)
-                x0 = a * rho
-                y0 = b * rho
-                x1 = int(x0 + 1000 * (-b))
-                y1 = int(y0 + 1000 * (a))
-                x2 = int(x0 - 1000 * (-b))
-                y2 = int(y0 - 1000 * (a))
-                slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
-                if slope < 0.2 and slope > -0.2:
-                    slopes.append(slope)
-                    detected_lines.append([x1,y1,x2,y2,slope])
-                    cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 4)
+                deg_theta = 90 - np.rad2deg(theta)
+                if(abs(deg_theta) < 70) or (abs(deg_theta) > 110):
+                    a = np.cos(theta)
+                    b = np.sin(theta)
+                    x0 = a * rho
+                    y0 = b * rho
+                    x1 = int(x0 + 1000 * (-b))
+                    y1 = int(y0 + 1000 * (a))
+                    x2 = int(x0 - 1000 * (-b))
+                    y2 = int(y0 - 1000 * (a))
+                    slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
+                    if slope < 0.2 and slope > -0.2:
+                        slopes.append(slope)
+                        detected_lines.append([x1,y1,x2,y2,slope])
+                        cv.line(img, (x1, y1), (x2, y2), (0, 0, 255), 4)
         else:
             print("No line detected") 
         if len(slopes) != 0:
@@ -71,25 +74,26 @@ class robot:
     
     def alling(self):
         error = self.slope
-        Kp = -0.1
+        Kp = -6.0
+        Kp_m = 6.0
         vel = Twist()
-        if abs(error) > 0.01:
-            #vel.linear.y = Kp*error
-            if(error > 0):
-                vel.angular.z = Kp*error
-            if(error < 0):
-                vel.angular.z = -Kp*error
-            vel.linear.y = 0
-            self.pub_vel.publish(vel)
-            rospy.sleep(0.03)
-            error= self.slope
-            print(error)
-        else:
+        print(error)
+        if abs(error) > 0.02:
+            if (error < 0) and (error != 1) :
+                vel.angular.z = Kp_m*abs(error)
+                error = self.slope
+            elif error > 0 and (error != 1) :
+                vel.angular.z = Kp*abs(error)
+                error = self.slope
+        else: #error == 0:
             vel.linear.x = 0
             vel.linear.y = 0
             vel.angular.z = 0
-            self.pub_vel.publish(vel)
-            print("Creo que estoy alineado")
+            print("Lined up")
+
+        self.pub_vel.publish(vel)
+        rospy.sleep(0.05)
+            
         return True
         
 rospy.init_node("Alling")
