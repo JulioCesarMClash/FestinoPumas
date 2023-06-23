@@ -243,3 +243,7 @@ add_executable(exploration_challenge_track src/exploration_challenge_track.cpp)
 add_dependencies(exploration_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(exploration_challenge_track ${catkin_LIBRARIES})
 
+add_executable(grasping_challenge_track src/grasping_challenge_track.cpp)
+add_dependencies(grasping_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(grasping_challenge_track ${catkin_LIBRARIES})
+
