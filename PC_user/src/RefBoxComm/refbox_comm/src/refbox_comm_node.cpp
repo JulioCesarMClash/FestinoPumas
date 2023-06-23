@@ -63,6 +63,7 @@
 using namespace std;
 using namespace protobuf_comm;
 
+
 //TODO topic robot position
 //
 
@@ -76,6 +77,7 @@ using namespace protobuf_comm;
 
 class Handler 
 {
+
     using AgentTask = llsf_msgs::AgentTask;
     using WorkpieceDescription = llsf_msgs::WorkpieceDescription;
     
@@ -154,7 +156,6 @@ class Handler
     using WorkpieceAddRing = llsf_msgs::WorkpieceAddRing;
 
     using Zone = llsf_msgs::Zone;
-
 
     private:
         std::string m_host;
@@ -472,6 +473,34 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
         ~Handler() 
         {
             m_running = false;
+        }
+
+
+        void reportAMachine(int machine){
+            ROS_INFO_STREAM("------A MACHINE REPORT SENT TO REFBOX--------- " << machine << " : ");
+            std::shared_ptr<MachineReport> machine_report_message(new MachineReport());
+
+                if("CYAN" == TEAM_COLOR){
+                    machine_report_message->set_team_color(Team::CYAN);
+                } else {
+                    machine_report_message->set_team_color(Team::MAGENTA);
+                }
+
+
+            MachineReportEntry* new_machine_entry = machine_report_message->add_machines();
+
+//            std::shared_ptr<MachineReportEntry> new_machine_entry(new MachineReportEntry());
+            new_machine_entry->set_name("una maquina");
+            new_machine_entry->set_type("CS");
+            new_machine_entry->set_zone(Zone::C_Z11);
+            new_machine_entry->set_rotation(180);
+
+            
+            //machine_report_message->add_machines();
+           //machine_report_message->add_machines();
+
+           m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           //m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
         }
 
         void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
@@ -1385,7 +1414,7 @@ pub_zone.publish(el_msg);
                 ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
 
                 //m_public_peer->send(2000, BeaconSignal::MSG_TYPE, msg);
-                m_public_peer->send(2000, 1, msg);
+                m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                 //m_private_peer->send(2000, 1, msg);
                 ROS_INFO_STREAM("Sending: 2");
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));ROS_INFO_STREAM("Sending: ");
@@ -1393,10 +1422,15 @@ pub_zone.publish(el_msg);
         }
 
 };
-/*
-void callbackRobotPose(const geometry_msgs::PoseStamped){
 
-}*/
+Handler p(HOST, PUBLIC_PORT);
+
+void callbackMachineReport(int machine_data){
+     p.reportAMachine(machine_data);
+}
+
+
+
 int main(int argc, char** argv) 
 {
 
@@ -1424,7 +1458,7 @@ int main(int argc, char** argv)
  pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
 //subRobotPose  = n.subscribe("/TODO_robot_pose", 1, callbackRobotPose);
  //---------------------------------------NAVIGATION CHALLENGE
-    Handler p(HOST, PUBLIC_PORT);
+    //p(HOST, PUBLIC_PORT);
 
     ros::Rate r(10);
     while (ros::ok()) {
