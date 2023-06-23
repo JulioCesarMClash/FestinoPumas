@@ -272,7 +272,6 @@ int main(int argc, char** argv){
 				std::cout << "Estoy escaneando zzz" << std::endl;
 	            srv.request.is_find_tag_enabled = true;
 				tag_flag = false;
-<<<<<<< Updated upstream
 				if (client.call(srv))
 				{
 					tag_flag = srv.response.success;
@@ -285,7 +284,7 @@ int main(int argc, char** argv){
 					
 					//mps_name = "Not Identified";
 					/*if(tag_flag and mps_name != srv.response.mps_name)
-=======
+
 				  if (client.call(srv))
 				  {
 				  	tag_flag = srv.response.success;
@@ -293,7 +292,6 @@ int main(int argc, char** argv){
 				  	mps_name = "Not Identified";
 				    //if(tag_flag and mps_name != srv.response.mps_name)
 					if(1)
->>>>>>> Stashed changes
 					{
 						std::cout << "Tag Found" << std::endl;
 						state = SM_TAG_DETECTED;
@@ -348,13 +346,11 @@ int main(int argc, char** argv){
 	            tag_flag = false;
 	            //std::cout << srv.response.mps_name << std::endl;
 	            //std::cout << srv.response.point_stamped.point.x << std::endl;
-<<<<<<< Updated upstream
+
 				//voice = "This is the " + srv.response.mps_name;
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-=======
 
->>>>>>> Stashed changes
 				//transform_mps();
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
