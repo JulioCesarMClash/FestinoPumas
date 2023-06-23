@@ -1,11 +1,11 @@
 <launch>
 
-	<!--LAUNCHES-->
+   	<!--LAUNCHES-->
 	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
 	<include file="$(find config_files)/launch/navigation.launch"> </include>	
 
-	<!--NODES-->
+   	<!--NODES-->
 	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
-	<node name="find_tag_service" pkg="img_proc" type="aruco_det_srv_array.py"/>
+    <node name="find_piece_service" pkg="img_proc" type="find_piece_srv.py"/>
 	
 </launch>
