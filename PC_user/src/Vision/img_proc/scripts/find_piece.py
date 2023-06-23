@@ -65,8 +65,6 @@ def callback_depth_points(data):
   piece_pose.header.frame_id = "camera_link"
   piece_pose.point.x, piece_pose.point.y, piece_pose.point.z = 0, 0, 0
 
-  aruco_pose = piece_pose
-
   ######## Filling msg for tapita_static_pose publisher ########
 
   static_transformStamped = geometry_msgs.msg.TransformStamped()
