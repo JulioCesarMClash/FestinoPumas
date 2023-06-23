@@ -105,8 +105,8 @@ class FindTagNode:
                 pos_y = float(arr[cent][1])
                 pos_z = float(arr[cent][2])
                 mps_name_arr, mps_name = aruco_mps(markerIds[i])
-                print(mps_name, "\n")
-                self.mps_name_pub.publish(mps_name)
+                #print(mps_name, "\n")
+                #self.mps_name_pub.publish(mps_name)
 
                 if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
                     aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
@@ -118,6 +118,7 @@ class FindTagNode:
                     name_list.append(mps_name)
                     aruco_list.append(aruco_pose_aux)
                     print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
+                    #self.aruco_pos_pub.publish(aruco_pose)
                     #print(aruco_pose)
                     #print(aruco_pose_aux)
 
