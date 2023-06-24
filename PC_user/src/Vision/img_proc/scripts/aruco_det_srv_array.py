@@ -36,7 +36,6 @@ class FindTagNode:
 
     self.depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,self.callback_depth_points)
     self.aruco_pos_pub     = rospy.Publisher("/aruco_pos",PointStamped,queue_size=10)
-    self.mps_name_pub      = rospy.Publisher("/mps_name",String,queue_size=10)
 
     self.find_tag_service = rospy.Service('/vision/find_tag/point_stamped', Find_tag_Srv, self.find_tag)
 

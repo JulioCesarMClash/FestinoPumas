@@ -24,6 +24,8 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+using namespace std;
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
@@ -184,15 +186,29 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Subscriber sub_mps_flag     = n.subscribe("/aruco_det", 10, callback_mps_flag);
-	ros::Subscriber sub_mps_name     = n.subscribe("/mps_name", 10, callback_mps_name);
+    ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
+    
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+	ros::Publisher station_info_pub = n.advertise<std_msgs::String>("station_info", 1000);
+
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
 
     ros::Rate loop(10);
 
     std::string voice;
+    
+    
+    std::stringstream stream;
+    std::string name;
+    std::string type;
+    std::string zone;
+    std::string rot;
+    std::string mps_info;
+
+
+    std::string mps_zone;
+    std::string mps_type;
 
     std::vector<std::string> mps_name;
     std::vector<geometry_msgs::PointStamped> mps_aruco;
@@ -237,7 +253,7 @@ int main(int argc, char** argv){
 				//Cuando se hayan recorrido las 4 zonas ya terminó
 				if(cont < 4){
 					// TestComment
-					navigate_to_location(zones_poses.at(cont));
+					//navigate_to_location(zones_poses.at(cont));
 					ros::Duration(1, 0).sleep();
 		            // TestComment
 					std::cout << "Im in Zone  " << cont << std::endl;	
@@ -279,6 +295,22 @@ int main(int argc, char** argv){
 					{
 						mps_name = srv.response.mps_name;
 						mps_aruco = srv.response.point_stamped;
+						mps_zone = "M_Z54";
+						mps_type = "CS";
+						int rotacion = 180;
+						for(int i = 0; i < mps_name.size(); i++)
+						{
+							stream << rotacion;
+							stream >> rot;
+
+							mps_info = mps_name[i] + "," + mps_type + "," + mps_zone + "," + rot;
+							mps_id.data = mps_info;
+							std::cout << "string info\n" << mps_info << std::endl;
+							//std::cout << "Elem - pos\n" << mps_aruco[i].point << std::endl;	
+							station_info_pub.publish(mps_id);
+							ros::Duration(2, 0).sleep();
+							//station_zone_pub.publish(voice);
+						}
 						print_vector(mps_names,",");
 					}
 					
