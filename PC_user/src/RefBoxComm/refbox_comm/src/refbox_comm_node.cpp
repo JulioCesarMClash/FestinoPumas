@@ -75,6 +75,12 @@ using namespace protobuf_comm;
         ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
 
+//--------------------------------EXPLORATION CHALLENGE
+
+        ros::Subscriber sub_mps_info;
+
+//--------------------------------EXPLORATION CHALLENGE
+
 class Handler 
 {
 
@@ -476,8 +482,8 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
         }
 
 
-        void reportAMachine(int machine){
-            ROS_INFO_STREAM("------A MACHINE REPORT SENT TO REFBOX--------- " << machine << " : ");
+        void reportAMachine(const std_msgs::String::ConstPtr& machine_data){
+            //ROS_INFO_STREAM("------A MACHINE REPORT SENT TO REFBOX--------- " << machine << " : ");
             std::shared_ptr<MachineReport> machine_report_message(new MachineReport());
 
                 if("CYAN" == TEAM_COLOR){
@@ -490,7 +496,25 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             MachineReportEntry* new_machine_entry = machine_report_message->add_machines();
 
 //            std::shared_ptr<MachineReportEntry> new_machine_entry(new MachineReportEntry());
-            new_machine_entry->set_name("una maquina");
+
+            /*string my_msg;
+            std_msgs::String el_msg;
+            
+                //std::stringstream ss;
+                //ss << my_msg << count;
+                el_msg.data = my_msg;//ss.str();
+            
+
+            ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);*/
+            std::vector<std::string> tokens;
+            tokens.clear();
+            boost::algorithm::split(tokens, machine_data->data, boost::algorithm::is_any_of(","));
+
+                    for(std::string token : tokens){
+                        ROS_INFO_STREAM("Un token: " << token);
+                    }
+
+            new_machine_entry->set_name(tokens[0]);
             new_machine_entry->set_type("CS");
             new_machine_entry->set_zone(Zone::C_Z11);
             new_machine_entry->set_rotation(180);
@@ -1423,10 +1447,11 @@ pub_zone.publish(el_msg);
 
 };
 
-Handler p(HOST, PUBLIC_PORT);
+Handler* p;
 
-void callbackMachineReport(int machine_data){
-     p.reportAMachine(machine_data);
+void callbackMachineReport(const std_msgs::String::ConstPtr& machine_data){
+
+     p->reportAMachine(machine_data);
 }
 
 
@@ -1440,6 +1465,7 @@ int main(int argc, char** argv)
         //Handler p(HOST, SENDPORT, RECVPORT);
         //Handler p(HOST, RECVPORT, RECVPORT);
         //Handler p(HOST, SENDPORT, SENDPORT);
+        p = new Handler(HOST, PUBLIC_PORT);
 /*
     if(HOST == "localhost"){
         ROS_INFO_STREAM("------Test local--------- ");
@@ -1456,6 +1482,7 @@ int main(int argc, char** argv)
 
 //---------------------------------------NAVIGATION CHALLENGE
  pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
+ sub_mps_info = n.subscribe("/station_info", 10, callbackMachineReport);
 //subRobotPose  = n.subscribe("/TODO_robot_pose", 1, callbackRobotPose);
  //---------------------------------------NAVIGATION CHALLENGE
     //p(HOST, PUBLIC_PORT);
