@@ -13,14 +13,19 @@
 
 #include <Festino_arm_moveit_demos/arm.h>
 
-
 void move_effector(float x, float y, float z, float pitch);
+void move_gripper(bool state);
 bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_moveit_demos::arm::Response &res);
 
-float x = 0.10;
+//Variables for inverse kinematics
+float x = 0.23;
 float y = 0.0;
-float z = 0.15;
+float z = 0.025;
 float pitch = 0;
+
+//Variables for gripper
+bool gripperState = false;
+bool manipBlocker = false;
 
 
 int main(int argc, char** argv)
@@ -41,9 +46,9 @@ void move_effector(float x, float y, float z, float pitch)
 	group.setPlanningTime(4.0);
 
 	std::cout<<"x = "<<x<<"; y = " <<y<<"; z = "<<z<< "; pitch = " <<pitch<<" ;"<<std::endl;
+
 	tf2::Quaternion orientation;
 	geometry_msgs::PoseStamped target_pose1;
-
 	orientation.setRPY(0, pitch , atan2(y,x));
 
 	target_pose1.header.frame_id = "arm_base_link";
@@ -53,12 +58,35 @@ void move_effector(float x, float y, float z, float pitch)
 	target_pose1.pose.orientation = tf2::toMsg(orientation);
 
 	group.setPoseTarget(target_pose1);
-
 	group.asyncMove();
 
-	std::cout<<"End Efector Link: "<<group.getEndEffectorLink()<<std::endl;
-	std::cout<<"End Efector: "<<group.getEndEffector()<<std::endl;
-	std::cout<<"Pose Reference Frame: "<<group.getPoseReferenceFrame()<<std::endl;
+	/*moveit::planning_interface::MoveGroupInterface group("gripper");
+	group.setPlanningTime(4.0);
+	group.setJointValueTarget("gripper_finger1_joint", 0.015);
+	group.setJointValueTarget("gripper_finger2_joint", 0.015);
+	group.asyncMove();*/
+}
+
+void move_gripper(bool state)
+{
+	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+	moveit::planning_interface::MoveGroupInterface group("gripper");
+	group.setPlanningTime(4.0);
+
+	if(state == true) //Open
+	{
+		group.setJointValueTarget("gripper_finger1_joint", 0.016);
+		group.setJointValueTarget("gripper_finger2_joint", 0.016);
+
+		group.asyncMove();
+	}
+	if(state == false) //Close
+	{
+		group.setJointValueTarget("gripper_finger1_joint", 0.0104);
+		group.setJointValueTarget("gripper_finger2_joint", 0.0104);
+
+		group.asyncMove();
+	}
 }
 
 bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_moveit_demos::arm::Response &res)
@@ -67,9 +95,25 @@ bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_movei
 	y = req.y;
 	z = req.z;
 	pitch = req.pitch;
-	move_effector(x,y,z,pitch);
+
+	gripperState = req.gripperState;
+	manipBlocker = req.manipBlocker;
+
+	//PONER LA FUNCION QUE FALTA PARA EL GRIPER
+	//PONER LO FALTANTE EN EL SERVICIO
+	//PONER EL IF PARA DIFERENCIAR
+
+	if (manipBlocker == true)
+	{
+		move_gripper(gripperState);
+	}
+
+	if(manipBlocker == false)
+	{
+		move_effector(x,y,z,pitch);
+	}
+
 	res.success = true;
-	
 	return true;
 }
 
