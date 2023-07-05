@@ -1,5 +1,13 @@
 //Explore the Field
 //Report the position and orientation of the MPSs
+//1 Alinearse con la salida de la máquina
+//2 Alejarse un poco (30 cm)
+//3 Levantar servicio "find piece" (da coordenadas (respecto al kinect) y un booleano de si encontró la pieza)
+//4 Convertir las coordenadas que da el servicio, resecto al arm_base_link en vez de que sean respecto al kinect (con TF).
+//5 Tomar la pieza
+//6 Ir a la entrada y dejar la pieza
+
+
 #include<iostream>
 #include <cmath>
 #include "ros/ros.h"
@@ -27,6 +35,7 @@
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
+	SM_ALLIGN,
 	SM_GO_ZONE,
 	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
@@ -226,6 +235,15 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the grasping challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
+				state = SM_ALLIGN;
+
+			case SM_ALLIGN:{
+				std::cout << "State machine: SM_ALLIGN" << std::endl;
+
+				//Se mueve tantito para atras para que el kinect pueda ver la pieza
+				FestinoNavigation::moveDist(3, 30000);
+			}
+			case SM_
 				tf::TransformListener listener;
 				tf::StampedTransform transform;
 
