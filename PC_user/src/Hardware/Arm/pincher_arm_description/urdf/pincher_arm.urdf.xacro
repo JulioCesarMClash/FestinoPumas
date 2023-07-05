@@ -3,7 +3,7 @@
 
   <xacro:include filename="$(find pincher_arm_description)/urdf/robotino_kinect_arm.xacro"/>
   <!--xacro:include filename="$(find pincher_arm_description)/urdf/dark_arm.xacro"/-->
-  <!--xacro:include filename="$(find robotino_description)/robotino_kinect.xacro"/-->
+  <!--xacro:include filename="$(find robotino_description)/robotino_kinect_arm.xacro"/-->
   
   <xacro:pincher_arm/>
 
