@@ -47,15 +47,18 @@
 #include <thread>
 
 //#define HOST "localhost"
-#define HOST "192.168.0.101"
+#define HOST "172.26.255.255"
+//#define HOST "172.23.134.255"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
 #define CRYPTO_KEY "randomkey"
-#define PUBLIC_PORT 4444
-#define CYAN_PORT 4441
-#define MAGENTA_PORT 4442
-
+#define PUBLIC_PORT_S 4444
+#define PUBLIC_PORT_R 4445
+#define CYAN_PORT_S 4441
+#define CYAN_PORT_R 4446
+#define MAGENTA_PORT_S 4442
+#define MAGENTA_PORT_R 4447
 
 #include <iostream>
 #include <typeinfo>
@@ -69,8 +72,8 @@ using namespace protobuf_comm;
 
 //--------------------------------NAVIGATION CHALLENGE
         //ros::Subscriber subRobotPose;
-        float pose_x = -0.5f;
-        float pose_y = 1.5f;
+        float pose_x = 0.0f;
+        float pose_y = 0.0f;
         float pose_ori = 0.0f;
         ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
@@ -165,7 +168,8 @@ class Handler
 
     private:
         std::string m_host;
-        int m_port;
+        int m_port_s;
+        int m_port_r;
         //int m_recv_port;
 
         unsigned long int m_sequence_nr_;
@@ -201,8 +205,9 @@ class Handler
         //ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
     public:
-        Handler(std::string host, int port)
-            : m_host(host), m_port(port)
+        Handler(std::string host, int port_s, int port_r)
+            : m_host(host), m_port_s(port_s)
+            , m_port_r(port_r)
             , m_mr(new MessageRegister()) {
 
 
@@ -331,7 +336,7 @@ zones_map[Zone::M_Z78] = "M_Z78";
 //--------------------------------NAVIGATION CHALLENGE
 
 
- ROS_INFO_STREAM("------Test print--------- Host: " << m_host << " SendPort:" << m_port);
+ ROS_INFO_STREAM("------Test print--------- Host: " << m_host << " SendPort:" << m_port_s << " RecvPort:" << m_port_r);
 
             m_mr->add_message_type<AgentTask>();
             m_mr->add_message_type<WorkpieceDescription>();
@@ -407,8 +412,10 @@ zones_map[Zone::M_Z78] = "M_Z78";
             */
 
 
-           
-            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
+           //ORIGINAL AQUI port conf
+//            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
+                //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
+              m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
             //try{
 
 
@@ -1058,14 +1065,18 @@ pub_zone.publish(el_msg);
                     
                     if(!crypto_setup){
                         ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
-
+//port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_SENDPORT, CYAN_RECVPORT, m_mr,CRYPTO_KEY);
-                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
+                            // m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
+                            //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                         } else {
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
-                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
+                            //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
+                            //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
                         }
 
                         m_private_peer->signal_received().connect(
@@ -1465,7 +1476,9 @@ int main(int argc, char** argv)
         //Handler p(HOST, SENDPORT, RECVPORT);
         //Handler p(HOST, RECVPORT, RECVPORT);
         //Handler p(HOST, SENDPORT, SENDPORT);
-        p = new Handler(HOST, PUBLIC_PORT);
+        //ORIGINAL AQUI
+        //p = new Handler(HOST, PUBLIC_PORT);
+        p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
 /*
     if(HOST == "localhost"){
         ROS_INFO_STREAM("------Test local--------- ");
