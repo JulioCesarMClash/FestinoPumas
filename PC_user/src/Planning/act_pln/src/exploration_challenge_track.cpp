@@ -1,5 +1,13 @@
+//De la arena completa solo se usa una mitad (Magenta o Cyan) y de esa solo se agarra 5x5.
+//La arena completa mide 14 x 8, pero en este caso solo se usará 5x5. 
+
+
+//¿Qué pasa si una máquina está muy cerca de un punto de escaneo? El kinect no verá el Aruco.
+//¿Qué pasa si hay una máquina en un punto de escaneo?
+//¿Qué pasa si un aruco está muy lejos para que la nube de puntos lo detecte?
+
 //Explore the Field
-//Report the position and orientation of the MPSs
+//Report the position and orientation of the MPS
 #include<iostream>
 #include <cmath>
 #include "ros/ros.h"
@@ -80,10 +88,22 @@ geometry_msgs::PoseStamped tf_zone;
 
 //Son las coordenadas respecto al mapa que considera solo las zonas disponibles
 //Estas coordenadas se obtuvieron contando los cuadritos en el rviz respecto al origen del mapa
+//Las zonas de arriba son las que se encuentran directamente en el archivo launch
 //Son las x de las zonas de escaneo respecto al mapa
-std::vector<float> tf_x {0.5, 4.5, 6.5, 9.5};
+//std::vector<float> tf_x {0.5, 4.5, 6.5, 9.5};
 //Son las y de las zonas de escaneo respecto al mapa
-std::vector<float> tf_y {-4.5, -3.5, -2.5, -3.5}; 
+//std::vector<float> tf_y {-4.5, -3.5, -2.5, -3.5}; 
+
+							//---------COMPETENCIA---------//
+
+//Para la competencia real nos toca el lado Magenta para la prueba de exploration challenge
+//Estas coordenadas se obtuvieron del archivo "logisticsZones.launch", las cuales ya están respecto al origen del mapa
+//Las 4 zonas que serán usadas son: M_Z42, M_Z22, M_Z24 y M_Z44
+
+//Son las x de las zonas de escaneo respecto al mapa
+std::vector<float> tf_x {-3.5, -1.5, -1.5, -3.5};
+//Son las y de las zonas de escaneo respecto al mapa
+std::vector<float> tf_y {1.5, 1.5, 3.5, 3.5}; 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -233,6 +253,8 @@ int main(int argc, char** argv){
 	//Contador que lleva el número de giros
 	int cont_giro = 0;
 
+	int rotacion = 0;
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
@@ -241,7 +263,7 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the exploration challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-	    		state = SM_SCAN_SPACE;
+	    		state = SM_GO_ZONE;
 	    		break;
 			}
 
@@ -250,15 +272,16 @@ int main(int argc, char** argv){
 				//Se navega a las zonas recorriendo el arreglo zones_poses
 				//El contador es el índice que recorre el arreglo
 
-				//Cuando se hayan recorrido las 4 zonas ya terminó
+				//Si aún no se han recorrido las 4 zonas entonces sigue 
 				if(cont < 4){
 					// TestComment
-					//navigate_to_location(zones_poses.at(cont));
+					navigate_to_location(zones_poses.at(cont));
 					ros::Duration(1, 0).sleep();
-		            // TestComment
+		            //TestComment
 					std::cout << "Im in Zone  " << cont << std::endl;	
 					state = SM_SCAN_SPACE;
 				}
+				//Cuando se hayan recorrido las 4 zonas ya terminó
 				else{
 					std::cout << "All Zones visited" << std::endl;
 					if(flag_names){
@@ -286,6 +309,7 @@ int main(int argc, char** argv){
 				
 				ros::Duration(5, 0).sleep();
 				std::cout << "Estoy escaneando zzz" << std::endl;
+				//Habilita el servicio y prende el kinect
 	            srv.request.is_find_tag_enabled = true;
 				tag_flag = false;
 				if (client.call(srv))
@@ -295,9 +319,14 @@ int main(int argc, char** argv){
 					{
 						mps_name = srv.response.mps_name;
 						mps_aruco = srv.response.point_stamped;
-						mps_zone = "M_Z54";
-						mps_type = "CS";
-						int rotacion = 180;
+						//mps_zone = "M_Z54";
+						//mps_type = "CS";
+					
+
+						/*if(no alcanza nube de puntos){
+							FestinoNavigation::moveDist(3, 30000);
+						}*/
+
 						for(int i = 0; i < mps_name.size(); i++)
 						{
 							stream << rotacion;
@@ -312,10 +341,14 @@ int main(int argc, char** argv){
 							//station_zone_pub.publish(voice);
 						}
 						print_vector(mps_names,",");
+						state = SM_TAG_DETECTED;
+					}
+					else{
+						state = SM_GIRO;
 					}
 					
 					//mps_name = "Not Identified";
-					/*if(tag_flag and mps_name != srv.response.mps_name)
+					/*if(tag_flag and mps_name != srv.responSM_GIROse.mps_name)
 
 				  if (client.call(srv))
 				  {
@@ -356,7 +389,7 @@ int main(int argc, char** argv){
 					//Le puse un ángulo de 6.2832 pero no funciona así
 
 					//TestComment
-					//FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
+					FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
 					// los 360 grados es demasiada vuelta (MitComment)
 					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
 					//TestComment
@@ -367,6 +400,7 @@ int main(int argc, char** argv){
 				else{
 					std::cout << "Navigating to New Zone" << std::endl;
 					cont++;
+					cont_giro = 0;
 					state = SM_GO_ZONE;
 				}
 			}
@@ -374,7 +408,7 @@ int main(int argc, char** argv){
 	    		//Scan Tag and Send Information
 	    		std::cout << "State machine: SM_TAG_DETECTED" << std::endl;	
 	            voice =  "Looking for information";
-	            std::cout << voice << std::endl;
+	            std::cout << voice << std::endl;                                                                                                               
 	            tag_flag = false;
 	            //std::cout << srv.response.mps_name << std::endl;
 	            //std::cout << srv.response.point_stamped.point.x << std::endl;

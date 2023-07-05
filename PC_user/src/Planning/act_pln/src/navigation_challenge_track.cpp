@@ -52,8 +52,11 @@ std::vector<geometry_msgs::PoseStamped> zones_path;
 std::vector<std::string> tokens;
 std::vector<std::string> real_refbox_names;
 std_msgs::String new_zone;
+std::string zone_name;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
+
+geometry_msgs::PoseStamped location_test;
 
 //Callback para recibir las 12 zonas una a una
 /*void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
@@ -223,6 +226,88 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
     }
 }
 
+void define_zone(geometry_msgs::PoseStamped location)
+{
+	if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z11";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z12";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z13";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z14";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z15";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z21";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z22";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z23";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z24";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z25";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z31";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z32";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z33";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z34";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z35";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z41";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z42";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z43";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z44";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z45";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z51";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z52";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z53";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z54";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z55";
+	}
+	else{
+		zone_name = "invalid";
+	}
+	
+}
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -253,6 +338,14 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the navigation challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
+			
+				location_test.header.frame_id = "/map";
+				location_test.pose.position.x = -3.7;
+				location_test.pose.position.y = 2.6;
+				
+				define_zone(location_test);
+				std::cout << "La zona es: " << zone_name << std::endl;
+
 	    		state = SM_WAIT_FOR_ZONES;
 	    		break;
 

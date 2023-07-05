@@ -236,14 +236,13 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 				state = SM_ALLIGN;
+			}
 
 			case SM_ALLIGN:{
 				std::cout << "State machine: SM_ALLIGN" << std::endl;
 
 				//Se mueve tantito para atras para que el kinect pueda ver la pieza
 				FestinoNavigation::moveDist(3, 30000);
-			}
-			case SM_
 				tf::TransformListener listener;
 				tf::StampedTransform transform;
 
