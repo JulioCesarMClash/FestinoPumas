@@ -34,6 +34,10 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+
+#include "geometry_msgs/Pose2D.h"
+#include "geometry_msgs/Twist.h"
+
 using namespace std;
 
 //Se puede cambiar, agregar o eliminar los estados
@@ -82,6 +86,8 @@ geometry_msgs::PoseStamped tf_zone;
 
 sensor_msgs::LaserScan laserScan;
 bool flag_door = true;
+
+geometry_msgs::Twist posNew;
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -251,10 +257,13 @@ int main(int argc, char** argv){
 	FestinoNavigation::setNodeHandle(&n);
 	FestinoHRI::setNodeHandle(&n);
 
+	std::string  cmd_vel_name="/cmd_vel";
+
     //Subscribers and Publishers
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
+
     ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
     
     ros::Publisher pub_goal 		= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
@@ -325,7 +334,9 @@ int main(int argc, char** argv){
  				nav_flag = true;
 				if(cont < 8){
 					// TestComment
-					navigate_to_location(zones_poses.at(cont));
+					//navigate_to_location(zones_poses.at(cont));
+					posNew.linear.x = 1.0;
+					pub_cmd_vel.publish(posNew);
 					ros::Duration(1, 0).sleep();
 		            //TestComment
 					if(nav_flag){
