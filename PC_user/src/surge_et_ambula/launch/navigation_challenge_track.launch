@@ -1,9 +1,11 @@
 <launch>
 
 	<!--LAUNCHES-->
-	<include file="$(find config_files)/launch/navigation_rcll_2023.launch"> </include>	
+	<include file="$(find config_files)/launch/navigation_rcll_2023.launch"> </include>
+	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
 
 	<!--NODES-->
-	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
+	<!--node name="speaker" pkg="robotino_talk" type="speaker.py"/-->
+	<node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/>
 	
 </launch>

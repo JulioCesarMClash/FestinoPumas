@@ -55,7 +55,8 @@ def main():
     order_arr = ordergen()
     #mps_state_gen()
 
-    zone_strings = ['M_Z64 ','M_Z63 ','M_Z62 ','M_Z61 ','M_Z53 ','M_Z43 ','M_Z34 ','M_Z24 ','M_Z15 ','C_Z75 ','C_Z65 ','C_Z54 ','C_Z45 ','C_Z44 ','C_Z35 ','C_Z34 ']
+    #zone_strings = ['M_Z64 ','M_Z63 ','M_Z62 ','M_Z61 ','M_Z53 ','M_Z43 ','M_Z34 ','M_Z24 ','M_Z15 ','C_Z75 ','C_Z65 ','C_Z54 ','C_Z45 ','C_Z44 ','C_Z35 ','C_Z34 ']
+    zone_strings = ['M_Z11 ','M_Z12 ','M_Z13 ','M_Z14 ','M_Z15 ','M_Z21 ','M_Z22 ','M_Z23 ','M_Z24 ','M_Z25 ','M_Z31 ','M_Z32 ','M_Z33 ','M_Z34 ','M_Z35 ','M_Z41 ', 'M_Z42 ', 'M_Z43 ', 'M_Z44 ','M_Z45 ', 'M_Z51 ','M_Z52 ','M_Z53 ','M_Z54 ','M_Z55 ']
     rnd_zones = np.random.choice(zone_strings, 12, replace = False)
     print("".join(rnd_zones))
 
