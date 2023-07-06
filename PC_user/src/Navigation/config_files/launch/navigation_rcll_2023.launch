@@ -1,8 +1,8 @@
 <launch>  
   <arg name="static_map_file"  default="$(find config_files)/maps/rcll_2023_clean_ch.yaml"/>
   <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/rcll_2023_blocked_ch.yaml"/>
-  <arg name="initial_pose_x" default="-4.36"/>
-  <arg name="initial_pose_y" default="1.596"/>
+  <arg name="initial_pose_x" default="0.0"/>
+  <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
   <arg name="laser_scan_topic" default="/scan"/>
   <arg name="point_cloud_topic" default="/camera/depth_registered/points"/>
@@ -102,7 +102,7 @@
     <param name="odom_alpha5" value="0.01"/>
     <param name="update_min_a" value="0.1"/>
     <param name="laser_min_range" value="0.3"/>
-    <param name="odom_model_type" value="omni-corrected"/>
+    <param name="odom_model_type" value="omni"/>
  
   </node>
 

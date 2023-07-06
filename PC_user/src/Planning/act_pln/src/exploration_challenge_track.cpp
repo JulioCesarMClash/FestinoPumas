@@ -24,6 +24,8 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 #include "img_proc/Find_tag_Srv.h"
+#include "sensor_msgs/Range.h"
+#include "sensor_msgs/LaserScan.h"
 
 
 //Festino Tools
@@ -72,9 +74,53 @@ std::vector<std_msgs::String> mps_names;
 bool flag_names = false;
 std_msgs::String mps_id;
 
+bool nav_flag = false;
+
 //Logistics zones
 std::vector<geometry_msgs::PoseStamped> zones_poses;
 geometry_msgs::PoseStamped tf_zone;
+
+sensor_msgs::LaserScan laserScan;
+bool flag_door = true;
+
+void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
+{
+    laserScan = *msg;
+
+    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+    float laser_l=0;
+    range=laserScan.ranges.size();
+    std::cout<<laserScan.ranges.size()<<std::endl;
+    range_c=range/2;
+    range_i=range_c-(range/10);
+    range_f=range_c+(range/10);
+    //std::cout<<"Range Size: "<< range << "\n ";
+    //std::cout<<"Range Central: "<< range_c << "\n ";
+    //std::cout<<"Range Initial: "<< range_i << "\n ";
+    //std::cout<<"Range Final: "<< range_f << "\n ";
+
+    cont_laser=0;
+    laser_l=0;
+    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
+    {
+        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+        { 
+            laser_l=laser_l+laserScan.ranges[i]; 
+            cont_laser++;
+        }
+    }
+    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
+    if(laser_l/cont_laser > 0.50)
+    {
+        flag_door = true;
+        //std::cout<<"door open"<<std::endl;
+    }
+    else
+    {
+        flag_door = false;
+        //std::cout<<"door closed"<<std::endl;
+    }
+}
 
 //Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
@@ -99,11 +145,12 @@ geometry_msgs::PoseStamped tf_zone;
 //Para la competencia real nos toca el lado Magenta para la prueba de exploration challenge
 //Estas coordenadas se obtuvieron del archivo "logisticsZones.launch", las cuales ya están respecto al origen del mapa
 //Las 4 zonas que serán usadas son: M_Z42, M_Z22, M_Z24 y M_Z44
+//Las otras 4 zonas son las esquinas: M_Z55, M_Z52, M_Z11 y M_Z15
 
 //Son las x de las zonas de escaneo respecto al mapa
-std::vector<float> tf_x {-3.5, -1.5, -1.5, -3.5};
+std::vector<float> tf_x {-3.5, -1.5, -1.5, -3.5, -4.5, -4.5, -0.5, -0.5};
 //Son las y de las zonas de escaneo respecto al mapa
-std::vector<float> tf_y {1.5, 1.5, 3.5, 3.5}; 
+std::vector<float> tf_y {1.5, 1.5, 3.5, 3.5, 4.5, 4.5, 1.5, 0.5, 4.5}; 
 
 void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 {
@@ -184,8 +231,9 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
 		//La función espera a que llegue a la localidad
         if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
-         	std::cout << "Cannot move to " << std::endl;
-                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
+			nav_flag = false;
+         	//std::cout << "Cannot move to " << std::endl;
+                //FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
         }
     }
 }
@@ -207,9 +255,11 @@ int main(int argc, char** argv){
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
+    ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
     
-    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    ros::Publisher pub_goal 		= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 	ros::Publisher station_info_pub = n.advertise<std_msgs::String>("station_info", 1000);
+	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1);
 
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
@@ -239,13 +289,13 @@ int main(int argc, char** argv){
     	tf_zone.header.frame_id = "/map";
 	    tf_zone.pose.position.x = tf_x.at(i);
 	    tf_zone.pose.position.y = tf_y.at(i);
-	    tf_zone.pose.position.z = 0.0;
-	    tf_zone.pose.orientation.x = 0.0;
-	    tf_zone.pose.orientation.y = 0.0;
-	    tf_zone.pose.orientation.z = 0.0;
-	    tf_zone.pose.orientation.w = 0.0;
-	    zones_poses.push_back(tf_zone);
-    }
+		tf_zone.pose.position.z = 0;
+		tf_zone.pose.orientation.x = 0;
+		tf_zone.pose.orientation.y = 0;
+		tf_zone.pose.orientation.z = 0;
+		tf_zone.pose.orientation.w = 0;
+		zones_poses.push_back(tf_zone);
+	}
 
 	//Contador que lleva el número de zonas que se han recorrido
 	int cont = 0;
@@ -271,15 +321,24 @@ int main(int argc, char** argv){
 				std::cout << "State machine: SM_GO_ZONE" << std::endl;	
 				//Se navega a las zonas recorriendo el arreglo zones_poses
 				//El contador es el índice que recorre el arreglo
-
 				//Si aún no se han recorrido las 4 zonas entonces sigue 
-				if(cont < 4){
+ 				nav_flag = true;
+				if(cont < 8){
 					// TestComment
 					navigate_to_location(zones_poses.at(cont));
 					ros::Duration(1, 0).sleep();
 		            //TestComment
-					std::cout << "Im in Zone  " << cont << std::endl;	
-					state = SM_SCAN_SPACE;
+					if(nav_flag){
+						std::cout << "Im in Zone  " << cont << std::endl;
+						std::cout << "Im in coordinates " << zones_poses.at(cont) << std::endl;
+						state = SM_SCAN_SPACE;
+					}
+					else{
+						std::cout << "I can't go to zone " << cont << std::endl;
+						cont++;
+						std::cout << "I'll nav to zone " << cont << std::endl;
+						state = SM_GO_ZONE;
+					}	
 				}
 				//Cuando se hayan recorrido las 4 zonas ya terminó
 				else{
@@ -383,6 +442,7 @@ int main(int argc, char** argv){
 	        }
 			case SM_GIRO:{
 				std::cout << "State machine: SM_GIRO" << std::endl;
+				std::cout << "Contador giro" << cont_giro << std::endl;
 				if(cont_giro < 3){
 					std::cout << "Turn arooound" << std::endl;
 					//Da un giro de 360 grados (2pi) para escanear todo
@@ -403,6 +463,7 @@ int main(int argc, char** argv){
 					cont_giro = 0;
 					state = SM_GO_ZONE;
 				}
+				break;
 			}
 			case SM_TAG_DETECTED:{
 	    		//Scan Tag and Send Information
