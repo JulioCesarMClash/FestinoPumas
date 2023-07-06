@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_service_files(
   FILES
-  arm.srv
+  srv_arm.srv
 )
 
 generate_messages(

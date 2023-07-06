@@ -11,11 +11,11 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 
-#include <Festino_arm_moveit_demos/arm.h>
+#include <Festino_arm_moveit_demos/srv_arm.h>
 
 void move_effector(float x, float y, float z, float pitch);
 void move_gripper(bool state);
-bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_moveit_demos::arm::Response &res);
+bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_moveit_demos::srv_arm::Response &res);
 
 //Variables for inverse kinematics
 float x = 0.23;
@@ -30,7 +30,7 @@ bool manipBlocker = false;
 
 int main(int argc, char** argv)
 {
-	ros::init(argc, argv, "srv_arm_node");
+	ros::init(argc, argv, "srv_arm");
 	std::cout << "pruebaSrv_node INITIALIZING" << std::endl;
 	ros::NodeHandle nh;
 	ros::ServiceServer service = nh.advertiseService("srv_arm", callback_arm);
@@ -89,7 +89,7 @@ void move_gripper(bool state)
 	}
 }
 
-bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_moveit_demos::arm::Response &res)
+bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_moveit_demos::srv_arm::Response &res)
 {
 	x = req.x;
 	y = req.y;
@@ -99,9 +99,6 @@ bool callback_arm(Festino_arm_moveit_demos::arm::Request &req, Festino_arm_movei
 	gripperState = req.gripperState;
 	manipBlocker = req.manipBlocker;
 
-	//PONER LA FUNCION QUE FALTA PARA EL GRIPER
-	//PONER LO FALTANTE EN EL SERVICIO
-	//PONER EL IF PARA DIFERENCIAR
 
 	if (manipBlocker == true)
 	{
