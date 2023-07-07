@@ -50,10 +50,10 @@
 
 
 //LOCALHOST
-//#define HOST "localhost"
+#define HOST "localhost"
 
 //ROBOCUP
-#define HOST "172.26.255.255"
+//#define HOST "172.26.255.255"
 
 
 //#define HOST "172.23.134.255"
@@ -665,7 +665,7 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             new_machine_entry->set_name(tokens[0]);
             new_machine_entry->set_type(tokens[1]);
             new_machine_entry->set_zone(zones_map_str[tokens[2]]);
-            new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
+            //new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
 //ROS_INFO_STREAM("El numero ° " << uint32_t(std::stoul(tokens[3])));
             
             //machine_report_message->add_machines();
@@ -673,6 +673,7 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
 
            //m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
            if(m_private_peer != nullptr){
+            ROS_INFO_STREAM("NOT NULL PTR, SENDING PRIVATE");
             m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
            }
         }
