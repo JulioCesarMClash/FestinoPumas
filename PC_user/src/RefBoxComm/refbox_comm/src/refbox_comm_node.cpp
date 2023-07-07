@@ -46,10 +46,11 @@
 #include <memory>
 #include <thread>
 
-bool local_refbox = false;
+//bool local_refbox = true;
 
+
+//LOCALHOST
 //#define HOST "localhost"
-
 
 //ROBOCUP
 #define HOST "172.26.255.255"
@@ -547,11 +548,11 @@ zones_map_str["M_Z78"] = Zone::M_Z78;
 
 
            //ORIGINAL AQUI port conf
-            if(local_refbox){
-m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
-            }else{
+            //if(local_refbox){
+//m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
+  //          }else{
 m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
-            }
+    //        }
 
 //            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
                 //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
@@ -670,8 +671,10 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             //machine_report_message->add_machines();
            //machine_report_message->add_machines();
 
-           m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
-           //m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           //m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           if(m_private_peer != nullptr){
+            m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           }
         }
 
         void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
@@ -1208,21 +1211,21 @@ pub_zone.publish(el_msg);
 //port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }else{
+                            //if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+  //                          }else{
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_SENDPORT, CYAN_RECVPORT, m_mr,CRYPTO_KEY);
                             // m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                         } else {
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            } else {
+      //                      if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+  //                          } else {
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
