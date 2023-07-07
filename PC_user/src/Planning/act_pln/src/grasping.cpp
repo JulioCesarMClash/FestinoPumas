@@ -356,34 +356,36 @@ int main(int argc, char** argv){
 				}
 
 				FestinoNavigation::moveDistAngle(0.0, 1.45, 30000);
-
-				posNew.linear.x = 0.55;
+				FestinoNavigation::moveDist(0.65,30000);
+				/*posNew.linear.x = 0.55;
 				posNew.linear.y = 0.00;
 				for(float x = 0; x<= posNew.linear.x; x+=0.05)
 				{
 					pub_cmd_vel.publish(posNew);
 					ros::Duration(1,0).sleep();
-				}
+				}*/
 
 				FestinoNavigation::moveDistAngle(0.0, -1.45, 30000);
+				FestinoNavigation::moveDist(0.95,30000);
 
-				posNew.linear.x = 0.70;
+				/*posNew.linear.x = 0.75;
 				posNew.linear.y = 0.00;
 				for(float x = 0; x<= posNew.linear.x; x+=0.05)
 				{
 					pub_cmd_vel.publish(posNew);
 					ros::Duration(1,0).sleep();
-				}
+				}*/
 
 				FestinoNavigation::moveDistAngle(0.0, -1.45 ,30000);
-				posNew.linear.x = 0.50;
+				FestinoNavigation::moveDist(0.60,30000);
+				/*posNew.linear.x = 0.60;
 				posNew.linear.y = 0.00;
 				
 				for(float x = 0; x<= posNew.linear.x; x+=0.05)
 				{
 					pub_cmd_vel.publish(posNew);
 					ros::Duration(1,0).sleep();
-				}
+				}*/
 
 				FestinoNavigation::moveDistAngle(0.0, -1.47 ,30000);
 				ros::Duration(3, 0).sleep();
@@ -398,7 +400,7 @@ int main(int argc, char** argv){
 				//Coordenates for pre-grasping
 				srv.request.manipBlocker = false;
 				srv.request.x = 0.23;
-				srv.request.y = 0.05;
+				srv.request.y = 0.035;
 				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
@@ -415,7 +417,7 @@ int main(int argc, char** argv){
 				//Coordenates for grasping
 				srv.request.manipBlocker = false;
 				srv.request.x = 0.23;
-				srv.request.y = 0.05;
+				srv.request.y = 0.035;
 				srv.request.z = 0.0475;
 				srv.request.pitch = 0.0;				
 
@@ -444,7 +446,7 @@ int main(int argc, char** argv){
 				//Coordenates for pos-grasping
 				srv.request.manipBlocker = false;
 				srv.request.x = 0.23;
-				srv.request.y = 0.05;
+				srv.request.y = 0.035;
 				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
