@@ -651,7 +651,7 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             new_machine_entry->set_type(tokens[1]);
             new_machine_entry->set_zone(zones_map_str[tokens[2]]);
             new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
-
+//ROS_INFO_STREAM("El numero ° " << uint32_t(std::stoul(tokens[3])));
             
             //machine_report_message->add_machines();
            //machine_report_message->add_machines();
@@ -1577,8 +1577,8 @@ pub_zone.publish(el_msg);
                 //m_public_peer->send(2000, BeaconSignal::MSG_TYPE, msg);
                 m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                 //m_private_peer->send(2000, 1, msg);
-                ROS_INFO_STREAM("Sending: 2");
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));ROS_INFO_STREAM("Sending: ");
+//                ROS_INFO_STREAM("Sending: 2");
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
             }
         }
 
@@ -1628,7 +1628,8 @@ int main(int argc, char** argv)
 
     ros::Rate r(10);
     while (ros::ok()) {
-
+/*  
+//NAVIGATION CHALLENGE
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;
 	tf::TransformListener listener_rob;
@@ -1648,7 +1649,7 @@ int main(int argc, char** argv)
     pose_x = transform_rob.getOrigin().x();
 	pose_y = transform_rob.getOrigin().y();
     pose_ori = 0.0f;
-
+*/
         ros::spinOnce();
     }
     return 0;
