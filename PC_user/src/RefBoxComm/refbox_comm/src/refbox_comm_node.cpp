@@ -46,10 +46,18 @@
 #include <memory>
 #include <thread>
 
+bool local_refbox = false;
+
 //#define HOST "localhost"
+
+
+//ROBOCUP
 #define HOST "172.26.255.255"
+
+
 //#define HOST "172.23.134.255"
 #define TEAM_COLOR "MAGENTA"
+//#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
 #define CRYPTO_KEY "randomkey"
@@ -539,9 +547,15 @@ zones_map_str["M_Z78"] = Zone::M_Z78;
 
 
            //ORIGINAL AQUI port conf
+            if(local_refbox){
+m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
+            }else{
+m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
+            }
+
 //            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
                 //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
-              m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
+              //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
             //try{
 
 
@@ -1194,15 +1208,25 @@ pub_zone.publish(el_msg);
 //port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
+                            if(local_refbox){
+m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+                            }else{
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+                            }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_SENDPORT, CYAN_RECVPORT, m_mr,CRYPTO_KEY);
                             // m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+                            //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                         } else {
+                            if(local_refbox){
+m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+                            } else {
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+                            }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+                            //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
                         }
 
                         m_private_peer->signal_received().connect(
@@ -1636,9 +1660,9 @@ int main(int argc, char** argv)
     tf::StampedTransform transform_rob;
 
     try{
-      listener_rob.waitForTransform("/Log_origin", "/base_link",  
+      listener_rob.waitForTransform("/base_link","/map",   
                                    ros::Time(0), ros::Duration(1000.0));
-      listener_rob.lookupTransform("/Log_origin", "/base_link",  
+      listener_rob.lookupTransform("/base_link","/map",   
                                    ros::Time(0), transform_rob);
     }
     catch (tf::TransformException ex){
@@ -1646,8 +1670,11 @@ int main(int argc, char** argv)
       ros::Duration(1.0).sleep();
     }
 
-    pose_x = transform_rob.getOrigin().x();
-	pose_y = transform_rob.getOrigin().y();
+    pose_y = transform_rob.getOrigin().x();
+	pose_x = transform_rob.getOrigin().y();
+
+    std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
+
     pose_ori = 0.0f;
 */
         ros::spinOnce();
