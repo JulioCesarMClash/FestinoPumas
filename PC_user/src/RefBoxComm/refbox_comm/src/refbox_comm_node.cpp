@@ -50,10 +50,10 @@
 
 
 //LOCALHOST
-#define HOST "localhost"
+//#define HOST "localhost"
 
 //ROBOCUP
-//#define HOST "172.26.255.255"
+#define HOST "172.26.255.255"
 
 
 //#define HOST "172.23.134.255"
