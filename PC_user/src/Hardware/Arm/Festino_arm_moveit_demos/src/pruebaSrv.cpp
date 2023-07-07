@@ -82,8 +82,8 @@ void move_gripper(bool state)
 	}
 	if(state == false) //Close
 	{
-		group.setJointValueTarget("gripper_finger1_joint", 0.0104);
-		group.setJointValueTarget("gripper_finger2_joint", 0.0104);
+		group.setJointValueTarget("gripper_finger1_joint", 0.009);
+		group.setJointValueTarget("gripper_finger2_joint", 0.009);
 
 		group.asyncMove();
 	}
