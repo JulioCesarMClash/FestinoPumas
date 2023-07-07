@@ -30,6 +30,9 @@
 #include "img_proc/Find_piece_Srv.h"
 #include "Festino_arm_moveit_demos/srv_arm.h"
 
+#include "geometry_msgs/Pose2D.h"
+#include "geometry_msgs/Twist.h"
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState
 {
@@ -72,6 +75,8 @@ std_msgs::String mps_id;
 std::vector<geometry_msgs::PoseStamped> zones_poses;
 geometry_msgs::PoseStamped tf_zone;
 geometry_msgs::PoseStamped piece;
+
+geometry_msgs::Twist posNew;
 
 //Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
@@ -127,6 +132,8 @@ int main(int argc, char** argv){
 	FestinoHRI::setNodeHandle(&n);
 
     //Subscribers and Publishers
+	std::string cmd_vel_name = "/cmd_vel";
+
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
     
@@ -136,12 +143,16 @@ int main(int argc, char** argv){
     ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     img_proc::Find_piece_Srv srvFindPiece;
 
+    ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);
+
     ros::Rate loop(10);
 
     std::string voice;
 
     std::vector<std::string> mps_name;
     geometry_msgs::PointStamped locProduct;
+
+    //tf2_ros::Buffer
 
     robotino_msgs::DigitalReadings arr_values;
     arr_values.stamp.sec = 0;
@@ -194,48 +205,27 @@ int main(int argc, char** argv){
 			case SM_FIND_PIECE:
 			{
 				std::cout << "State machine: SM_FIND_PIECE" << std::endl;	
-				//--------------------------------------------------
-				//-----AQUI VA EL SERVICIO DE BUSQUEDA DE PIEZA-----
-				//--------------------------------------------------
 
-				//find_piece_srv
-				//tf::TransformListener listener;
-				//tf::StampedTransform transform;
-
-				//TF related stuff 
-				/*piece.pose.position.x = 0.0;
-				piece.pose.position.y = 0.0;
-				piece.pose.position.z = 0.0;
-				piece.pose.orientation.x = 0.0;
-				piece.pose.orientation.y = 0.0;
-				piece.pose.orientation.z = 0.0;
-				piece.pose.orientation.w = 0.0;
-
-				try{
-					listener.waitForTransform("/piece_link", "/base_link", ros::Time(0), ros::Duration(1000.0));
-					listener.lookupTransform("/piece_link", "/base_link", ros::Time(0), transform);
-				}
-				catch(tf::TransformException ex){
-					ROS_ERROR("%s",ex.what());
-					ros::Duration(1.0).sleep();
-				}
-				piece.pose.position.x = -transform.getOrigin().x();
-				piece.pose.position.y = -transform.getOrigin().y();
-				piece.pose.position.z = -transform.getOrigin().z();
-				
-				std::cout << piece.pose.position << std::endl;*/
 				srvFindPiece.request.is_find_piece_enabled = true;
 				if(clientFindPiece.call(srvFindPiece))
 				{
 					locProduct = srvFindPiece.response.point_stamped;
 					
-					std::cout<<"x = "<<srvFindPiece.response.point_stamped.point.x<<std::endl;
-					std::cout<<"y = "<<srvFindPiece.response.point_stamped.point.y<<std::endl;
-					std::cout<<"z = "<<srvFindPiece.response.point_stamped.point.z<<std::endl;
+					//std::cout<<"x = "<<srvFindPiece.response.point_stamped.point.x<<std::endl;
+					//std::cout<<"y = "<<srvFindPiece.response.point_stamped.point.y<<std::endl;
+					//std::cout<<"z = "<<srvFindPiece.response.point_stamped.point.z<<std::endl;
 
 					std::cout<<"para el LOC"<<std::endl<<"x= "<<locProduct.point.x<<std::endl;
 					std::cout<<"y= "<<locProduct.point.y<<std::endl;
 					std::cout<<"z= "<<locProduct.point.z<<std::endl;
+
+					std::cout<<"frame_id= "<<locProduct.header.frame_id<<std::endl;
+
+
+					//--------------------------------------------------
+					//-----AQUI VA LA TRANSFORMACION DE COORDENADAS-----
+					//--------------------------------------------------
+
 				}
 
 		    	state = SM_GRASPING_PIECE;
@@ -245,24 +235,25 @@ int main(int argc, char** argv){
 			case SM_GRASPING_PIECE:
 			{
 				std::cout << "State machine: SM_GRASPING_PIECE" << std::endl;	
-				//---------------------------------------
-				//-----AQUI VA EL SERVICIO DEL BRAZO-----
-				//---------------------------------------
 
 				//Coordenates for pre-grasping
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.23;
-				srv.request.y = 0.0;
-				srv.request.z = 0.075;
+				//srv.request.x = locProduct.point.x;
+				//srv.request.y = locProduct.point.y;
+				//srv.request.z = locProduct.point.z;
+
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo (pre-grasp)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo, sad sad sad (pre-grasp)"<<std::endl;
 				}
 
 				srv.request.manipBlocker = true;
@@ -270,32 +261,32 @@ int main(int argc, char** argv){
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Abriendo pinza (pre-grasp)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pude abrir pinzaaaa (pre-grasp), sad sad sad"<<std::endl;
 				}
 
-				ros::Duration(1, 0).sleep();
+				ros::Duration(2, 0).sleep();
 
 				//Coordenates for grasping
 				srv.request.manipBlocker = false;
 				
-				srv.request.x = 0.23;
-				srv.request.y = 0;
-				srv.request.z = 0.025;
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.0475;
 				srv.request.pitch = 0.0;				
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Alineando pinza (grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo para alinear pinza (grasping), sad sad sad"<<std::endl;
 				}
-				ros::Duration(1, 0).sleep();
+				ros::Duration(2, 0).sleep();
 
 				//Grasping
 				srv.request.manipBlocker = true;
@@ -303,29 +294,29 @@ int main(int argc, char** argv){
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Cerrando pinza (grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee cerrar pinza (grasping), sad sad sad"<<std::endl;
 				}
 				ros::Duration(1, 0).sleep();
 				//Coordenates for pos-grasping
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.23;
-				srv.request.y = 0;
-				srv.request.z = 0.075;
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo (post-grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo (post-grasping), sad sad sad"<<std::endl;
 				}
-				ros::Duration(1, 0).sleep();
+				ros::Duration(2, 0).sleep();
 
 				//------------------------------------------------
 				//-----RETRAER BRAZO (coordenadas opcionales)-----
@@ -338,99 +329,121 @@ int main(int argc, char** argv){
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo a guardadito"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo a guardadito, sad sad sad"<<std::endl;
 				}
 				ros::Duration(1, 0).sleep();
 				state = SM_GO_INPUT;
+				break;
 			}
 
 			case SM_GO_INPUT:
 			{
 				std::cout << "State machine: SM_GO_INPUT" << std::endl;	
-				//Se mueve hacia atras (Supongo que en este momento el laser no lee el obstaculo)
+				
+				//Se mueve hacia atras 25cm
 				//FestinoNavigation::moveDist(-0.45, 30000);
-				std::cout << "Se mueve hacia atras 45 cm" << std::endl;	
-				//Se mueve hacia adelante para llegar al "input". 
-				//FestinoNavigation::moveDist(1.35, 30000);
-				std::cout << "Se mueve hacia adelante 1.35 m" << std::endl;	
+				std::cout << "Se mueve hacia atras 25 cm" << std::endl;	
+				posNew.linear.x = -0.25;
+				for(float x = 0; x<= posNew.linear.x; x+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
+				
+				//Se mueve hacia la derecha 50 cm
+				std::cout << "Se mueve hacia la derecha 50 cm" << std::endl;	
+				posNew.linear.y = 0.50;
+				for(float y = 0; y<= posNew.linear.y; y+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
+
+				//Se mueve hacia adelante 1 m
+				std::cout << "Se mueve hacia adelante 1 m" << std::endl;	
+				posNew.linear.x = 1.00;
+				for(float x = 0; x<= posNew.linear.x; x+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
+
 				//Da media vuelta
-				//FestinoNavigation::moveDistAngle(0.0, M_PI,30000);
+				FestinoNavigation::moveDistAngle(0.0, M_PI,30000);
 				std::cout << "Da media vuelta" << std::endl;	
 				state = SM_GRASPING_DELIVER;
 				ros::Duration(3, 0).sleep();
+				break;
 			}
 
 			case SM_GRASPING_DELIVER:
 			{
 				std::cout << "State machine: SM_GRASPING_DELIVER" << std::endl;	
-				//---------------------------------------
-				//-----AQUI VA EL SERVICIO DEL BRAZO-----
-				//---------------------------------------
 
 				//Coordenates for pre-grasping
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.23;
-				srv.request.y = 0;
-				srv.request.z = 0.075;
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo (pre-grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo (pre-grasping), sad sad sad"<<std::endl;
 				}
 
-				ros::Duration(1, 0).sleep();
+				ros::Duration(2, 0).sleep();
 				//Coordenates for grasping
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.23;
-				srv.request.y = 0;
-				srv.request.z = 0.025;
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.0475;
 				srv.request.pitch = 0.0;				
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Alineando el brazo (pre-grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee alinear el brazo (post-grasping), sad sad sad"<<std::endl;
 				}
-				ros::Duration(1, 0).sleep();
+				ros::Duration(2, 0).sleep();
 				//Grasping
 				srv.request.manipBlocker = true;
 				srv.request.gripperState = true;
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Abriendo pinza (grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee arir pinza (grasping), sad sad sad"<<std::endl;
 				}
 				ros::Duration(1, 0).sleep();
 				//Coordenates for pos-grasping
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.23;
-				srv.request.y = 0;
-				srv.request.z = 0.075;
+				srv.request.x = 0.17;
+				srv.request.y = -0.095;
+				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo sin pieza (post-grasping)"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo (post-grasping), sad sad sad"<<std::endl;
 				}
 				ros::Duration(1, 0).sleep();
 				//------------------------------------------------
@@ -444,50 +457,72 @@ int main(int argc, char** argv){
 
 				if(client.call(srv))
 				{
-					std::cout<<"Moviendo el brazo"<<std::endl;
+					std::cout<<"Moviendo el brazo a guardadito"<<std::endl;
 				}
 				else
 				{
-					std::cout<<"No pudeeeee mover el brazo, sad sad sad"<<std::endl;
+					std::cout<<"No pudeeeee mover el brazo a guardadito, sad sad sad"<<std::endl;
 				}
+				state = SM_GO_INIT;
 				ros::Duration(1, 0).sleep();
-				conde++;
-				std::cout<<"Conde: "<<conde<<std::endl;
-				if(conde < 2)
-				{
-					state = SM_GO_INIT;
-				}
-				else
-				{
-					state = SM_FINAL_STATE;
-				}
-				ros::Duration(1, 0).sleep();
+				break;
 			}
 
 			case SM_GO_INIT:
 			{
 				std::cout << "State machine: SM_GO_INIT" << std::endl;	
 				
-				std::cout << "se mueve hacia atras 45 cm" << std::endl;	
-				//FestinoNavigation::moveDist(-0.45,30000);
+				//Se mueve hacia atras 25cm
+				std::cout << "Se mueve hacia atras 25 cm" << std::endl;
+				//FestinoNavigation::moveDist(-0.25, 30000);
+				posNew.linear.x = -0.25;
+				for(float x = 0; x<= posNew.linear.x; x+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
+				
+				//Se mueve hacia la derecha 50 cm
+				std::cout << "Se mueve hacia la derecha 50 cm" << std::endl;	
+				posNew.linear.y = 0.50;
+				for(float y = 0; y<= posNew.linear.y; y+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
 
-				std::cout << "Se mueve hacia adelante 1.35 m" << std::endl;	
-				//FestinoNavigation::moveDist(1.35,30000);
+				//Se mueve hacia adelante 1 m
+				std::cout << "Se mueve hacia adelante 1 m" << std::endl;
+				//FestinoNavigation::moveDist(1.0, 30000);
+				posNew.linear.x = 1.00;
+				for(float x = 0; x<= posNew.linear.x; x+=0.05)
+				{
+					pub_cmd_vel.publish(posNew);
+					ros::Duration(1,0).sleep();
+				}
 
+				//Da media vuelta
 				std::cout << "Da media vuelta" << std::endl;	
-				//FestinoNavigation::moveDistAngle(0.0, M_PI, 30000);
+				FestinoNavigation::moveDistAngle(0.0, M_PI,30000);
+				state = SM_GRASPING_DELIVER;
+				ros::Duration(3, 0).sleep();
 
 				conde++;
-
-				if(conde < 2)
+				std::cout<<"Conde -> "<<conde<<std::endl;
+				if(conde < 3)
 				{
 					state = SM_ALLIGN;
+					std::cout << "state = "<< state<<std::endl;
+					std::cout << "ALINEAAAAR"<<std::endl;
 				}
 				else
 				{
 					state = SM_FINAL_STATE;
+					std::cout << "state = "<< state<<std::endl;
+					std::cout << "TERMINEEEEE "<<std::endl;
 				}
-
+				ros::Duration(1, 0).sleep();
+				break;
 			}
 
 	    	case SM_FINAL_STATE:
