@@ -46,7 +46,7 @@
 #include <memory>
 #include <thread>
 
-bool local_refbox = false;
+//bool local_refbox = false;
 
 //#define HOST "localhost"
 
@@ -547,11 +547,11 @@ zones_map_str["M_Z78"] = Zone::M_Z78;
 
 
            //ORIGINAL AQUI port conf
-            if(local_refbox){
-m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
-            }else{
+            //if(local_refbox){
+//m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
+  //          }else{
 m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
-            }
+    //        }
 
 //            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
                 //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
@@ -1208,21 +1208,21 @@ pub_zone.publish(el_msg);
 //port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }else{
+                          //  if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+  //                          }else{
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_SENDPORT, CYAN_RECVPORT, m_mr,CRYPTO_KEY);
                             // m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                         } else {
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            } else {
+      //                      if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+  //                          } else {
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
@@ -1652,7 +1652,7 @@ int main(int argc, char** argv)
 
     ros::Rate r(10);
     while (ros::ok()) {
-
+/* NAVIGATION CHALLENGE
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;
 	tf::TransformListener listener_rob;
@@ -1675,7 +1675,7 @@ int main(int argc, char** argv)
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
 
     pose_ori = 0.0f;
-
+NAVIGATION CHALLENGE*/
         ros::spinOnce();
     }
     return 0;
