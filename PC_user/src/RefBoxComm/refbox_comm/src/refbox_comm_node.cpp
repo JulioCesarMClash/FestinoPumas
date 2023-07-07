@@ -46,10 +46,11 @@
 #include <memory>
 #include <thread>
 
-bool local_refbox = false;
+//bool local_refbox = true;
 
+
+//LOCALHOST
 //#define HOST "localhost"
-
 
 //ROBOCUP
 #define HOST "172.26.255.255"
@@ -547,11 +548,11 @@ zones_map_str["M_Z78"] = Zone::M_Z78;
 
 
            //ORIGINAL AQUI port conf
-            if(local_refbox){
-m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
-            }else{
+            //if(local_refbox){
+//m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
+  //          }else{
 m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
-            }
+    //        }
 
 //            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port, m_mr);
                 //m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_S, m_mr);
@@ -665,13 +666,15 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
             new_machine_entry->set_type(tokens[1]);
             new_machine_entry->set_zone(zones_map_str[tokens[2]]);
             new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
-
+//ROS_INFO_STREAM("El numero ° " << uint32_t(std::stoul(tokens[3])));
             
             //machine_report_message->add_machines();
            //machine_report_message->add_machines();
 
-           m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
-           //m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           //m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           if(m_private_peer != nullptr){
+            m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           }
         }
 
         void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
@@ -1208,21 +1211,21 @@ pub_zone.publish(el_msg);
 //port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }else{
+                            //if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
+  //                          }else{
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_SENDPORT, CYAN_RECVPORT, m_mr,CRYPTO_KEY);
                             // m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_R, CYAN_PORT_S, m_mr,CRYPTO_KEY);
                         } else {
-                            if(local_refbox){
-m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            } else {
+      //                      if(local_refbox){
+//m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
+  //                          } else {
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
-                            }
+    //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT, m_mr,CRYPTO_KEY);
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
@@ -1601,8 +1604,8 @@ m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S
                 //m_public_peer->send(2000, BeaconSignal::MSG_TYPE, msg);
                 m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                 //m_private_peer->send(2000, 1, msg);
-                ROS_INFO_STREAM("Sending: 2");
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));ROS_INFO_STREAM("Sending: ");
+//                ROS_INFO_STREAM("Sending: 2");
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
             }
         }
 
@@ -1652,7 +1655,8 @@ int main(int argc, char** argv)
 
     ros::Rate r(10);
     while (ros::ok()) {
-
+/*  
+//NAVIGATION CHALLENGE
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;
 	tf::TransformListener listener_rob;
@@ -1675,7 +1679,7 @@ int main(int argc, char** argv)
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
 
     pose_ori = 0.0f;
-
+*/
         ros::spinOnce();
     }
     return 0;
