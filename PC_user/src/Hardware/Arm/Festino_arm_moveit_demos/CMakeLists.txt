@@ -38,9 +38,9 @@ include_directories(
 
 
 add_executable(pick_place src/pick_place.cpp)
-add_executable(prueba1 src/prueba1.cpp)
+
 add_executable(pruebaSrv src/pruebaSrv.cpp)
 
 target_link_libraries(pick_place ${catkin_LIBRARIES})
-target_link_libraries(prueba1 ${catkin_LIBRARIES})
+
 target_link_libraries(pruebaSrv ${catkin_LIBRARIES})
