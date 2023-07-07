@@ -210,6 +210,7 @@ class Handler
 
 //--------------------------------NAVIGATION CHALLENGE
         std::map<Zone, std::string> zones_map;
+        std::map<std::string, Zone> zones_map_str;
         //ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
     public:
@@ -342,6 +343,131 @@ zones_map[Zone::M_Z76] = "M_Z76";
 zones_map[Zone::M_Z77] = "M_Z77";
 zones_map[Zone::M_Z78] = "M_Z78";
 //--------------------------------NAVIGATION CHALLENGE
+
+//--------------------------------EXPLORATION CHALLENGE
+zones_map_str["C_Z11"] = Zone::C_Z11;
+zones_map_str["C_Z12"] = Zone::C_Z12;
+zones_map_str["C_Z13"] = Zone::C_Z13;
+zones_map_str["C_Z14"] = Zone::C_Z14;
+zones_map_str["C_Z15"] = Zone::C_Z15;
+zones_map_str["C_Z16"] = Zone::C_Z16;
+zones_map_str["C_Z17"] = Zone::C_Z17;
+zones_map_str["C_Z18"] = Zone::C_Z18;
+
+zones_map_str["C_Z21"] = Zone::C_Z21;
+zones_map_str["C_Z22"] = Zone::C_Z22;
+zones_map_str["C_Z23"] = Zone::C_Z23;
+zones_map_str["C_Z24"] = Zone::C_Z24;
+zones_map_str["C_Z25"] = Zone::C_Z25;
+zones_map_str["C_Z26"] = Zone::C_Z26;
+zones_map_str["C_Z27"] = Zone::C_Z27;
+zones_map_str["C_Z28"] = Zone::C_Z28;
+
+zones_map_str["C_Z31"] = Zone::C_Z31;
+zones_map_str["C_Z32"] = Zone::C_Z32;
+zones_map_str["C_Z33"] = Zone::C_Z33;
+zones_map_str["C_Z34"] = Zone::C_Z34;
+zones_map_str["C_Z35"] = Zone::C_Z35;
+zones_map_str["C_Z36"] = Zone::C_Z36;
+zones_map_str["C_Z37"] = Zone::C_Z37;
+zones_map_str["C_Z38"] = Zone::C_Z38;
+
+zones_map_str["C_Z41"] = Zone::C_Z41;
+zones_map_str["C_Z42"] = Zone::C_Z42;
+zones_map_str["C_Z43"] = Zone::C_Z43;
+zones_map_str["C_Z44"] = Zone::C_Z44;
+zones_map_str["C_Z45"] = Zone::C_Z45;
+zones_map_str["C_Z46"] = Zone::C_Z46;
+zones_map_str["C_Z47"] = Zone::C_Z47;
+zones_map_str["C_Z48"] = Zone::C_Z48;
+
+zones_map_str["C_Z52"] = Zone::C_Z52;
+zones_map_str["C_Z53"] = Zone::C_Z53;
+zones_map_str["C_Z54"] = Zone::C_Z54;
+zones_map_str["C_Z55"] = Zone::C_Z55;
+zones_map_str["C_Z56"] = Zone::C_Z56;
+zones_map_str["C_Z57"] = Zone::C_Z57;
+zones_map_str["C_Z58"] = Zone::C_Z58;
+
+zones_map_str["C_Z62"] = Zone::C_Z62;
+zones_map_str["C_Z63"] = Zone::C_Z63;
+zones_map_str["C_Z64"] = Zone::C_Z64;
+zones_map_str["C_Z65"] = Zone::C_Z65;
+zones_map_str["C_Z66"] = Zone::C_Z66;
+zones_map_str["C_Z67"] = Zone::C_Z67;
+zones_map_str["C_Z68"] = Zone::C_Z68;
+
+zones_map_str["C_Z72"] = Zone::C_Z72;
+zones_map_str["C_Z73"] = Zone::C_Z73;
+zones_map_str["C_Z74"] = Zone::C_Z74;
+zones_map_str["C_Z75"] = Zone::C_Z75;
+zones_map_str["C_Z76"] = Zone::C_Z76;
+zones_map_str["C_Z77"] = Zone::C_Z77;
+zones_map_str["C_Z78"] = Zone::C_Z78;
+
+
+
+
+zones_map_str["M_Z11"] = Zone::M_Z11;
+zones_map_str["M_Z12"] = Zone::M_Z12;
+zones_map_str["M_Z13"] = Zone::M_Z13;
+zones_map_str["M_Z14"] = Zone::M_Z14;
+zones_map_str["M_Z15"] = Zone::M_Z15;
+zones_map_str["M_Z16"] = Zone::M_Z16;
+zones_map_str["M_Z17"] = Zone::M_Z17;
+zones_map_str["M_Z18"] = Zone::M_Z18;
+
+zones_map_str["M_Z21"] = Zone::M_Z21;
+zones_map_str["M_Z22"] = Zone::M_Z22;
+zones_map_str["M_Z23"] = Zone::M_Z23;
+zones_map_str["M_Z24"] = Zone::M_Z24;
+zones_map_str["M_Z25"] = Zone::M_Z25;
+zones_map_str["M_Z26"] = Zone::M_Z26;
+zones_map_str["M_Z27"] = Zone::M_Z27;
+zones_map_str["M_Z28"] = Zone::M_Z28;
+
+zones_map_str["M_Z31"] = Zone::M_Z31;
+zones_map_str["M_Z32"] = Zone::M_Z32;
+zones_map_str["M_Z33"] = Zone::M_Z33;
+zones_map_str["M_Z34"] = Zone::M_Z34;
+zones_map_str["M_Z35"] = Zone::M_Z35;
+zones_map_str["M_Z36"] = Zone::M_Z36;
+zones_map_str["M_Z37"] = Zone::M_Z37;
+zones_map_str["M_Z38"] = Zone::M_Z38;
+
+zones_map_str["M_Z41"] = Zone::M_Z41;
+zones_map_str["M_Z42"] = Zone::M_Z42;
+zones_map_str["M_Z43"] = Zone::M_Z43;
+zones_map_str["M_Z44"] = Zone::M_Z44;
+zones_map_str["M_Z45"] = Zone::M_Z45;
+zones_map_str["M_Z46"] = Zone::M_Z46;
+zones_map_str["M_Z47"] = Zone::M_Z47;
+zones_map_str["M_Z48"] = Zone::M_Z48;
+
+zones_map_str["M_Z52"] = Zone::M_Z52;
+zones_map_str["M_Z53"] = Zone::M_Z53;
+zones_map_str["M_Z54"] = Zone::M_Z54;
+zones_map_str["M_Z55"] = Zone::M_Z55;
+zones_map_str["M_Z56"] = Zone::M_Z56;
+zones_map_str["M_Z57"] = Zone::M_Z57;
+zones_map_str["M_Z58"] = Zone::M_Z58;
+
+zones_map_str["M_Z62"] = Zone::M_Z62;
+zones_map_str["M_Z63"] = Zone::M_Z63;
+zones_map_str["M_Z64"] = Zone::M_Z64;
+zones_map_str["M_Z65"] = Zone::M_Z65;
+zones_map_str["M_Z66"] = Zone::M_Z66;
+zones_map_str["M_Z67"] = Zone::M_Z67;
+zones_map_str["M_Z68"] = Zone::M_Z68;
+
+zones_map_str["M_Z72"] = Zone::M_Z72;
+zones_map_str["M_Z73"] = Zone::M_Z73;
+zones_map_str["M_Z74"] = Zone::M_Z74;
+zones_map_str["M_Z75"] = Zone::M_Z75;
+zones_map_str["M_Z76"] = Zone::M_Z76;
+zones_map_str["M_Z77"] = Zone::M_Z77;
+zones_map_str["M_Z78"] = Zone::M_Z78;
+//--------------------------------EXPLORATION CHALLENGE
 
 
  ROS_INFO_STREAM("------Test print--------- Host: " << m_host << " SendPort:" << m_port_s << " RecvPort:" << m_port_r);
@@ -536,9 +662,9 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                     }
 
             new_machine_entry->set_name(tokens[0]);
-            new_machine_entry->set_type("CS");
-            new_machine_entry->set_zone(Zone::C_Z11);
-            new_machine_entry->set_rotation(180);
+            new_machine_entry->set_type(tokens[1]);
+            new_machine_entry->set_zone(zones_map_str[tokens[2]]);
+            new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
 
             
             //machine_report_message->add_machines();
