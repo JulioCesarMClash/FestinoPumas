@@ -134,16 +134,17 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
 	std::string cmd_vel_name = "/cmd_vel";
 
-    ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
-    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
-    
-    ros::ServiceClient client = n.serviceClient<Festino_arm_moveit_demos::srv_arm>("srv_arm");
-    Festino_arm_moveit_demos::srv_arm srv;
+    ros::Publisher pub_digital 	= n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
+    ros::Publisher pub_goal 	= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    ros::Publisher pub_alling 	= n.advertise<std_msgs::Bool>("/alling_flag", 1000); //, latch=True);
+	ros::Publisher pub_cmd_vel 	= n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);    
 
-    ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+    ros::ServiceClient client 			= n.serviceClient<Festino_arm_moveit_demos::srv_arm>("srv_arm");
+    ros::ServiceClient clientFindPiece 	= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+
+    Festino_arm_moveit_demos::srv_arm srv;
     img_proc::Find_piece_Srv srvFindPiece;
 
-    ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);
 
     ros::Rate loop(10);
 
