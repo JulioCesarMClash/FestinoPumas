@@ -21,90 +21,173 @@ from cv_bridge import CvBridge, CvBridgeError
 tfBuffer = tf2_ros.Buffer()
 bridge = CvBridge()
 
+# def aruco_mps(aruco_id):
+#   ######## CYAN STATIONS ########
+#   #CapStations
+#   mps_name_arr = 0
+#   if(aruco_id == 101):
+#     mps_name_arr = ['C','CS1','O']
+#   elif(aruco_id == 102):
+#     mps_name_arr = ['C','CS1','I']
+#   elif(aruco_id == 103):
+#     mps_name_arr = ['C','CS2','O']
+#   elif(aruco_id == 104):
+#     mps_name_arr = ['C','CS2','I']
+
+#   #RingStations
+#   elif(aruco_id == 111):
+#     mps_name_arr = ['C','RS1','O']
+#   elif(aruco_id == 112):
+#     mps_name_arr = ['C','RS1','I']
+#   elif(aruco_id == 113):
+#     mps_name_arr = ['C','RS2','O']
+#   elif(aruco_id == 114):
+#     mps_name_arr = ['C','RS2','I']
+
+#   #BaseStations
+#   elif(aruco_id == 121):
+#     mps_name_arr = ['C','BS','O']
+#   elif(aruco_id == 122):
+#     mps_name_arr = ['C','BS','I']
+
+#   #DeliveryStations
+#   elif(aruco_id == 131):
+#     mps_name_arr = ['C','DS','O']
+#   elif(aruco_id == 132):
+#     mps_name_arr = ['C','DS','I']
+  
+#   #StorageStations
+#   elif(aruco_id == 141):
+#     mps_name_arr = ['C','SS','O']
+#   elif(aruco_id == 142):
+#     mps_name_arr = ['C','SS','I']
+
+#   ######## MAGENTA STATIONS ########
+#   #CapStations
+#   elif(aruco_id == 201):
+#     mps_name_arr = ['M','CS1','O']
+#   elif(aruco_id == 202):
+#     mps_name_arr = ['M','CS1','I']
+#   elif(aruco_id == 203):
+#     mps_name_arr = ['M','CS2','O']
+#   elif(aruco_id == 204):
+#     mps_name_arr = ['M','CS2','I']
+
+#   #RingStations
+#   elif(aruco_id == 211):
+#     mps_name_arr = ['M','RS1','O']
+#   elif(aruco_id == 212):
+#     mps_name_arr = ['M','RS1','I']
+#   elif(aruco_id == 213):
+#     mps_name_arr = ['M','RS2','O']
+#   elif(aruco_id == 214):
+#     mps_name_arr = ['M','RS2','I']
+
+#   #BaseStations
+#   elif(aruco_id == 221):
+#     mps_name_arr = ['M','BS','O']
+#   elif(aruco_id == 222):
+#     mps_name_arr = ['M','BS','I']
+
+#   #DeliveryStations
+#   elif(aruco_id == 231):
+#     mps_name_arr = ['M','DS','O']
+#   elif(aruco_id == 232):
+#     mps_name_arr = ['M','DS','I']
+  
+#   #StorageStations
+#   elif(aruco_id == 241):
+#     mps_name_arr = ['M','SS','O']
+#   elif(aruco_id == 242):
+#     mps_name_arr = ['M','SS','I']
+#   mps_name = mps_name_arr[0]+'-'+mps_name_arr[1]+'-'+mps_name_arr[2]
+#   return mps_name_arr, mps_name
+
 def aruco_mps(aruco_id):
   ######## CYAN STATIONS ########
   #CapStations
   mps_name_arr = 0
   if(aruco_id == 101):
-    mps_name_arr = ['C','CS1','O']
+    mps_name_arr = ['C','CS1']
   elif(aruco_id == 102):
-    mps_name_arr = ['C','CS1','I']
+    mps_name_arr = ['C','CS1']
   elif(aruco_id == 103):
-    mps_name_arr = ['C','CS2','O']
+    mps_name_arr = ['C','CS2']
   elif(aruco_id == 104):
-    mps_name_arr = ['C','CS2','I']
+    mps_name_arr = ['C','CS2']
 
   #RingStations
   elif(aruco_id == 111):
-    mps_name_arr = ['C','RS1','O']
+    mps_name_arr = ['C','RS1']
   elif(aruco_id == 112):
-    mps_name_arr = ['C','RS1','I']
+    mps_name_arr = ['C','RS1']
   elif(aruco_id == 113):
-    mps_name_arr = ['C','RS2','O']
+    mps_name_arr = ['C','RS2']
   elif(aruco_id == 114):
-    mps_name_arr = ['C','RS2','I']
+    mps_name_arr = ['C','RS2']
 
   #BaseStations
   elif(aruco_id == 121):
-    mps_name_arr = ['C','BS','O']
+    mps_name_arr = ['C','BS']
   elif(aruco_id == 122):
-    mps_name_arr = ['C','BS','I']
+    mps_name_arr = ['C','BS']
 
   #DeliveryStations
   elif(aruco_id == 131):
-    mps_name_arr = ['C','DS','O']
+    mps_name_arr = ['C','DS']
   elif(aruco_id == 132):
-    mps_name_arr = ['C','DS','I']
+    mps_name_arr = ['C','DS']
   
   #StorageStations
   elif(aruco_id == 141):
-    mps_name_arr = ['C','SS','O']
+    mps_name_arr = ['C','SS']
   elif(aruco_id == 142):
-    mps_name_arr = ['C','SS','I']
+    mps_name_arr = ['C','SS']
 
   ######## MAGENTA STATIONS ########
   #CapStations
   elif(aruco_id == 201):
-    mps_name_arr = ['M','CS1','O']
+    mps_name_arr = ['M','CS1']
   elif(aruco_id == 202):
-    mps_name_arr = ['M','CS1','I']
+    mps_name_arr = ['M','CS1']
   elif(aruco_id == 203):
-    mps_name_arr = ['M','CS2','O']
+    mps_name_arr = ['M','CS2']
   elif(aruco_id == 204):
-    mps_name_arr = ['M','CS2','I']
+    mps_name_arr = ['M','CS2']
 
   #RingStations
   elif(aruco_id == 211):
-    mps_name_arr = ['M','RS1','O']
+    mps_name_arr = ['M','RS1']
   elif(aruco_id == 212):
-    mps_name_arr = ['M','RS1','I']
+    mps_name_arr = ['M','RS1']
   elif(aruco_id == 213):
-    mps_name_arr = ['M','RS2','O']
+    mps_name_arr = ['M','RS2']
   elif(aruco_id == 214):
-    mps_name_arr = ['M','RS2','I']
+    mps_name_arr = ['M','RS2']
 
   #BaseStations
   elif(aruco_id == 221):
-    mps_name_arr = ['M','BS','O']
+    mps_name_arr = ['M','BS']
   elif(aruco_id == 222):
-    mps_name_arr = ['M','BS','I']
+    mps_name_arr = ['M','BS']
 
   #DeliveryStations
   elif(aruco_id == 231):
-    mps_name_arr = ['M','DS','O']
+    mps_name_arr = ['M','DS']
   elif(aruco_id == 232):
-    mps_name_arr = ['M','DS','I']
+    mps_name_arr = ['M','DS']
   
   #StorageStations
   elif(aruco_id == 241):
-    mps_name_arr = ['M','SS','O']
+    mps_name_arr = ['M','SS']
   elif(aruco_id == 242):
-    mps_name_arr = ['M','SS','I']
-  mps_name = mps_name_arr[0]+'-'+mps_name_arr[1]+'-'+mps_name_arr[2]
+    mps_name_arr = ['M','SS']
+  mps_name = mps_name_arr[0]+'-'+mps_name_arr[1]#+'-'+mps_name_arr[2]
   return mps_name_arr, mps_name
 
 def callback_depth_points(data):
   global rate, arr
+  listener = tf.TransformListener()
   arr = ros_numpy.point_cloud2.pointcloud2_to_array(data)
   mps_name = [0,0]
   rgb_arr = arr['rgb'].copy()
@@ -128,6 +211,7 @@ def callback_depth_points(data):
   thickness = 2
   aruco_det_flag = False
   mps_name = "Not Identified"
+  fracaso = "fracaso"
   try:
     if(markerIds.shape[0] >= 1):
       for i in range (markerIds.shape[0]):
@@ -159,12 +243,44 @@ def callback_depth_points(data):
             print(mps_name, "\n")
             mps_name_pub.publish(mps_name)
 
+            mps_type = "IDK"
+
+            if "CS" in mps_name:
+              mps_type = "CS"
+              print("CapStation")
+            elif "DS" in mps_name:
+              mps_type = "DS"
+              print("DeliveryStation")
+            elif "BS" in mps_name:
+              mps_type = "BS"
+              print("BaseStation")
+            elif "SS" in mps_name:
+              mps_type = "SS"
+              print("StorageStation")
+            elif "RS" in mps_name:
+              mps_type = "RS"
+              print("RingStation")
+
+            #mps_type_pub.publish(mps_info)
+              
+            mps_info = mps_name + "," + mps_type;
+            mps_data_pub.publish(mps_info)
+
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
                 aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                 br_ar = tf.TransformBroadcaster()
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                 aruco_pos_pub.publish(aruco_pose)
+                """try:
+                  print("nop")
+                  tf_name = "/"+mps_name
+                  now = rospy.Time.now()
+                  listener.waitForTransform(tf_name, "/base_link", now, rospy.Duration(4.0))
+                  (trans,rot) = listener.lookupTransform(tf_name, "/base_link", now)
+                  print("nop",trans)
+                except fracaso:
+                  print(fracaso)"""
           except IndexError:
             print('Not identified')
   except AttributeError:
@@ -181,13 +297,14 @@ def callback_depth_points(data):
 def main(args):
   rospy.init_node('aruco_det', anonymous=True)
 
-  global rate, arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, aruco_flag_pub, mps_name_pub
+  global rate, arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, aruco_flag_pub, mps_data_pub, mps_name_pub
   print("Image Processing Node - Looking for piece")
   rate = rospy.Rate(10)
   depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,callback_depth_points)
-  aruco_pos_pub     = rospy.Publisher("/aruco_pos",PointStamped,queue_size=10)
+  aruco_pos_pub     = rospy.Publisher("/mps_pos",PointStamped,queue_size=10)
   aruco_flag_pub    = rospy.Publisher("/aruco_det",Bool,queue_size=10)
   mps_name_pub    = rospy.Publisher("/mps_name",String,queue_size=10)
+  mps_data_pub    = rospy.Publisher("/mps_data",String,queue_size=10)
 
   
   depth_img_bgr = np.zeros((480, 640))
