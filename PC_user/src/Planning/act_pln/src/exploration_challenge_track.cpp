@@ -63,6 +63,13 @@ void print_vector(const std::vector<T> & vec, std::string sep=" ")
     std::cout<<std::endl;
 }
 
+//MitChanges (Last slot)
+
+std_msgs::String mps_data2send;
+std_msgs::String mps_name2send;
+
+//MitChanges (Last slot)
+
 bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
@@ -169,7 +176,7 @@ void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
 }
 
 //Arreglo con los nombres de las estaciones
-void callback_mps_name(const std_msgs::String::ConstPtr& msg){
+/*void callback_mps_name(const std_msgs::String::ConstPtr& msg){
     mps_name = *msg;
 	if(mps_names.size() == 0){
 		mps_names.push_back(mps_name);
@@ -181,7 +188,19 @@ void callback_mps_name(const std_msgs::String::ConstPtr& msg){
 	{
 		flag_names = true;
 	}
+}*/
+
+
+//MitChanges (Last slot)
+void callback_mps_name(const std_msgs::String::ConstPtr& msg){
+    mps_name2send = *msg;
 }
+
+void callback_mps_data(const std_msgs::String::ConstPtr& msg){
+    mps_data2send = *msg;
+}
+
+//MitChanges (Last slot)
 
 //Encontro un TAG
 void callback_mps_flag(const std_msgs::Bool::ConstPtr& msg){
@@ -244,6 +263,117 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
     }
 }
 
+//Estas coordenadas son M_Z32, ahi sabemos que no habra maquina
+std::vector<float> arreglo_x = {-2.5};
+std::vector<float> arreglo_y = {1.5};
+//Los angulos de este arreglo estan en radianes, en grados son: 0, 270, 180, 90
+std::vector<float> arreglo_alfa = {0, 4.71239, 3.14159, 1.5708};
+
+//Nuevas coordeandas del aruco respecto al mapa
+float aruco_x;
+float aruco_y;
+
+//Paso en el que se encuentre el robot para saber su posicion
+int step = 0;
+
+//Contador que lleva el número de giros
+int cont_giro = 0;
+
+geometry_msgs::PoseStamped location_map;
+
+void transform_aruco_map(geometry_msgs::PoseStamped location)
+{
+	location_map.pose.position.x = -cos(arreglo_alfa.at(cont_giro))*location.pose.position.x + sin(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_x.at(step);
+	location_map.pose.position.y = sin(arreglo_alfa.at(cont_giro))*location.pose.position.x + cos(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_y.at(step);
+	std::cout << location_map.pose.position.x << location_map.pose.position.y << std::endl;
+
+}
+
+std::string zone_name;
+
+void define_zone(geometry_msgs::PoseStamped location)
+{
+	if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z11";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z12";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z13";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z14";
+	}
+	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z15";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z21";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z22";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z23";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z24";
+	}
+	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z25";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z31";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z32";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z33";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z34";
+	}
+	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z35";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z41";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z42";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z43";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z44";
+	}
+	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z45";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 0 && location.pose.position.y < 1){
+		zone_name = "M_Z51";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 1 && location.pose.position.y < 2){
+		zone_name = "M_Z52";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 2 && location.pose.position.y < 3){
+		zone_name = "M_Z53";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 3 && location.pose.position.y < 4){
+		zone_name = "M_Z54";
+	}
+	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 4 && location.pose.position.y < 5){
+		zone_name = "M_Z55";
+	}
+	else{
+		zone_name = "invalid";
+	}
+	
+}
+
 int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
@@ -259,16 +389,22 @@ int main(int argc, char** argv){
 
 	std::string  cmd_vel_name="/cmd_vel";
 
+
     //Subscribers and Publishers
     ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
-
     ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
+	//MitChanges (Last slot)
+    ros::Subscriber sub_mps_name     		= n.subscribe("/mps_name", 10, callback_mps_name);
+	ros::Subscriber sub_mps_data     		= n.subscribe("/mps_data", 10, callback_mps_data);
+	//MitChanges (Last slot)
+
     
     ros::Publisher pub_goal 		= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
-	ros::Publisher station_info_pub = n.advertise<std_msgs::String>("station_info", 1000);
-	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1);
+	ros::Publisher pub_station_info = n.advertise<std_msgs::String>("/station_info", 1000, true);
+	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);
+
 
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
@@ -288,6 +424,8 @@ int main(int argc, char** argv){
 
     std::string mps_zone;
     std::string mps_type;
+
+    std_msgs::String mps_info2send;
 
     std::vector<std::string> mps_name;
     std::vector<geometry_msgs::PointStamped> mps_aruco;
@@ -309,10 +447,28 @@ int main(int argc, char** argv){
 	//Contador que lleva el número de zonas que se han recorrido
 	int cont = 0;
 
-	//Contador que lleva el número de giros
-	int cont_giro = 0;
-
 	int rotacion = 0;
+
+
+	tf::TransformListener listener;
+	tf::StampedTransform transform;
+
+	//TF related stuff 
+	det_mps.pose.position.x = 0.0;
+	det_mps.pose.position.y = 0.0;
+	det_mps.pose.position.z = 0.0;
+	det_mps.pose.orientation.x = 0.0;
+	det_mps.pose.orientation.y = 0.0;
+	det_mps.pose.orientation.z = 0.0;
+	det_mps.pose.orientation.w = 0.0;
+
+	location_map.pose.position.x = 0.0;
+	location_map.pose.position.y = 0.0;
+	location_map.pose.position.z = 0.0;
+	location_map.pose.orientation.x = 0.0;
+	location_map.pose.orientation.y = 0.0;
+	location_map.pose.orientation.z = 0.0;
+	location_map.pose.orientation.w = 0.0;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -325,31 +481,66 @@ int main(int argc, char** argv){
 	    		state = SM_GO_ZONE;
 	    		break;
 			}
-
 			case SM_GO_ZONE:{
 				std::cout << "State machine: SM_GO_ZONE" << std::endl;	
 				//Se navega a las zonas recorriendo el arreglo zones_poses
 				//El contador es el índice que recorre el arreglo
 				//Si aún no se han recorrido las 4 zonas entonces sigue 
  				nav_flag = true;
-				if(cont < 8){
+				if(cont < 4){
 					// TestComment
 					//navigate_to_location(zones_poses.at(cont));
-					posNew.linear.x = 1.0;
-					pub_cmd_vel.publish(posNew);
+
+
+					//Avanza medio metro
+					posNew.linear.x = 0.85;
+					for(float x = 0; x <= posNew.linear.x; x+=0.05)
+					{
+						std::cout<<x<<std::endl;
+						pub_cmd_vel.publish(posNew);
+						ros::Duration(1, 0).sleep();	
+					}
+					//step++;
+
+
+					//FestinoNavigation::moveDistAngle(0.0, -1.2, 10000);
+					// //posNew.linear.x = 0.50;
+					// for(float x = 0; x <= posNew.linear.x; x+=0.05)
+					// {
+					// 	std::cout<<x<<std::endl;
+					// 	pub_cmd_vel.publish(posNew);
+					// 	ros::Duration(1, 0).sleep();	
+					// }
+					// FestinoNavigation::moveDistAngle(0.0, -1.2, 10000);
+					// //posNew.linear.x = 0.50;
+					// for(float x = 0; x <= posNew.linear.x; x+=0.05)
+					// {
+					// 	std::cout<<x<<std::endl;
+					// 	pub_cmd_vel.publish(posNew);
+					// 	ros::Duration(1, 0).sleep();	
+					// }
+					// //posNew.linear.x = 0.50;
+					// FestinoNavigation::moveDistAngle(0.0, -1.2, 10000);
+					// for(float x = 0; x <= posNew.linear.x; x+=0.05)
+					// {
+					// 	std::cout<<x<<std::endl;
+					// 	pub_cmd_vel.publish(posNew);
+					// 	ros::Duration(1, 0).sleep();	
+					// }
 					ros::Duration(1, 0).sleep();
 		            //TestComment
-					if(nav_flag){
-						std::cout << "Im in Zone  " << cont << std::endl;
-						std::cout << "Im in coordinates " << zones_poses.at(cont) << std::endl;
-						state = SM_SCAN_SPACE;
-					}
-					else{
-						std::cout << "I can't go to zone " << cont << std::endl;
-						cont++;
-						std::cout << "I'll nav to zone " << cont << std::endl;
-						state = SM_GO_ZONE;
-					}	
+					// if(nav_flag){
+					// 	std::cout << "Im in Zone  " << cont << std::endl;
+					// 	std::cout << "Im in coordinates " << zones_poses.at(cont) << std::endl;
+					// 	state = SM_SCAN_SPACE;
+					// }
+					// else{
+					// 	std::cout << "I can't go to zone " << cont << std::endl;
+					// 	cont++;
+					// 	std::cout << "I'll nav to zone " << cont << std::endl;
+					// 	state = SM_GO_ZONE;
+					// }	
+					state = SM_SCAN_SPACE;
 				}
 				//Cuando se hayan recorrido las 4 zonas ya terminó
 				else{
@@ -379,7 +570,36 @@ int main(int argc, char** argv){
 				
 				ros::Duration(5, 0).sleep();
 				std::cout << "Estoy escaneando zzz" << std::endl;
-				//Habilita el servicio y prende el kinect
+
+				if(mps_name2send.data != ""){
+					try{
+						listener.waitForTransform(mps_name2send.data, "/base_link", ros::Time(0), ros::Duration(1000.0));
+						listener.lookupTransform(mps_name2send.data, "/base_link", ros::Time(0), transform);
+					}
+					catch(tf::TransformException ex){
+						ROS_ERROR("%s",ex.what());
+						ros::Duration(1.0).sleep();
+					}
+				}
+				det_mps.pose.position.x = -transform.getOrigin().x();
+				det_mps.pose.position.y = -transform.getOrigin().y();
+				det_mps.pose.position.z = -transform.getOrigin().z();
+
+
+				std::cout << det_mps.pose.position << std::endl; //<< det_mps << std::endl;
+
+				transform_aruco_map(det_mps);
+
+				define_zone(location_map);
+				std::cout << zone_name << std::endl;
+
+				mps_info2send.data = mps_data2send.data +","+ zone_name + ",-1";
+
+				pub_station_info.publish(mps_info2send);
+
+
+
+				/*Habilita el servicio y prende el kinect
 	            srv.request.is_find_tag_enabled = true;
 				tag_flag = false;
 				if (client.call(srv))
@@ -393,9 +613,9 @@ int main(int argc, char** argv){
 						//mps_type = "CS";
 					
 
-						/*if(no alcanza nube de puntos){
+						if(no alcanza nube de puntos){
 							FestinoNavigation::moveDist(3, 30000);
-						}*/
+						}
 
 						for(int i = 0; i < mps_name.size(); i++)
 						{
@@ -435,13 +655,13 @@ int main(int argc, char** argv){
 					else{
 						std::cout << "Tag Not Found - Turn" << std::endl;
 						state = SM_GIRO;
-					}*/
+					}
 				}
 				else
 				{
 					ROS_ERROR("Failed to call service to search Tag");
 					return 1;
-				}
+				}*/
 	            /*voice.data = msg;
 	            pub_speaker.publish(voice);
 	            ros::Duration(3, 0).sleep();*/
@@ -460,7 +680,7 @@ int main(int argc, char** argv){
 					//Le puse un ángulo de 6.2832 pero no funciona así
 
 					//TestComment
-					FestinoNavigation::moveDistAngle(0.0, 1.2, 10000);
+					FestinoNavigation::moveDistAngle(0.0, 1.47, 10000);
 					// los 360 grados es demasiada vuelta (MitComment)
 					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
 					//TestComment
@@ -472,6 +692,8 @@ int main(int argc, char** argv){
 					std::cout << "Navigating to New Zone" << std::endl;
 					cont++;
 					cont_giro = 0;
+					//Ultimo giro para quedar mirando hacia en frente 
+					FestinoNavigation::moveDistAngle(0.0, 1.46, 10000);
 					state = SM_GO_ZONE;
 				}
 				break;
