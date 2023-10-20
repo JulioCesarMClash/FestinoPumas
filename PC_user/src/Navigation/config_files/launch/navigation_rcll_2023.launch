@@ -1,6 +1,6 @@
 <launch>  
-  <arg name="static_map_file"  default="$(find config_files)/maps/rcll_2023_clean_ch.yaml"/>
-  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/rcll_2023_blocked_ch.yaml"/>
+  <arg name="static_map_file"  default="$(find config_files)/maps/challenges_clean.yaml"/>
+  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/challenges_blocked.yaml"/>
   <arg name="initial_pose_x" default="0.0"/>
   <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
