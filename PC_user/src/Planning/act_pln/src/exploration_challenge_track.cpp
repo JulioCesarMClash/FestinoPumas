@@ -264,10 +264,29 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 }
 
 //Estas coordenadas son M_Z32, ahi sabemos que no habra maquina
-std::vector<float> arreglo_x = {-2.5};
-std::vector<float> arreglo_y = {1.5};
+std::vector<float> arreglo_x = {-2.5, 0.0, 0.0, 0.0, 0.0};
+std::vector<float> arreglo_y = {1.5, 0.0, 0.0, 0.0, 0.0};
+
+//M_Z32, M_Z34
+//std::vector<float> arreglo_x = {-2.5, -2.5};
+//std::vector<float> arreglo_y = {1.5, 3.5};
+
+//M_Z32, M_Z34, M_Z44, M_Z24
+//std::vector<float> arreglo_x = {-2.5, -2.5, -3.5, -1.5};
+//std::vector<float> arreglo_y = {1.5, 3.5, 3.5, 3.5};
+
+//M_Z32, M_Z22, M_Z24, M_Z44, M_Z42
+//std::vector<float> arreglo_x = {-2.5, -1.5, -1.5, -3.5, -3.5};
+//std::vector<float> arreglo_y = {1.5, 1.5, 3.5, 3.5, 1.5};
+
+
+
 //Los angulos de este arreglo estan en radianes, en grados son: 0, 270, 180, 90
-std::vector<float> arreglo_alfa = {0, 4.71239, 3.14159, 1.5708};
+//std::vector<float> arreglo_alfa = {0, 4.71239, 3.14159, 1.5708};
+
+//Los angulos de este arreglo estan en radianes, en grados son: 45, 90, 135, 180, 225, 270, 315, 0
+//Avanza de 45 en 45 grados
+std::vector<float> arreglo_alfa = {0.7853, 1.5708, 2.356, 3.14159, 3.9269, 4.71239, 5.4977, 0};
 
 //Nuevas coordeandas del aruco respecto al mapa
 float aruco_x;
@@ -279,12 +298,15 @@ int step = 0;
 //Contador que lleva el número de giros
 int cont_giro = 0;
 
+//Contador que lleva el número de zonas que se han recorrido
+int cont = 0;
+
 geometry_msgs::PoseStamped location_map;
 
 void transform_aruco_map(geometry_msgs::PoseStamped location)
 {
-	location_map.pose.position.x = -cos(arreglo_alfa.at(cont_giro))*location.pose.position.x + sin(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_x.at(step);
-	location_map.pose.position.y = sin(arreglo_alfa.at(cont_giro))*location.pose.position.x + cos(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_y.at(step);
+	location_map.pose.position.x = -cos(arreglo_alfa.at(cont_giro))*location.pose.position.x + sin(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_x.at(cont);
+	location_map.pose.position.y = sin(arreglo_alfa.at(cont_giro))*location.pose.position.x + cos(arreglo_alfa.at(cont_giro))*location.pose.position.y + arreglo_y.at(cont);
 	std::cout << location_map.pose.position.x << location_map.pose.position.y << std::endl;
 
 }
@@ -444,9 +466,6 @@ int main(int argc, char** argv){
 		zones_poses.push_back(tf_zone);
 	}
 
-	//Contador que lleva el número de zonas que se han recorrido
-	int cont = 0;
-
 	int rotacion = 0;
 
 
@@ -470,6 +489,34 @@ int main(int argc, char** argv){
 	location_map.pose.orientation.z = 0.0;
 	location_map.pose.orientation.w = 0.0;
 
+
+	int num_zonas_visitadas;
+
+	int opcion = 3;
+
+	if (opcion == 0){
+		num_zonas_visitadas = 1;
+		arreglo_x = {-2.5, 0.0, 0.0, 0.0, 0.0};
+		arreglo_y = {1.5, 0.0, 0.0, 0.0, 0.0};
+	}
+	else if (opcion == 1){
+		num_zonas_visitadas = 2;
+		arreglo_x = {-2.5, -2.5, 0.0, 0.0, 0.0};
+		arreglo_y = {1.5, 3.5, 0.0, 0.0, 0.0};
+	}
+	else if (opcion == 2){
+		num_zonas_visitadas = 4;
+		arreglo_x = {-2.5, -2.5, -3.5, -1.5, 0.0};
+		arreglo_y = {1.5, 3.5, 3.5, 3.5, 0.0};
+	}
+	else if (opcion == 3){
+		num_zonas_visitadas = 5;
+		arreglo_x = {-2.5, -1.5, -1.5, -3.5, -3.5};
+		arreglo_y = {1.5, 1.5, 3.5, 3.5, 1.5};
+	}
+
+	int num_giros = 7;
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
@@ -487,21 +534,81 @@ int main(int argc, char** argv){
 				//El contador es el índice que recorre el arreglo
 				//Si aún no se han recorrido las 4 zonas entonces sigue 
  				nav_flag = true;
-				if(cont < 4){
+				if(cont < num_zonas_visitadas){
 					// TestComment
 					//navigate_to_location(zones_poses.at(cont));
 
 
-					//Avanza medio metro
-					posNew.linear.x = 0.85;
-					for(float x = 0; x <= posNew.linear.x; x+=0.05)
-					{
-						std::cout<<x<<std::endl;
-						pub_cmd_vel.publish(posNew);
-						ros::Duration(1, 0).sleep();	
-					}
+					//Avanza un metro
+					// posNew.linear.x = 0.85;
+					// for(float x = 0; x <= posNew.linear.x; x+=0.05)
+					// {
+					// 	std::cout<<x<<std::endl;
+					// 	pub_cmd_vel.publish(posNew);
+					// 	ros::Duration(1, 0).sleep();	
+					// }
 					//step++;
 
+					//Avanza un metro
+					if(cont == 0){
+						FestinoNavigation::moveDist(1, 10000);
+						std::cout << "avanza" << std::endl;
+					}
+
+					if (opcion == 1){
+						if(cont == 1){
+							FestinoNavigation::moveDist(2, 10000);	
+						}
+					}
+					else if (opcion == 2){
+						
+						if(cont == 1){
+						   FestinoNavigation::moveDist(2, 10000);
+						}
+						else if(cont == 2){
+						   FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						   ros::Duration(1, 0).sleep();
+						   FestinoNavigation::moveDist(1, 10000);
+						   ros::Duration(1, 0).sleep();
+						   FestinoNavigation::moveDistAngle(0.0, -1.5, 10000);
+						}
+						else if (cont == 2){
+							FestinoNavigation::moveDistAngle(0.0, -1.5, 10000);
+							ros::Duration(1, 0).sleep();
+						   	FestinoNavigation::moveDist(2, 10000);
+							ros::Duration(1, 0).sleep();
+							FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						}
+					}
+					else if (opcion == 3){
+						if(cont == 1){
+						   FestinoNavigation::moveDistAngle(0.0, -1.5, 10000);
+						   ros::Duration(1, 0).sleep();
+						   FestinoNavigation::moveDist(1, 10000);
+						   FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						}
+						else if(cont == 2){
+						   FestinoNavigation::moveDist(2, 10000);
+						}
+						else if (cont == 2){
+						   FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						   ros::Duration(1, 0).sleep();
+						   FestinoNavigation::moveDist(2, 10000);
+						   ros::Duration(1, 0).sleep();
+						   FestinoNavigation::moveDistAngle(0.0, -1.5, 10000);
+						}
+						else if(cont == 3){
+							FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						   	ros::Duration(1, 0).sleep();
+							FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+							ros::Duration(1, 0).sleep();
+							FestinoNavigation::moveDist(2, 10000);
+							ros::Duration(1, 0).sleep();
+							FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						   	ros::Duration(1, 0).sleep();
+							FestinoNavigation::moveDistAngle(0.0, 1.5, 10000);
+						}
+					}
 
 					//FestinoNavigation::moveDistAngle(0.0, -1.2, 10000);
 					// //posNew.linear.x = 0.50;
@@ -595,9 +702,17 @@ int main(int argc, char** argv){
 
 				mps_info2send.data = mps_data2send.data +","+ zone_name + ",-1";
 
-				pub_station_info.publish(mps_info2send);
+				if(zone_name != "invalid")
+				{
+					pub_station_info.publish(mps_info2send);
+				}
+				else
+				{
+					std::cout << "zone_name = invalid" << std::endl;
 
+				}
 
+				ros::Duration(2.0).sleep();
 
 				/*Habilita el servicio y prende el kinect
 	            srv.request.is_find_tag_enabled = true;
@@ -668,19 +783,19 @@ int main(int argc, char** argv){
 
 				// ----- If Tag Detected -> Send Information and discard as go_to_obstacle -----
 				// ----- Else -> Continue to navigate -----
-				
+				state = SM_GIRO;
 	            break;
 	        }
 			case SM_GIRO:{
 				std::cout << "State machine: SM_GIRO" << std::endl;
 				std::cout << "Contador giro" << cont_giro << std::endl;
-				if(cont_giro < 3){
+				if(cont_giro < num_giros){
 					std::cout << "Turn arooound" << std::endl;
 					//Da un giro de 360 grados (2pi) para escanear todo
 					//Le puse un ángulo de 6.2832 pero no funciona así
 
 					//TestComment
-					FestinoNavigation::moveDistAngle(0.0, 1.47, 10000);
+					FestinoNavigation::moveDistAngle(0.0, -0.715, 10000);
 					// los 360 grados es demasiada vuelta (MitComment)
 					//FestinoNavigation::moveDistAngle(0.0, 2.4, 10000);
 					//TestComment
@@ -693,7 +808,7 @@ int main(int argc, char** argv){
 					cont++;
 					cont_giro = 0;
 					//Ultimo giro para quedar mirando hacia en frente 
-					FestinoNavigation::moveDistAngle(0.0, 1.46, 10000);
+					FestinoNavigation::moveDistAngle(0.0, -0.715, 10000);
 					state = SM_GO_ZONE;
 				}
 				break;

@@ -9,13 +9,17 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
+from std_msgs.msg import Bool
 
 
 class robot:
     def __init__(self):
         self.image = None
-        self.sub_img = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
-        self.pub_vel = rospy.Publisher("/hardware/mobile_base/cmd_vel",Twist,queue_size=1)
+        self.sub_img    = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
+        self.sub_alling = rospy.Subscriber("/alling_flag", Bool, self.callback_alling_flag)
+        #self.pub_vel   = rospy.Publisher("/hardware/mobile_base/cmd_vel",Twist,queue_size=1)
+        self.pub_vel    = rospy.Publisher("/cmd_vel",Twist,queue_size=1)
+
         self.slope = 0
     
     def callback(self,data):
@@ -27,6 +31,11 @@ class robot:
         self.alling()
         cv.imshow("Kinect_image",self.image)
         cv.waitKey(1)
+
+    def callback_alling_flag(data):
+        global begin_flag
+        print(begin_flag)
+        begin_flag = data
 
     def crop_image(self):
         img= self.image
@@ -73,6 +82,8 @@ class robot:
         self.slope = average
     
     def alling(self):
+        if begin_flag:
+            print("begin please")
         error = self.slope
         Kp = -6.0
         Kp_m = 6.0
@@ -98,5 +109,6 @@ class robot:
         
 rospy.init_node("Alling")
 rate = rospy.Rate(0.1)
+begin_flag = False
 robot = robot()
 rospy.spin()

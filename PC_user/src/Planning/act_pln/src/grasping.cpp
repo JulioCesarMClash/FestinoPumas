@@ -134,17 +134,16 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
 	std::string cmd_vel_name = "/cmd_vel";
 
-    ros::Publisher pub_digital 	= n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
-    ros::Publisher pub_goal 	= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
-    ros::Publisher pub_alling 	= n.advertise<std_msgs::Bool>("/alling_flag", 1000); //, latch=True);
-	ros::Publisher pub_cmd_vel 	= n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);    
-
-    ros::ServiceClient client 			= n.serviceClient<Festino_arm_moveit_demos::srv_arm>("srv_arm");
-    ros::ServiceClient clientFindPiece 	= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
-
+    ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
+    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+    
+    ros::ServiceClient client = n.serviceClient<Festino_arm_moveit_demos::srv_arm>("srv_arm");
     Festino_arm_moveit_demos::srv_arm srv;
+
+    ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     img_proc::Find_piece_Srv srvFindPiece;
 
+    ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);
 
     ros::Rate loop(10);
 
@@ -189,16 +188,48 @@ int main(int argc, char** argv){
 			case SM_ALLIGN:
 			{
 				std::cout << "State machine: SM_ALLIGN" << std::endl;
+				srv.request.manipBlocker = false;
+				srv.request.x = 0.04;
+				srv.request.y = -0.18;
+				srv.request.z = -0.06;
+				srv.request.pitch = 1.75;
+
+				if(client.call(srv))
+				{
+					std::cout<<"Moviendo el brazo donde NO le estorbe a Mitzi!!"<<std::endl;
+				}
+				else
+				{
+					std::cout<<"No pudeeeee mover el brazo, sad sad sad (pre-grasp)"<<std::endl;
+				}
+
+				std::cout<<"Moviendo hacia atras 45 cm"<<std::endl;
+				FestinoNavigation::moveDist(-1.00,30000);
+
 
 				//-------------------------------------------
 				//-----AQUI VA EL SERVICIO DE ALINEACION-----
 				//-------------------------------------------
 
 				//Alling_srv
-
-				//Se mueve tantito para atras para que el kinect pueda ver la pieza
-				std::cout<<"Moviendo hacia atras 45 cm"<<std::endl;
 				//FestinoNavigation::moveDist(0.45, 30000);
+
+				srv.request.manipBlocker = false;
+				srv.request.x = 0.04;
+				srv.request.y = 0.0;
+				srv.request.z = 0.18;
+				srv.request.pitch = 0.0;
+
+				if(client.call(srv))
+				{
+					std::cout<<"Moviendo el brazo a guardadito"<<std::endl;
+				}
+				else
+				{
+					std::cout<<"No pudeeeee mover el brazo, sad sad sad (pre-grasp)"<<std::endl;
+				}
+
+				FestinoNavigation::moveDist(1.00,30000);
 				state = SM_FIND_PIECE;
 				break;
 			}
@@ -323,9 +354,9 @@ int main(int argc, char** argv){
 				//-----RETRAER BRAZO (coordenadas opcionales)-----
 				//------------------------------------------------
 				srv.request.manipBlocker = false;
-				srv.request.x = 0.1;
+				srv.request.x = 0.04;
 				srv.request.y = 0.0;
-				srv.request.z = 0.15;
+				srv.request.z = 0.18;
 				srv.request.pitch = 0.0;
 
 				if(client.call(srv))
@@ -348,13 +379,6 @@ int main(int argc, char** argv){
 				//Se mueve hacia atras 25cm
 				//FestinoNavigation::moveDist(-0.45, 30000);
 				std::cout << "Se mueve hacia atras 25 cm" << std::endl;	
-				posNew.linear.x = -0.25;
-				posNew.linear.y = 0.00;
-				for(float x = 0; x<= posNew.linear.x; x+=0.05)
-				{
-					pub_cmd_vel.publish(posNew);
-					ros::Duration(1,0).sleep();
-				}
 
 				FestinoNavigation::moveDistAngle(0.0, 1.45, 30000);
 				FestinoNavigation::moveDist(0.65,30000);
@@ -397,8 +421,30 @@ int main(int argc, char** argv){
 			case SM_GRASPING_DELIVER:
 			{
 				std::cout << "State machine: SM_GRASPING_DELIVER" << std::endl;	
+				srv.request.manipBlocker = false;
+				srv.request.x = -0.05;
+				srv.request.y = -0.18;
+				srv.request.z = -0.06;
+				srv.request.pitch = 1.75;
 
-				//Coordenates for pre-grasping
+				if(client.call(srv))
+				{
+					std::cout<<"Moviendo el brazo (pre-grasping)"<<std::endl;
+				}
+				else
+				{
+					std::cout<<"No pudeeeee mover el brazo (pre-grasping), sad sad sad"<<std::endl;
+				}
+
+				FestinoNavigation::moveDist(-1.0,30000);
+
+				//--------------------------------------
+				//-----AQUI VA LO DE ALINEAAAAAAAAR-----
+				//--------------------------------------
+
+
+				FestinoNavigation::moveDist(1.0,30000);
+
 				srv.request.manipBlocker = false;
 				srv.request.x = 0.23;
 				srv.request.y = 0.035;
@@ -489,43 +535,21 @@ int main(int argc, char** argv){
 				//Se mueve hacia atras 25cm
 				std::cout << "Se mueve hacia atras 25 cm" << std::endl;
 				//FestinoNavigation::moveDist(-0.25, 30000);
-				posNew.linear.x = -0.25;
-				posNew.linear.y = 0.00;
-				for(float x = 0; x<= posNew.linear.x; x+=0.05)
-				{
-					pub_cmd_vel.publish(posNew);
-					ros::Duration(1,0).sleep();
-				}
 
 				FestinoNavigation::moveDistAngle(0.0, -1.45, 30000);
+				FestinoNavigation::moveDist(0.60,30000);
 
-				posNew.linear.x = 0.40;
-				posNew.linear.y = 0.00;
-				for(float x = 0; x<= posNew.linear.x; x+=0.05)
-				{
-					pub_cmd_vel.publish(posNew);
-					ros::Duration(1,0).sleep();
-				}
 
 				FestinoNavigation::moveDistAngle(0.0, 1.45, 30000);
+				FestinoNavigation::moveDist(0.95,30000);
 
-				posNew.linear.x = 0.85;
-				posNew.linear.y = 0.00;
-				for(float x = 0; x<= posNew.linear.x; x+=0.05)
-				{
-					pub_cmd_vel.publish(posNew);
-					ros::Duration(1,0).sleep();
-				}
 
 				FestinoNavigation::moveDistAngle(0.0, 1.45 ,30000);
-				posNew.linear.x = 0.40;
-				posNew.linear.y = 0.00;
-				for(float x = 0; x<= posNew.linear.x; x+=0.05)
-				{
-					pub_cmd_vel.publish(posNew);
-					ros::Duration(1,0).sleep();
-				}
+				FestinoNavigation::moveDist(0.65,30000);
+
+				
 				FestinoNavigation::moveDistAngle(0.0, 1.45 ,30000);
+
 				ros::Duration(3, 0).sleep();
 
 				conde++;
