@@ -188,7 +188,8 @@ class CppParam(object):
         return 'true' if value else 'false'
 
     def _format_string(self, value):
-        return '"%s"' % str(value or '').encode('string_escape')
+        return '"%s"' % str(value or '').encode('unicode_escape')
+        #Ubuntu18?? return '"%s"' % str(value or '').encode('string_escape')
 
 
 class Generator(object):
