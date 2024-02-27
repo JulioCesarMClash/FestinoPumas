@@ -1,2 +1,0 @@
-Robotino_pkgs/robotino_description:Robotino_pkgs/robotino_msgs
--DCATKIN_DEVEL_PREFIX=/home/juliobotic/FestinoPumas/PC_user/devel -DCMAKE_INSTALL_PREFIX=/home/juliobotic/FestinoPumas/PC_user/install -G Unix Makefiles
