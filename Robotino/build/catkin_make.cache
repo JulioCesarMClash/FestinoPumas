@@ -1,2 +1,0 @@
-Hardware/learning_joy:Hardware/robotino_description:Hardware/robotino_msgs:Hardware/robotino_node
--DCATKIN_DEVEL_PREFIX=/home/robotino/FestinoPumas/Robotino/devel -DCMAKE_INSTALL_PREFIX=/home/robotino/FestinoPumas/Robotino/install -G Unix Makefiles
