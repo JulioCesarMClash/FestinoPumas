@@ -235,7 +235,7 @@ int main(int argc, char** argv)
     tf::TransformListener tf_listener;
     ros::Rate loop(RATE);
 
-    float max_linear_speed  = 0.3;
+    float max_linear_speed  = 0.7;
     float min_linear_speed  = 0.05;
     float max_angular_speed = 1.0;
     float alpha = 0.6548;
