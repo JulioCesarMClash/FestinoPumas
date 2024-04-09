@@ -4,7 +4,7 @@
 
 	<include file="$(find pocketsphinx)/launch/pocketsphinx.launch"> </include>	
 
-	<include file="$(find config_files)/launch/navigation.launch"> </include>	
+	<!--include file="$(find config_files)/launch/navigation.launch"> </include-->	
 
 	<node name="streaming_keypoints" pkg="human_pose_estimation" type="streaming_keypoints"/>
 	<node name="pointing_hands_detector" pkg="human_pose_estimation" type="pointing_hands_detector.py"/>

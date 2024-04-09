@@ -1,0 +1,27 @@
+########## Bibliotecas a installar ##########
+
+#~~~~~~~~~ Basicas ~~~~~~~~~#
+sudo apt install ros-noetic-random-numbers
+
+#~~~~~~~~~ Speaker ~~~~~~~~~#
+
+sudo apt update
+sudo apt install espeak
+sudo apt install python3-pip
+pip install pyttsx3
+sudo apt install mbrola
+sudo apt install mbrola-us1
+
+#~~~~~~~~~ PocketSphinx ~~~~~~~~~#
+
+sudo apt-get install cmake
+sudo apt-get install git
+pip install pocketsphinx
+sudo apt update 
+sudo apt install swig
+sudo apt install python3-pyaudio
+sudo apt-get -y install pocketsphinx
+sudo apt install pocketsphinx-en-us
+
+
+

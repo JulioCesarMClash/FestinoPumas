@@ -38,8 +38,14 @@ entrance:
 - qy: 0.0
 - qz: -0.01
 - qw: -1.0
-<<<<<<< HEAD
-=======
+exit:
+- x: 6.122
+- y: -2.612
+- theta: 0.462
+- qx: 0.0
+- qy: 0.0
+- qz: 0.229
+- qw: 0.973
 exit_prueba:
 - x: -0.57
 - y: 0.435
@@ -48,7 +54,14 @@ exit_prueba:
 - qy: 0.0
 - qz: 0.598
 - qw: 0.801
->>>>>>> 1ada5179c760c920b47f6ece57ac31a041c63e32
+inspection_point:
+- x: 4.177
+- y: -3.583
+- theta: -0.006
+- qx: 0.0
+- qy: 0.0
+- qz: -0.003
+- qw: 0.999
 kitchen:
 - x: 7.3
 - y: -2.6

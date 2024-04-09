@@ -109,7 +109,7 @@ bool FestinoHRI::frontalLegsFound()
 
 void FestinoHRI::callbackLegsFound(const std_msgs::Bool::ConstPtr& msg)
 {
-    // std::cout << "FestinoHRI.->Legs found signal received!" << std::endl;
+     std::cout << "FestinoHRI.->Legs found signal received!" << msg->data << ":V" << std::endl;
     FestinoHRI::_legsFound = msg->data;
 }
 

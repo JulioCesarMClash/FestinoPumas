@@ -320,7 +320,6 @@ int main(int argc, char** argv){
 						FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
 					}
 
-	    			
 					state = SM_FIND_PERSON;
 	    		}
 	    		break;

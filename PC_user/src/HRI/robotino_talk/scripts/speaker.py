@@ -6,12 +6,14 @@ import subprocess
 from std_msgs.msg import String
 
 def speakcall(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    rospy.loginfo(rospy.get_caller_id() + "\n I heard \n %s", data.data)
     text = data.data
     subprocess.Popen(["espeak", "-v", "mb-us1","-s", "125", text])
 
     
 def listener():
+
+    print("Speaker node Ready")
 
     rospy.init_node("speaker_node")
 

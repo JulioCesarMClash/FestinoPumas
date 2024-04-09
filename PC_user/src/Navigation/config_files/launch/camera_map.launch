@@ -1,0 +1,3 @@
+<launch>
+<node pkg="tf" type="static_transform_publisher" name="camera_to_map_link" args="-5 0 0 0 0 0 map camera_link  50"/>
+</launch>
