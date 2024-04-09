@@ -95,6 +95,7 @@ bool callback_recog_obj(vision_msgs::RecognizeObject::Request& req, vision_msgs:
     std::cout << "ObjReco.->Trying to recognize " << req.name << " by Jebug's method." << std::endl;
     cv::Mat img, cloud;
     //transform_cloud_wrt_base(req.point_cloud, img, cloud);
+    return true;
 }
 
 bool callback_train_object(vision_msgs::TrainObject::Request& req, vision_msgs::TrainObject::Response& resp)
