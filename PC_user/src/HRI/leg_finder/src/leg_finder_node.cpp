@@ -168,6 +168,8 @@ bool obst_in_front(sensor_msgs::LaserScan& laser, float xmin, float xmax, float 
     //std::cout << "leg_finder_node.-> quantize : " << quantize << std::endl;
     if(quantize >= thr)
         return true;
+
+    return false;
 }
 
 Eigen::Affine3d get_lidar_position()
