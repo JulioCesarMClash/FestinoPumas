@@ -8,9 +8,9 @@
 	<arg name="_wavpath" value="_wavpath:=none"/>
 	<arg name="_output" value="_output:=/sphinx_result"/>
 
-  <!--node name="pocketsphinx_recognizer" pkg="pocketsphinx" type="recognizer.py" output="screen" args="$(arg _lm) $(arg _dict) $(arg _kws) $(arg _jsgf) $(arg _stream) $(arg _wavpath) $(arg _output)">
+  <node name="pocketsphinx_recognizer" pkg="pocketsphinx" type="recognizer.py" output="screen" args="$(arg _lm) $(arg _dict) $(arg _kws) $(arg _jsgf) $(arg _stream) $(arg _wavpath) $(arg _output)">
   	<param name="recognize_threshold" value="0.2" type="double"/>
 	<param name="recognition_time" value="7.0" type="double"/>
-	</node-->
+	</node>
 
 </launch>
