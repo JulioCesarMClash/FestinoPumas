@@ -49,7 +49,7 @@ def read_tf(t):
 
 def read_yaml(known_locations_file = '/known_locations.yaml'):
     
-    file_path = '/home/robocup20/FestinoPumas/PC_user/src/Navigation/config_files' + known_locations_file
+    file_path = '../../../Navigation/config_files' + known_locations_file
 
     with open(file_path, 'r') as file:
         content = yaml.safe_load(file)
