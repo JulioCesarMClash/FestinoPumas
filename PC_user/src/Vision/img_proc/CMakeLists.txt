@@ -52,13 +52,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
  FILES
+MPS_Detector.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
  FILES
  Find_piece_Srv.srv
- Find_tag_Srv.srv		
+ Find_tag_Srv.srv
+ Align_Srv.srv	
 )
 
 ## Generate actions in the 'action' folder

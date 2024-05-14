@@ -13,8 +13,14 @@
 
 #include <Festino_arm_moveit_demos/srv_arm.h>
 
+#include <tf/transform_listener.h>
+#include "geometry_msgs/PoseStamped.h"
+
+
+
 void move_effector(float x, float y, float z, float pitch);
 void move_gripper(bool state);
+void kinect_hide(bool flag);
 bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_moveit_demos::srv_arm::Response &res);
 
 //Variables for inverse kinematics
@@ -26,6 +32,7 @@ float pitch = 0;
 //Variables for gripper
 bool gripperState = false;
 bool manipBlocker = false;
+bool kinect_flag = false;
 
 
 int main(int argc, char** argv)
@@ -39,8 +46,22 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+void kinect_hide()
+{
+	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+	moveit::planning_interface::MoveGroupInterface group("arm");
+	group.setPlanningTime(4.0);
+	group.setJointValueTarget("arm_shoulder_pan_joint", 2.40);
+	group.setJointValueTarget("arm_shoulder_lift_joint", 1.32);
+	group.setJointValueTarget("arm_elbow_flex_joint", 0.31);
+	group.setJointValueTarget("arm_wrist_flex_joint", 0.61);
+	group.asyncMove();
+}
+
 void move_effector(float x, float y, float z, float pitch)
 {
+	tf::TransformListener listener;
+	tf::StampedTransform transform;
 	moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 	moveit::planning_interface::MoveGroupInterface group("arm");
 	group.setPlanningTime(4.0);
@@ -51,6 +72,8 @@ void move_effector(float x, float y, float z, float pitch)
 	geometry_msgs::PoseStamped target_pose1;
 	orientation.setRPY(0, pitch , atan2(y,x));
 
+	geometry_msgs::PoseStamped det_mps;
+
 	target_pose1.header.frame_id = "arm_base_link";
 	target_pose1.pose.position.x = x;
 	target_pose1.pose.position.y = y;
@@ -59,6 +82,8 @@ void move_effector(float x, float y, float z, float pitch)
 
 	group.setPoseTarget(target_pose1);
 	group.asyncMove();
+
+	sleep(2.0);
 
 	/*moveit::planning_interface::MoveGroupInterface group("gripper");
 	group.setPlanningTime(4.0);
@@ -91,6 +116,7 @@ void move_gripper(bool state)
 
 bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_moveit_demos::srv_arm::Response &res)
 {
+	res.success = false;
 	x = req.x;
 	y = req.y;
 	z = req.z;
@@ -98,6 +124,7 @@ bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_m
 
 	gripperState = req.gripperState;
 	manipBlocker = req.manipBlocker;
+	kinect_flag  = req.kinect_hide;
 
 
 	if (manipBlocker == true)
@@ -107,7 +134,13 @@ bool callback_arm(Festino_arm_moveit_demos::srv_arm::Request &req, Festino_arm_m
 
 	if(manipBlocker == false)
 	{
-		move_effector(x,y,z,pitch);
+		if(kinect_flag == true)
+		{
+			kinect_hide();
+		}
+		else{
+			move_effector(x,y,z,pitch);
+		}
 	}
 
 	res.success = true;

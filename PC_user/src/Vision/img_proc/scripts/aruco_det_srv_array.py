@@ -35,7 +35,6 @@ class FindTagNode:
     self.bridge = CvBridge()
 
     self.depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,self.callback_depth_points)
-    self.aruco_pos_pub     = rospy.Publisher("/aruco_pos",PointStamped,queue_size=10)
 
     self.find_tag_service = rospy.Service('/vision/find_tag/point_stamped', Find_tag_Srv, self.find_tag)
 
@@ -108,7 +107,7 @@ class FindTagNode:
                 #self.mps_name_pub.publish(mps_name)
 
                 if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
-                    aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                    aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                     br_ar = tf.TransformBroadcaster()
                     br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                     aruco_pose_aux.point.x = aruco_pose.point.x

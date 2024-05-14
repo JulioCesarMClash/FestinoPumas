@@ -4,5 +4,6 @@ float64 y
 float64 z
 float64 pitch
 bool gripperState
+bool kinect_hide
 ---
 bool success
