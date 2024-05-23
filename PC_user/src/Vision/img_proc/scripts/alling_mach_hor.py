@@ -10,15 +10,17 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from std_msgs.msg import Bool
+from img_proc.srv import *
 
 
 class robot:
     def __init__(self):
         self.image = None
         self.sub_img    = rospy.Subscriber("/camera/rgb/image_color", Image, self.callback)
-        self.sub_alling = rospy.Subscriber("/alling_flag", Bool, self.callback_alling_flag)
+        #self.sub_align = rospy.Subscriber("/align_flag", Bool, self.callback_align_flag)
         #self.pub_vel   = rospy.Publisher("/hardware/mobile_base/cmd_vel",Twist,queue_size=1)
         self.pub_vel    = rospy.Publisher("/cmd_vel",Twist,queue_size=1)
+        #self.find_piece_service = rospy.Service('/vision/align', Align_Srv, self.align)
 
         self.slope = 0
     
@@ -28,14 +30,13 @@ class robot:
         self.image = img
         #self.crop_image()
         self.line_detector()
-        self.alling()
+        self.align()
         cv.imshow("Kinect_image",self.image)
         cv.waitKey(1)
 
-    def callback_alling_flag(data):
-        global begin_flag
-        print(begin_flag)
-        begin_flag = data
+    #def callback_align_flag(self,data):
+    #    global begin_flag
+    #    begin_flag = data
 
     def crop_image(self):
         img= self.image
@@ -81,34 +82,37 @@ class robot:
             average = sum(slopes)/len(slopes)     
         self.slope = average
     
-    def alling(self):
-        if begin_flag:
-            print("begin please")
-        error = self.slope
-        Kp = -6.0
-        Kp_m = 6.0
-        vel = Twist()
-        print(error)
-        if abs(error) > 0.02:
-            if (error < 0) and (error != 1) :
-                vel.angular.z = Kp_m*abs(error)
-                error = self.slope
-            elif error > 0 and (error != 1) :
-                vel.angular.z = Kp*abs(error)
-                error = self.slope
-        else: #error == 0:
-            vel.linear.x = 0
-            vel.linear.y = 0
-            vel.angular.z = 0
-            print("Lined up")
+    def align(self):
+        #global begin_flag
+        #print("flag: ", begin_flag)
+        if True:
+            #print("flag: ", begin_flag)
+            error = self.slope
+            Kp = -6.0
+            Kp_m = 6.0
+            vel = Twist()
+            print(error)
+            if abs(error) > 0.02:
+                if (error < 0) and (error != 1) :
+                    vel.angular.z = Kp_m*abs(error)
+                    error = self.slope
+                elif error > 0 and (error != 1) :
+                    vel.angular.z = Kp*abs(error)
+                    error = self.slope
+            else: #error == 0:
+                vel.linear.x = 0
+                vel.linear.y = 0
+                vel.angular.z = 0
+                print("Lined up")
 
-        self.pub_vel.publish(vel)
-        rospy.sleep(0.05)
-            
+            self.pub_vel.publish(vel)
+            rospy.sleep(0.05)
+        else:
+            print("Not activated")
         return True
         
-rospy.init_node("Alling")
+rospy.init_node("Align")
 rate = rospy.Rate(0.1)
-begin_flag = False
+print(" \n Aligning node")
 robot = robot()
 rospy.spin()

@@ -267,7 +267,8 @@ def callback_depth_points(data):
             mps_data_pub.publish(mps_info)
 
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
-                aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                 br_ar = tf.TransformBroadcaster()
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
