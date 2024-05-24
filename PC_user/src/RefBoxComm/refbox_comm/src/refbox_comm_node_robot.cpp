@@ -22,8 +22,8 @@
 #define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-#define ROBOT_NAME "Festino"
-#define ROBOT_NUMBER 1
+#define ROBOT_NAME "Festina"
+#define ROBOT_NUMBER 2
 #define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
 #define PUBLIC_PORT_R 4445
@@ -121,13 +121,13 @@ class Handler {
                 ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 ROS_INFO_STREAM(""<< game_state->ShortDebugString());
 
-                if(!team_color_set){
+                //if(!team_color_set){
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
                         m_is_cyan = true;
-                        team_color_set = true;
+                  //      team_color_set = true;
                     }
-                }
+                //}
             }
         }
 
@@ -142,7 +142,7 @@ class Handler {
         // This method should notifies the refbox of a robot
         void sendBeaconSignal() {
             while (m_running) {
-                if(team_color_set) {
+                //if(team_color_set) {
                     auto cur_time = ros::Time::now();
                     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> now =
                     std::chrono::high_resolution_clock::now();
@@ -158,14 +158,14 @@ class Handler {
                     Pose2D *pose = msg->mutable_pose();
                     
                     /* Create Semaphore */
-                    while(!pose_sem_th.load()){
-                        std::this_thread::yield();
-                    }
+                    //while(!pose_sem_th.load()){
+                      //  std::this_thread::yield();
+                    //}
                     pose->set_x(pose_x);
                     pose->set_y(pose_y);
                     pose->set_ori(pose_ori);
-                    pose_sem_main.store(true);
-                    pose_sem_th.store(false);
+                    //pose_sem_main.store(true);
+                    //pose_sem_th.store(false);
                     /* Create Semaphore */
 
                     Time *posetimestamp = pose->mutable_timestamp();
@@ -183,7 +183,7 @@ class Handler {
 
                     m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
-                }
+                //}
             }
         }
 };
@@ -221,14 +221,14 @@ int main(int argc, char** argv)
         }
 
         /* Create Semaphore */
-        while(!pose_sem_main){
-            std::this_thread::yield();
-        }
+        //while(!pose_sem_main.load()){
+          //  std::this_thread::yield();
+        //}
         pose_y = transform_rob.getOrigin().x();
 	    pose_x = transform_rob.getOrigin().y();
         pose_ori = 0.0f;
-        pose_sem_th.store(true);
-        pose_sem_main.store(false);
+        //pose_sem_th.store(true);
+        //pose_sem_main.store(false);
         /* Create Semaphore */
 
         std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
