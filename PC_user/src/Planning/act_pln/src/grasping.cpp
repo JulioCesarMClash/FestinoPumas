@@ -28,7 +28,7 @@
 #include "festino_tools/FestinoKnowledge.h"
 
 #include "img_proc/Find_piece_Srv.h"
-#include "Festino_arm_moveit_demos/srv_arm.h"
+#include "festino_arm_moveit_demos/srv_arm.h"
 
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/Twist.h"
@@ -137,8 +137,8 @@ int main(int argc, char** argv){
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
     
-    ros::ServiceClient client = n.serviceClient<Festino_arm_moveit_demos::srv_arm>("srv_arm");
-    Festino_arm_moveit_demos::srv_arm srv;
+    ros::ServiceClient client = n.serviceClient<festino_arm_moveit_demos::srv_arm>("srv_arm");
+    festino_arm_moveit_demos::srv_arm srv;
 
     ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     img_proc::Find_piece_Srv srvFindPiece;
