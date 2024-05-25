@@ -53,8 +53,8 @@
 //#define HOST "localhost"
 
 //ROBOCUP
-#define HOST "172.26.255.255"
-
+//#define HOST "172.26.255.255"
+#define HOST "192.168.0.255"
 
 //#define HOST "172.23.134.255"
 #define TEAM_COLOR "MAGENTA"
@@ -63,11 +63,13 @@
 #define ROBOT_NAME "Festino"
 #define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
-#define PUBLIC_PORT_R 4445
+#define PUBLIC_PORT_R 4445//4445
 #define CYAN_PORT_S 4441
-#define CYAN_PORT_R 4446
-#define MAGENTA_PORT_S 4442
-#define MAGENTA_PORT_R 4447
+#define CYAN_PORT_R 4441//4446
+#define MAGENTA_PORT_S 4447
+#define MAGENTA_PORT_R 4442//4447
+
+#define TCPPORT 9002
 
 #include <iostream>
 #include <typeinfo>
@@ -680,7 +682,7 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
 
         void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
         {
-            ROS_INFO_STREAM("-------------------------------Recv message on private A------------------------------------------------------------------");
+            ROS_INFO_STREAM("-------------------------------\n\n\n\n\nRecv message on private A\n\n\n\n\n------------------------------------------------------------------");
             //ROS_INFO_STREAM(""<< msg->ShortDebugString() << " typeOOOO " << msg_type);
             switch (msg_type) {
                 case 502://AGENT TASK / AGENT TASK
@@ -1093,7 +1095,7 @@ pub_zone.publish(el_msg);
                 }
            }
 
-            ROS_INFO_STREAM("-------------------------------Recv message on private B----------------------------------------------------------------");
+            ROS_INFO_STREAM("-------------------------------\n\n\n\n\nRecv message on private B\n\n\n\n\n----------------------------------------------------------------");
 
             /*
             std::shared_ptr<OrderInfo> order_info;
@@ -1208,10 +1210,11 @@ pub_zone.publish(el_msg);
                     ROS_INFO_STREAM("------2 GAME STATE / GAME STATE--------- ");
                     
                     if(!crypto_setup){
-                        ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
+                        ROS_INFO_STREAM("------          \n\n\n\n\nCRYPTO SETUP\n\n\n\n\n      --------- ");
 //port conf
                         crypto_setup = true;
                         if(TEAM_COLOR == "CYAN"){
+                            ROS_INFO_STREAM("------          \n\n\n\n\nCyan\n\n\n\n\n      --------- ");
                             //if(local_refbox){
 //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, m_mr,CRYPTO_KEY);
   //                          }else{
@@ -1225,6 +1228,7 @@ pub_zone.publish(el_msg);
       //                      if(local_refbox){
 //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
   //                          } else {
+    ROS_INFO_STREAM("------          \n\n\n\n\n Magenta SETUP\n\n\n\n\n      --------- ");
                                 m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_R, MAGENTA_PORT_S, m_mr,CRYPTO_KEY);
     //                        }
                             //m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_SENDPORT, MAGENTA_RECVPORT, m_mr,CRYPTO_KEY);
@@ -1619,6 +1623,75 @@ void callbackMachineReport(const std_msgs::String::ConstPtr& machine_data){
      p->reportAMachine(machine_data);
 }
 
+void single_robot_communication(int robot_no, int client_socket){
+    std::cout << "\n\nattending robot" << std::endl;
+    std::cout << " no " << robot_no << "\n\n"<< std::endl;
+    unsigned int read_size;
+    unsigned int write_size;
+    unsigned char buffer[256];
+
+    while(true){
+        //read_size = recv(client_socket , &buffer , sizeof(unsigned char), 0);
+        read_size = read(client_socket, buffer, 255);
+
+        std::cout << "message from robot " << robot_no << " is: " << buffer << std::endl;
+
+        std::ostringstream oss;
+        oss << "hello robot no " << robot_no << " Im the main server ";
+
+        write_size = write(client_socket, oss.str().c_str(), oss.str().size());
+
+    }
+}
+
+
+std::thread robot_connection_threads[3];
+void robots_connection(){
+
+    int clients[3];
+    int server_socket_desc, c;
+    struct sockaddr_in server, client;
+    server_socket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (server_socket_desc == -1){
+        printf("Could not create TCP socket");
+    }
+
+      //Prepare the sockaddr_in structure
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;//When INADDR_ANY is specified in the bind call, the socket will be bound to all local interfaces.
+    server.sin_port = htons( TCPPORT );
+
+
+    if( bind(server_socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0){
+
+        //print the error message
+        perror("bind TCP failed. Error");
+        //return -1;
+        return;
+    }
+  
+    puts("bind TCP done");
+    listen(server_socket_desc , 3);
+
+    c = sizeof(struct sockaddr_in);
+
+    int robots_connected = 0;
+
+    while(true){
+        ROS_INFO_STREAM("\n\n\n\n\n------         Waiting for incoming connections TCP TALKING TO ROBOTS      ---------\n\n\n\n\n");
+        clients[robots_connected] = accept(server_socket_desc, (struct sockaddr *)&client, (socklen_t*)&c);
+        if (clients[robots_connected] < 0){
+            perror("robot connection failed");
+            //return -1;
+            return;
+        } else {
+            puts("Connection accepted");
+            
+            robot_connection_threads[robots_connected] = std::thread(single_robot_communication, robots_connected, clients[robots_connected]);
+            robots_connected++;
+        }
+    }
+}
 
 
 int main(int argc, char** argv) 
@@ -1632,6 +1705,8 @@ int main(int argc, char** argv)
         //Handler p(HOST, SENDPORT, SENDPORT);
         //ORIGINAL AQUI
         //p = new Handler(HOST, PUBLIC_PORT);
+        
+        
         p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
 /*
     if(HOST == "localhost"){
@@ -1653,6 +1728,8 @@ int main(int argc, char** argv)
 //subRobotPose  = n.subscribe("/TODO_robot_pose", 1, callbackRobotPose);
  //---------------------------------------NAVIGATION CHALLENGE
     //p(HOST, PUBLIC_PORT);
+
+    //std::thread server_connection_thread(robots_connection);
 
     ros::Rate r(10);
     while (ros::ok()) {
