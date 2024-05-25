@@ -22,8 +22,6 @@
 //#define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-//#define ROBOT_NAME "Festino_macro"
-//#define ROBOT_NUMBER 6
 //#define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
 #define PUBLIC_PORT_R 4445
@@ -39,9 +37,6 @@ using namespace protobuf_comm;
         float pose_y = 0.0f;
         float pose_ori = 0.0f;
 //--------------------------------ROBOT POSE
-
-    std::atomic<bool> pose_sem_th;
-    std::atomic<bool> pose_sem_main;
 
 class Handler {
 
@@ -68,7 +63,7 @@ class Handler {
         std::string m_robot_name = "Festino";
         int m_robot_number = 1;
         //Default values 2
-        bool m_is_cyan;
+        bool m_is_cyan = false;
 
         bool m_running;
         bool team_color_set;
@@ -103,7 +98,6 @@ class Handler {
             m_sequence_nr_ = 0;
 
             m_team_name = TEAM_NAME;
-            m_is_cyan = false;
 
             m_running = true;
             team_color_set = false;
@@ -128,8 +122,10 @@ class Handler {
 
         void handleRefboxMessage(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
             std::shared_ptr<GameState> game_state;
+            ROS_INFO_STREAM("Message " << msg_type);
             if ((game_state = std::dynamic_pointer_cast<GameState>(msg)))
             {
+            ROS_INFO_STREAM("Game State");
                 ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 ROS_INFO_STREAM(""<< game_state->ShortDebugString());
 
@@ -185,7 +181,7 @@ class Handler {
                     posetimestamp->set_nsec(time->nsec());
 
                     msg->set_seq(++m_sequence_nr_);
-                    msg->set_number(ROBOT_NUMBER);
+                    msg->set_number(m_robot_number);
                     msg->set_team_name(m_team_name);
                     msg->set_peer_name(m_robot_name);
 
@@ -205,9 +201,6 @@ Handler* p;
 
 int main(int argc, char** argv) 
 {
-
-    pose_sem_th.store(false);
-    pose_sem_main.store(true);
 
     ros::init(argc, argv, "refbox_comm_node");
     ros::NodeHandle n;
