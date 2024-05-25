@@ -19,12 +19,12 @@
 //Lab
 #define HOST "192.168.0.255"
 
-#define TEAM_COLOR "MAGENTA"
+//#define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-#define ROBOT_NAME "Festina"
-#define ROBOT_NUMBER 2
-#define CRYPTO_KEY "randomkey"
+//#define ROBOT_NAME "Festino_macro"
+//#define ROBOT_NUMBER 6
+//#define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
 #define PUBLIC_PORT_R 4445
 
@@ -64,7 +64,10 @@ class Handler {
         unsigned long int m_sequence_nr_;
 
         std::string m_team_name = TEAM_NAME;
-        std::string m_robot_name = ROBOT_NAME;
+        //Default values 1
+        std::string m_robot_name = "Festino";
+        int m_robot_number = 1;
+        //Default values 2
         bool m_is_cyan;
 
         bool m_running;
@@ -78,15 +81,24 @@ class Handler {
             , m_port_r(port_r)
             , m_mr(new MessageRegister()) {
 
+            if(ros::param::has("~robot_name")){
+                ros::param::get("~robot_name", m_robot_name);
+            }
+            if(ros::param::has("~robot_number")){
+                ros::param::get("~robot_number", m_robot_number);
+            }
+
+            ROS_INFO_STREAM("Sending NAME: " << m_robot_name << "\t Sending NUMBER: " << m_robot_number);
+
             m_mr->add_message_type<BeaconSignal>();
 
             m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
 
-            /*
+            
             m_public_peer->signal_received().connect(
                 boost::bind(&Handler::handleRefboxMessage, this, _1, _2, _3, _4)
             );
-            */
+            
 
             m_sequence_nr_ = 0;
 
