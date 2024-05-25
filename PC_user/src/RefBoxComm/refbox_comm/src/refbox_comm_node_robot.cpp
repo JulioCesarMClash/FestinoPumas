@@ -22,8 +22,8 @@
 #define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-//#define ROBOT_NAME "Festino_macro"
-//#define ROBOT_NUMBER 6
+#define ROBOT_NAME "Festina"
+#define ROBOT_NUMBER 2
 #define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
 #define PUBLIC_PORT_R 4445
@@ -64,7 +64,7 @@ class Handler {
         unsigned long int m_sequence_nr_;
 
         std::string m_team_name = TEAM_NAME;
-        std::string m_robot_name;
+        std::string m_robot_name = ROBOT_NAME;
         bool m_is_cyan;
 
         bool m_running;
@@ -72,28 +72,11 @@ class Handler {
 
         std::thread m_beacon_thread;
 
-        // Para recibir los parametros desde el Launch 1
-
-        int m_robot_number;
-
-        // Para recibir los parametros desde el Launch 2
-
     public:
         Handler(std::string host, int port_s, int port_r)
             : m_host(host), m_port_s(port_s)
             , m_port_r(port_r)
             , m_mr(new MessageRegister()) {
-
-
-            if(ros::param::has("robot_name")){
-                ros::param::get("robot_name", m_robot_name);
-                ROS_INFO_STREAM("entró al If :CCCCCCCCCCCCCCCC: ");    
-            }
-            if(ros::param::has("robot_number")){
-                ros::param::get("robot_number", m_robot_number);
-            }
-
-            ROS_INFO_STREAM("Sending NAME: " << m_robot_name << "Sending NUMBER" << m_robot_number);
 
             m_mr->add_message_type<BeaconSignal>();
 
@@ -142,9 +125,9 @@ class Handler {
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
                         m_is_cyan = true;
+                  //      team_color_set = true;
                     }
                 //}
-                    team_color_set = true;
             }
         }
 
@@ -159,7 +142,7 @@ class Handler {
         // This method should notifies the refbox of a robot
         void sendBeaconSignal() {
             while (m_running) {
-                if(team_color_set) {
+                //if(team_color_set) {
                     auto cur_time = ros::Time::now();
                     std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> now =
                     std::chrono::high_resolution_clock::now();
@@ -190,7 +173,7 @@ class Handler {
                     posetimestamp->set_nsec(time->nsec());
 
                     msg->set_seq(++m_sequence_nr_);
-                    msg->set_number(m_robot_number);
+                    msg->set_number(ROBOT_NUMBER);
                     msg->set_team_name(m_team_name);
                     msg->set_peer_name(m_robot_name);
 
@@ -200,7 +183,7 @@ class Handler {
 
                     m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                     std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
-                }
+                //}
             }
         }
 };
