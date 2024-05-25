@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(festino_arm_moveit_demos)
+
+find_package(catkin REQUIRED COMPONENTS
+  moveit_core
+  moveit_ros_planning_interface
+  roscpp
+  rospy
+  tf2_geometry_msgs
+  std_msgs
+  message_generation
+  geometry_msgs
+)
+
+add_service_files(
+  FILES
+  srv_arm.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS
+    moveit_core
+    moveit_ros_planning_interface
+    roscpp
+    tf2_geometry_msgs
+    message_runtime 
+)
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+
+
+
+add_executable(pick_place src/pick_place.cpp)
+
+add_executable(pruebaSrv src/pruebaSrv.cpp)
+
+target_link_libraries(pick_place ${catkin_LIBRARIES})
+
+target_link_libraries(pruebaSrv ${catkin_LIBRARIES})
