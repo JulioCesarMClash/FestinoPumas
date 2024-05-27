@@ -133,6 +133,7 @@ class Handler {
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
                         m_is_cyan = true;
+                        ROS_INFO_STREAM(" \n\n\n\n COLOR SET \n\n\n\n");
                   //      team_color_set = true;
                     }
                 //}
