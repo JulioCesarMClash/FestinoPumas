@@ -23,8 +23,8 @@
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
 //#define CRYPTO_KEY "randomkey"
-#define PUBLIC_PORT_S 4444
-#define PUBLIC_PORT_R 4445
+#define PUBLIC_PORT_S 4445
+#define PUBLIC_PORT_R 4444
 
 #include <iostream>
 #include <typeinfo>
@@ -33,9 +33,9 @@ using namespace std;
 using namespace protobuf_comm;
 
 //--------------------------------ROBOT POSE
-        float pose_x = 0.0f;
-        float pose_y = 0.0f;
-        float pose_ori = 0.0f;
+        float pose_x = 3.0f;
+        float pose_y = 2.0f;
+        float pose_ori = 45.0f;
 //--------------------------------ROBOT POSE
 
 class Handler {
@@ -86,8 +86,9 @@ class Handler {
             ROS_INFO_STREAM("Sending NAME: " << m_robot_name << "\t Sending NUMBER: " << m_robot_number);
 
             m_mr->add_message_type<BeaconSignal>();
+            m_mr->add_message_type<GameState>();
 
-            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, PUBLIC_PORT_R, PUBLIC_PORT_S, m_mr);
+            m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port_s, m_port_r, m_mr);
 
             
             m_public_peer->signal_received().connect(
@@ -128,15 +129,16 @@ class Handler {
             ROS_INFO_STREAM("Game State");
                 ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 ROS_INFO_STREAM(""<< game_state->ShortDebugString());
-
-                //if(!team_color_set){
+                
+                if(!team_color_set){
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
                         m_is_cyan = true;
                         ROS_INFO_STREAM(" \n\n\n\n COLOR SET \n\n\n\n");
-                  //      team_color_set = true;
                     }
-                //}
+                    team_color_set = true;
+                }
+                
             }
         }
 
@@ -151,48 +153,50 @@ class Handler {
         // This method should notifies the refbox of a robot
         void sendBeaconSignal() {
             while (m_running) {
-                //if(team_color_set) {
-                    auto cur_time = ros::Time::now();
-                    std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> now =
-                    std::chrono::high_resolution_clock::now();
-                    std::chrono::seconds seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
-                    std::chrono::nanoseconds nanoseconds = now.time_since_epoch() - seconds;
+                if(!team_color_set){
+                    continue;
+                }
 
-                    std::shared_ptr<BeaconSignal> msg(new BeaconSignal());
+                auto cur_time = ros::Time::now();
+                std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> now =
+                std::chrono::high_resolution_clock::now();
+                std::chrono::seconds seconds = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch());
+                std::chrono::nanoseconds nanoseconds = now.time_since_epoch() - seconds;
 
-                    Time *time = msg->mutable_time();
-                    time->set_sec(static_cast<google::protobuf::int64>(seconds.count()));
-                    time->set_nsec(static_cast<google::protobuf::int64>(nanoseconds.count()));
+                std::shared_ptr<BeaconSignal> msg(new BeaconSignal());
 
-                    Pose2D *pose = msg->mutable_pose();
+                Time *time = msg->mutable_time();
+                time->set_sec(static_cast<google::protobuf::int64>(seconds.count()));
+                time->set_nsec(static_cast<google::protobuf::int64>(nanoseconds.count()));
+
+                Pose2D *pose = msg->mutable_pose();
                     
-                    /* Create Semaphore */
-                    //while(!pose_sem_th.load()){
-                      //  std::this_thread::yield();
-                    //}
-                    pose->set_x(pose_x);
-                    pose->set_y(pose_y);
-                    pose->set_ori(pose_ori);
-                    //pose_sem_main.store(true);
-                    //pose_sem_th.store(false);
-                    /* Create Semaphore */
-
-                    Time *posetimestamp = pose->mutable_timestamp();
-                    posetimestamp->set_sec(time->sec());
-                    posetimestamp->set_nsec(time->nsec());
-
-                    msg->set_seq(++m_sequence_nr_);
-                    msg->set_number(m_robot_number);
-                    msg->set_team_name(m_team_name);
-                    msg->set_peer_name(m_robot_name);
-
-                    msg->set_team_color(m_is_cyan ? Team::CYAN : Team::MAGENTA);
-
-                    ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
-
-                    m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
+                /* Create Semaphore */
+                //while(!pose_sem_th.load()){
+                  //  std::this_thread::yield();
                 //}
+                pose->set_x(pose_x);
+                pose->set_y(pose_y);
+                pose->set_ori(pose_ori);
+                //pose_sem_main.store(true);
+                //pose_sem_th.store(false);
+                /* Create Semaphore */
+
+                Time *posetimestamp = pose->mutable_timestamp();
+                posetimestamp->set_sec(time->sec());
+                posetimestamp->set_nsec(time->nsec());
+
+                msg->set_seq(++m_sequence_nr_);
+                msg->set_number(m_robot_number);
+                msg->set_team_name(m_team_name);
+                msg->set_peer_name(m_robot_name);
+
+                msg->set_team_color(m_is_cyan ? Team::CYAN : Team::MAGENTA);
+
+                ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
+
+                m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
             }
         }
 };
@@ -230,8 +234,8 @@ int main(int argc, char** argv)
         //while(!pose_sem_main.load()){
           //  std::this_thread::yield();
         //}
-        pose_y = transform_rob.getOrigin().x();
-	    pose_x = transform_rob.getOrigin().y();
+        pose_x = transform_rob.getOrigin().x();
+	    pose_y = transform_rob.getOrigin().y();
         pose_ori = 0.0f;
         //pose_sem_th.store(true);
         //pose_sem_main.store(false);
