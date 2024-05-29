@@ -236,7 +236,10 @@ int main(int argc, char** argv)
         //}
         pose_x = transform_rob.getOrigin().x();
 	    pose_y = transform_rob.getOrigin().y();
-        pose_ori = 0.0f;
+        tfScalar yaw, pitch, roll;
+        tf::Matrix3x3 mat(transform_rob.getRotation());
+        mat.getEulerYPR(yaw, pitch, roll);
+        pose_ori = yaw;
         //pose_sem_th.store(true);
         //pose_sem_main.store(false);
         /* Create Semaphore */
