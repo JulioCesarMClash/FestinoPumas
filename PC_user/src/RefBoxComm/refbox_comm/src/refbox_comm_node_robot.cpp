@@ -127,14 +127,16 @@ class Handler {
             std::shared_ptr<GameState> game_state;
             if ((game_state = std::dynamic_pointer_cast<GameState>(msg)))
             {
-                ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
-                ROS_INFO_STREAM(""<< game_state->ShortDebugString());
+                //ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
+                //ROS_INFO_STREAM(""<< game_state->ShortDebugString());
                 
                 if(!team_color_set){
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
                         m_is_cyan = true;
-                        ROS_INFO_STREAM(" \n\n\n\n COLOR SET \n\n\n\n");
+                        ROS_INFO_STREAM("COLOR SET CYAN ");
+                    } else {
+                        ROS_INFO_STREAM("COLOR SET MAGENTA ");
                     }
                     team_color_set = true;
                 }
@@ -193,7 +195,7 @@ class Handler {
 
                 msg->set_team_color(m_is_cyan ? Team::CYAN : Team::MAGENTA);
 
-                ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
+                //ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
 
                 m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
@@ -262,7 +264,7 @@ int main(int argc, char** argv)
         pose_sem_main.store(false);
         /* Create Semaphore */
 
-        std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
+        //std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
 
         ros::spinOnce();
     }
