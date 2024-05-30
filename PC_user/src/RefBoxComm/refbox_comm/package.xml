@@ -55,7 +55,6 @@
   <build_depend>protobuf_comm</build_depend>
   <build_depend>refbox_protobuf_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  
 
 
 
@@ -69,8 +68,6 @@
   <exec_depend>protobuf_comm</exec_depend>
   <exec_depend>refbox_protobuf_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-
-
 
 
   <!-- The export tag contains other, unspecified, tags -->

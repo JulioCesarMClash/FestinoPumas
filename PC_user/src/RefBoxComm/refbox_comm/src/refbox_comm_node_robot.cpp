@@ -36,6 +36,8 @@ using namespace protobuf_comm;
         float pose_x = 3.0f;
         float pose_y = 2.0f;
         float pose_ori = 45.0f;
+        std::atomic<bool> pose_sem_th;
+        std::atomic<bool> pose_sem_main;
 //--------------------------------ROBOT POSE
 
 class Handler {
@@ -123,10 +125,8 @@ class Handler {
 
         void handleRefboxMessage(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
             std::shared_ptr<GameState> game_state;
-            ROS_INFO_STREAM("Message " << msg_type);
             if ((game_state = std::dynamic_pointer_cast<GameState>(msg)))
             {
-            ROS_INFO_STREAM("Game State");
                 ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 ROS_INFO_STREAM(""<< game_state->ShortDebugString());
                 
@@ -172,14 +172,14 @@ class Handler {
                 Pose2D *pose = msg->mutable_pose();
                     
                 /* Create Semaphore */
-                //while(!pose_sem_th.load()){
-                  //  std::this_thread::yield();
-                //}
+                while(!pose_sem_th.load()){
+                    std::this_thread::yield();
+                }
                 pose->set_x(pose_x);
                 pose->set_y(pose_y);
                 pose->set_ori(pose_ori);
-                //pose_sem_main.store(true);
-                //pose_sem_th.store(false);
+                pose_sem_main.store(true);
+                pose_sem_th.store(false);
                 /* Create Semaphore */
 
                 Time *posetimestamp = pose->mutable_timestamp();
@@ -203,12 +203,19 @@ class Handler {
 
 Handler* p;
 
-
+/*//DEBUG
+float debug_value_x = 0.0f;
+float debug_value_y = 1.0f;
+float debug_value_ori = 2.0f;
+*/
 int main(int argc, char** argv) 
 {
 
     ros::init(argc, argv, "refbox_comm_node");
     ros::NodeHandle n;
+
+    pose_sem_main.store(true);
+    pose_sem_th.store(false);
         
     p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
 
@@ -220,6 +227,8 @@ int main(int argc, char** argv)
 	    tf::TransformListener listener_rob;
         tf::StampedTransform transform_rob;
 
+
+        /*//real
         try {
             listener_rob.waitForTransform("/base_link","/map",   
                                    ros::Time(0), ros::Duration(1000.0));
@@ -228,20 +237,29 @@ int main(int argc, char** argv)
         } catch (tf::TransformException ex){
             ROS_ERROR("%s",ex.what());
             ros::Duration(1.0).sleep();
-        }
+        }*/
 
         /* Create Semaphore */
-        //while(!pose_sem_main.load()){
-          //  std::this_thread::yield();
-        //}
+        while(!pose_sem_main.load()){
+            std::this_thread::yield();
+        }
+        /*//DEBUG
+        debug_value_x += 0.01f;
+        pose_x = debug_value_x;
+        debug_value_y += 0.01f;
+        pose_y = debug_value_y;
+        debug_value_ori += 1.0f;
+        pose_ori = debug_value_ori;
+        */
+        //real
         pose_x = transform_rob.getOrigin().x();
 	    pose_y = transform_rob.getOrigin().y();
         tfScalar yaw, pitch, roll;
         tf::Matrix3x3 mat(transform_rob.getRotation());
         mat.getEulerYPR(yaw, pitch, roll);
         pose_ori = yaw;
-        //pose_sem_th.store(true);
-        //pose_sem_main.store(false);
+        pose_sem_th.store(true);
+        pose_sem_main.store(false);
         /* Create Semaphore */
 
         std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
