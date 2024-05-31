@@ -1,7 +1,7 @@
 <launch>
 
 	<arg name="_lm" value="_lm:=/usr/share/pocketsphinx/model/en-us/en-us"/>
-	<arg name="_dict" value="_dict:=$(find pocketsphinx)/knowledge_base/masterDic.dict"/>
+	<arg name="_dict" value="_dict:=$(find pocketsphinx)/knowledge_base/masterDic2.dict"/>
 	<arg name="_kws" value="_kws:=$(find pocketsphinx)/knowledge_base/kwlist/voice_cmd.kwlist"/>
 	<arg name="_jsgf" value="_jsgf:=$(find pocketsphinx)/grammars/carryMyLuggage.jsgf"/>
 	<arg name="_stream" value="_stream:=true"/>

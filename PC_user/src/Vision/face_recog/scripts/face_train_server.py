@@ -13,7 +13,7 @@ import cv2 as cv
 class TrainingFaceNode:
     def __init__(self):
         rospy.init_node('face_training_node')
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_color', Image, self.image_callback)
         self.bridge = CvBridge()
         self.face_encodings = []
         self.train_face_service = rospy.Service('/vision/training_face/name', FaceTrainSrv, self.handle_face_training)
@@ -53,7 +53,7 @@ class TrainingFaceNode:
             response.message = "Cara entrenada con exito con el nombre " + req.name.data
         
         else: 
-
+            print(self.face_encodings)
             response.success = False
             response.message = "No hay un invitado o hay mas de uno en la escena. " 
 

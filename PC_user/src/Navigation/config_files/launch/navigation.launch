@@ -1,5 +1,5 @@
 <launch>  
-  <arg name="static_map_file"  default="$(find config_files)/maps/Lab_arena_hor_clean.yaml"/>
+  <arg name="static_map_file"  default="$(find config_files)/maps/Lab_el_meromero_clean.yaml"/>
   <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/Lab_arena_hor_blocked.yaml"/>
   <arg name="initial_pose_x" default="1.8"/>
   <arg name="initial_pose_y" default="-4.5"/>
@@ -66,7 +66,7 @@
     <param name="point_cloud_topic" value="$(arg point_cloud_topic)"/>
     <param name="laser_scan_topic" value="$(arg laser_scan_topic)"/>
     <param name="cloud_downsampling" value="$(arg cloud_downsampling)"/>
-    <param name="inflation_radius" value="0.2"/>
+    <param name="inflation_radius" value="0.1"/>
     <param name="cost_radius" value="0.5"/>
     <param name="max_x" value="$(arg max_x)"/>
     <param name="min_x" value="$(arg min_x)"/>

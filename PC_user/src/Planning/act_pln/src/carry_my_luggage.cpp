@@ -9,6 +9,7 @@
 #include <cmath>
 #include <vector> 
 #include <string>
+#include <tuple>
 
 #include "std_msgs/String.h"
 #include "sensor_msgs/LaserScan.h"
@@ -33,6 +34,26 @@
 #include "actionlib_msgs/GoalStatus.h"
 
 
+#include <stdlib.h>
+#include <iostream>
+#include "ros/ros.h"
+
+#include "festino_tools/FestinoKnowledge.h"
+
+//#include "justina_tools/JustinaVision.h"
+#include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Float32.h"
+#include "std_msgs/Float64MultiArray.h"
+#include "std_msgs/Float64.h"
+#include "geometry_msgs/PoseStamped.h"
+
+#include "robotino_msgs/DigitalReadings.h"
+#include "sensor_msgs/LaserScan.h"
+
+
+
+
+
 
 #define GRAMMAR_POCKET_COMMANDS "grammars/carryMyLuggage.jsgf"
 
@@ -48,6 +69,7 @@ enum SMState {
 	SM_FIND_QUEUE,
 	SM_NAV_QUEUE,
 	SM_FOLLOW_QUEUE,
+	SM_BACK_TO_ARENA,
     SM_FINAL_STATE
 };
 
@@ -60,6 +82,11 @@ SMState state = SM_INIT;
 std::string grammarCommandsID = "carryMyLuggageCommands";
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
+bool stop = false;
+int counter = 0;
+
+std::vector<float> goal_vec(3);
+
 
 bool HumanDetector()
 {
@@ -139,6 +166,7 @@ int main(int argc, char** argv){
     FestinoHRI::setNodeHandle(&n);
     FestinoVision::setNodeHandle(&n);
     FestinoNavigation::setNodeHandle(&n);
+	FestinoKnowledge::setNodeHandle(&n);
 
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
     ros::Subscriber sub_human_bool = n.subscribe("human_detector_bool", 1000, humanBoolCallback);
@@ -174,6 +202,18 @@ int main(int argc, char** argv){
     tf_human_coordinates.pose.orientation.y = 0.0;
     tf_human_coordinates.pose.orientation.z = 0.0;
     tf_human_coordinates.pose.orientation.w = 0.0;
+
+    //Dict with coords pose, 
+    std::map<int, std::tuple<float, float, float>> poses;
+    float currentX, currentY, currentTheta;
+    
+    float goalX, goalY, goalTheta;
+    std::vector<float> goal_vec(3);
+
+    // Variable para contar las poses
+	int pose_counter = 0;
+
+
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -213,6 +253,7 @@ int main(int argc, char** argv){
 
 	    		//Waiting for the operator to confirm
 	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
+	    		
 	    			//Disable speech recognition 
 	    			FestinoHRI::enableSpeechRecognized(false);
 					ros::Duration(2, 0).sleep();
@@ -232,8 +273,9 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
 
 	    		pointing_hand = FestinoVision::PointingHand();
-
+	    		
 	    		if (pointing_hand){
+	    		
     				voice = "Are you pointing at the left bag? tell me Robot yes or Robot no";
     				FestinoHRI::say(voice, 5);
 
@@ -255,7 +297,7 @@ int main(int argc, char** argv){
 	                	ros::Duration(0.5, 0).sleep();
 
     					FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
-		    			voice = "Please put the left bag on the gripper";
+		    			voice = "Please hang the left bag on my green hook";
 		            	FestinoHRI::say(voice, 10);
 		            	FestinoHRI::enableLegFinder(true);
 		    			state = SM_WAIT_FOR_BAG;
@@ -282,7 +324,7 @@ int main(int argc, char** argv){
 	                	ros::Duration(0.5, 0).sleep();
 
     					FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
-		    			voice = "Please put the right bag on the gripper";
+		    			voice = "Please hang the right bag on my green hook";
 		            	FestinoHRI::say(voice, 10);
 		            	FestinoHRI::enableLegFinder(true);
 		    			state = SM_WAIT_FOR_BAG;
@@ -307,7 +349,7 @@ int main(int argc, char** argv){
 				//Waiting for the operator to confirm
 	    		if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
 	    			FestinoHRI::enableSpeechRecognized(false);
-
+	    			//Save the point or coord of point
 	    			//Command recognized (green light)
 					arr_values.values = {0,0,0,0,1,0};
 	                pub_digital.publish(arr_values);
@@ -377,43 +419,65 @@ int main(int argc, char** argv){
 	    		}
 	    		break;
 	    	case SM_FOLLOW_OPERATOR:
-	    		std::cout << "State machine: SM_FOLLOW_OPERATOR" << std::endl;	
-	    		
-	    		//Following (turquoise light)
-				arr_values.values = {0,0,0,0,1,1};
-                pub_digital.publish(arr_values);
-                ros::Duration(0.5, 0).sleep();
+	    	    std::cout << "State machine: SM_FOLLOW_OPERATOR" << std::endl;	
+    
+			    //Following (turquoise light)
+			    arr_values.values = {0,0,0,0,1,1};
+			    pub_digital.publish(arr_values);
+			    ros::Duration(0.5, 0).sleep();
 
-	    		if(confirm_car_again){
-	    			voice = "Please say here is the car if we reached the final destination";
-	    			FestinoHRI::say(voice, 5);
-	    			confirm_car_again = false;
-	    		}
-	    		
-				FestinoHRI::enableHumanFollower(true);
+			    if(confirm_car_again){
+			        voice = "Please say here is the car if we reached the final destination";
+			        FestinoHRI::say(voice, 5);
+			        confirm_car_again = false;
+			    }
 
-	    		FestinoHRI::enableSpeechRecognized(true);
+			    FestinoHRI::enableHumanFollower(true);
+			    FestinoHRI::enableSpeechRecognized(true);
+			    //Storage the ultimate pose with Map
+			    FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
+			    poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
 
-	    		if(!FestinoHRI::frontalLegsFound()){
-	    			std::cout << "Lost operator" << std::endl;
-	    			voice = "I lost you";
-					FestinoHRI::say(voice, 5);
-	    			FestinoHRI::enableHumanFollower(false);
-	    			state = SM_FIND_PERSON;
-	    			break;
-	    		}
-    			
-    			if(FestinoHRI::waitForSpecificSentence("here is the car", 5000)){
+			    // Bucle para capturar las poses
+			    while (!stop) {
+			      
+			        FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
+					poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
+			        // Guardar la pose cada 10 poses
+			        //if (pose_counter % 3 == 0) {
+			        //    poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
+			        //}
+			        //printf("%f\n",currentX );
+			        // Incrementar el contador de poses
+			        pose_counter++;
 
-					FestinoHRI::enableSpeechRecognized(false);
+			        // Comprobar si se ha perdido al operador
+			        if (!FestinoHRI::frontalLegsFound()) {
+			            std::cout << "Lost operator" << std::endl;
+			            voice = "I lost you";
+			            FestinoHRI::say(voice, 5);
+			            FestinoHRI::enableHumanFollower(false);
+			            state = SM_FIND_PERSON;
+			            break;
+			        }
 
-    				//Command recognized (green light)
-					arr_values.values = {0,0,0,0,1,0};
-	                pub_digital.publish(arr_values);
-	                ros::Duration(0.5, 0).sleep();
-    				
-    				state = SM_WAIT_CONF_CAR;
-    			}
+			        // Esperar a que se diga "here is the car"
+			        if (FestinoHRI::waitForSpecificSentence("here is the car", 5000)) {
+
+			       
+			            FestinoHRI::enableSpeechRecognized(false);
+
+			            // Command recognized (green light)
+			            arr_values.values = {0,0,0,0,1,0};
+			            pub_digital.publish(arr_values);
+			            ros::Duration(0.5, 0).sleep();		        
+			            stop = true;
+			      
+			       
+			        }
+			     }
+			     FestinoHRI::enableHumanFollower(false);
+			     state = SM_WAIT_CONF_CAR;
     			
 	    		break;
 	    	case SM_WAIT_CONF_CAR:
@@ -425,7 +489,7 @@ int main(int argc, char** argv){
                 pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
 
-				FestinoHRI::enableSpeechRecognized(true);
+				//FestinoHRI::enableSpeechRecognized(true);
 				ros::Duration(2, 0).sleep();
 
 				if(FestinoHRI::waitForSpecificSentence("robot yes", 5000)){
@@ -443,7 +507,7 @@ int main(int argc, char** argv){
 				else{
 					confirm_car_again = true;
 					FestinoHRI::enableSpeechRecognized(false);
-					state = SM_FOLLOW_OPERATOR;
+					state = SM_LEAVE_BAG;
 				}
 
 				break;
@@ -453,7 +517,7 @@ int main(int argc, char** argv){
 	    		FestinoHRI::say(voice, 2);
 	    		voice = "Tell me, robot yes, when you take the bag";
 				FestinoHRI::say(voice, 5);
-
+				FestinoHRI::enableHumanFollower(false);
 				//Waiting for command (red light)
 				arr_values.values = {0,0,0,1,0,0};
                 pub_digital.publish(arr_values);
@@ -472,13 +536,56 @@ int main(int argc, char** argv){
 
 
 	    			//Turn 180 degree
-	    			FestinoNavigation::moveDistAngle(0.0, 3.12, 20000);
-	    			FestinoNavigation::moveDist(3, 30000);
+	    			//FestinoNavigation::moveDistAngle(0.0, 3.12, 20000);
+	    			//FestinoNavigation::moveDist(3, 30000);
 
 					//state = SM_FIND_QUEUE;
-					state = SM_FINAL_STATE;
-	    		}
+					state = SM_BACK_TO_ARENA;
+	    		 }
 	    		break;
+	    	case SM_BACK_TO_ARENA:
+
+	    		// Use the dictionary poses for local goals
+	    		std::cout<<"State: Back to arena"<<std::endl;
+				for (const auto& pose : poses) {
+		        	counter = counter + 1;
+		            // Obtener las coordenadas de la pose
+					std::tie(goalX, goalY, goalTheta) = pose.second;
+		            printf("This is point X %f\n , This is point Y %f\n", goalX, goalY);
+		            
+		         
+                	     
+		        }
+
+				goal_vec = FestinoKnowledge::CoordenatesLocSrv("living_room");
+                std::cout <<"Coordenates of inspection_point:"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                    	std::cout << "Cannot move to inspection point" << std::endl;
+		        /*for (const auto& pose : poses) {
+		        	counter = counter + 1;
+		            // Obtener las coordenadas de la pose
+		            printf("This is point %d\n", counter);
+		            std::tie(goalX, goalY, goalTheta) = pose.second;
+
+		            if(!FestinoNavigation::getClose(goal_vec[goalX], goal_vec[goalY], goal_vec[goalTheta],120000))
+                   		 if(!FestinoNavigation::getClose(goal_vec[goalX], goal_vec[goalY], goal_vec[goalTheta], 120000))
+                       		 std::cout << "Cannot move to inspection point" << std::endl;
+                
+                	     
+		        }*/
+
+
+		        FestinoNavigation::stopNavigation();
+		        FestinoHRI::enableHumanFollower(false);
+
+		        FestinoHRI::say("I have reached the living room", 4);
+		        state = SM_FINAL_STATE;
+	    	
+
+	    		break;	
+
 	    	case SM_FIND_QUEUE:
 	    		std::cout << "State machine: SM_FIND_QUEUE" << std::endl;
 	    		ros::Duration(2, 0).sleep();

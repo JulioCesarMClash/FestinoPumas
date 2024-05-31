@@ -24,6 +24,62 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+#include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoVision.h"
+#include "festino_tools/FestinoKnowledge.h"
+
+#include "std_msgs/Bool.h"
+
+#include "string"
+
+#include <iostream>
+#include <stdlib.h>
+#include <vector>
+#include <string>
+#include <sstream>
+#include "ros/ros.h"
+
+//Libraries for FestionoTools
+#include "festino_tools/FestinoHRI.h"
+#include "festino_tools/FestinoVision.h"
+#include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoKnowledge.h"
+#include "robotino_msgs/DigitalReadings.h"
+#include "sensor_msgs/LaserScan.h"
+
+#include "std_msgs/Bool.h"
+#include "string"
+#include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Float32.h"
+#include "std_msgs/Float64MultiArray.h"
+#include "std_msgs/Float64.h"
+#include "geometry_msgs/PoseStamped.h"
+//#include "boost/date_time/posix_time.hpp"
+//#include "boost/thread/thread.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+//#include <boost/algorithm/string/split.hpp>
+#include "sensor_msgs/LaserScan.h"
+
+//Nuevos abajo
+
+#include "object_classification/Classify.h"
+
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/PointField.h>
+#include <sensor_msgs/point_cloud2_iterator.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Image.h>
+
+#include <sensor_msgs/Image.h>
+//Nuevos arriba
+
 //Digital readings
 #include "robotino_msgs/DigitalReadings.h"
 
@@ -36,6 +92,10 @@
 #define GRAMMAR_POCKET_COMMANDS_R "grammars/receptionist_commands.jsgf"
 #define GRAMMAR_POCKET_DRINKS "grammars/order_drinks.jsgf"
 #define GRAMMAR_POCKET_NAMES "grammars/people_names.jsgf"
+
+std::vector<sensor_msgs::Image> class_image;
+object_classification::Classify::Response message_clas;
+
 
 enum SMState
 {
@@ -180,8 +240,8 @@ void navigate_to_location(std::string location)
 std::string find_name(std::vector<std::string> tokens){
     for(std::string name: tokens){
         if(name == "jamie" || name == "morgan" || name == "michael" || name == "jordan" || name == "taylor" || name == "tracy" ||
-        name == "robin" || name == "alex" || name == "coke" || name == "apple" || name == "mug" || name == "soap" ||
-        name == "banana" || name == "pitcher"){
+        name == "robin" || name == "alex" || name == "apple" || name == "mug" ||
+        name == "banana" || name == "ball" || name == "mustard" || name == "plate" || name == "pear"){
             return name;
         }
     }
@@ -190,13 +250,22 @@ std::string find_name(std::vector<std::string> tokens){
 }
 
 bool its_an_object(std::string name){
-    if(name == "coke" || name == "apple" || name == "mug" || name == "soap" ||
-        name == "banana" || name == "pitcher"){
+    if(name == "apple" || name == "mug" ||
+        name == "banana" || name == "ball" || name == "mustard" || name == "plate" || name == "pear"){
             return true;
         }
 
         return false;
 }
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+	class_image.clear();
+	std::cout << "holi call" << std::endl;
+    class_image.push_back(*msg);
+
+}
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -211,6 +280,13 @@ int main(int argc, char** argv){
     FestinoNavigation::setNodeHandle(&n);
     FestinoKnowledge::setNodeHandle(&n);
 
+    std::vector<sensor_msgs::Image> image_bb;
+
+    ros::Subscriber class_image_sub = n.subscribe("/camera/rgb/image_color", 1000, imageCallback);
+    ros::ServiceClient client_image_class = n.serviceClient<object_classification::Classify>("classify"); 
+	object_classification::Classify srv;
+ 
+
     pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
     ros::Subscriber sub_human = n.subscribe("human_detector_bool", 1000, humanDetectorCallback);
 
@@ -221,12 +297,12 @@ int main(int argc, char** argv){
 
     drinks.push_back("coke");
     //Locations
-    locations["instruction_point"] = "instruction point";
-    locations["exit"] = "exit";
-    locations["entrance"] = "entrance";
+    locations["instruction_point"] = "gpsr";
+    locations["exit"] = "entrance_door";
+    locations["entrance"] = "entrance_door";
     locations["kitchen"] = "kitchen";
-    locations["dinning_room"] = "dinning room";
-    locations["living_room"] = "living room";
+    locations["dinning_room"] = "dinning_room";
+    locations["living_room"] = "living_room";
     locations["bedroom"] = "bedroom";
 
     //bool human_detector_bool;
@@ -239,7 +315,22 @@ int main(int argc, char** argv){
     FestinoHRI::say(" ",3);
 
 	while(ros::ok() && !fail && !success){
+
+        std::cout << "In Classification state" << std::endl;
+        if(!class_image.empty()){
+            srv.request.in.image_msgs = class_image;
+            if(client_image_class.call(srv)){
+                message_clas = srv.response;
+                cv::Mat image = cv_bridge::toCvCopy(message_clas.debug_image.image_msgs.at(0), sensor_msgs::image_encodings::TYPE_8UC3)->image;
+                cv::namedWindow("Imgclass", cv::WINDOW_NORMAL);
+                cv::resizeWindow("Imgclass", 600, 600);
+                cv::imshow("Imgclass", image);
+                cv::waitKey(1);
+            }
+        }
+
 	    switch(state){
+
 			case SM_INIT:
             {
 	    		//Init case
@@ -769,7 +860,10 @@ Go to {location} and bring me {object}
                 //Find object
                         FestinoHRI::say(" I found you the " + object_person_name,3);
                         sleep(3);
+
+
                         state = SM_FINISHED_TASK;
+                        break;
                 
             }
             case SM_FINISHED_TASK:

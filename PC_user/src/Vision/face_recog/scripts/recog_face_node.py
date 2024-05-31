@@ -19,10 +19,10 @@ class FaceRecognitionNode:
         self.load_known_faces()
 
     def load_known_faces(self):
-        for filename in os.listdir("/home/juliobotic/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/"):
+        for filename in os.listdir("/home/joshua/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/"):
             name = os.path.splitext(filename)[0]
             print (name)
-            image_path = os.path.join("/home/juliobotic/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/", filename)
+            image_path = os.path.join("/home/joshua/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/", filename)
             image = face_recognition.load_image_file(image_path)
             face_encoding = face_recognition.face_encodings(image)[0]
             self.known_face_encodings.append(face_encoding)

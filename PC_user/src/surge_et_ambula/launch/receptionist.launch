@@ -1,6 +1,6 @@
 <launch>
 
-	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
+	<!--include file="$(find freenect_launch)/launch/freenect.launch"> </include-->	
 	<include file="$(find pocketsphinx)/launch/pocketsphinx.launch"> </include>	
 	<include file="$(find config_files)/launch/navigation.launch"> </include>	
 

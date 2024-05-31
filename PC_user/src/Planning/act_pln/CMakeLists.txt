@@ -263,3 +263,7 @@ target_link_libraries(DemoTMR2023 ${catkin_LIBRARIES})
 add_executable(demo_follow src/demo_follow.cpp)
 add_dependencies(demo_follow ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(demo_follow ${catkin_LIBRARIES})
+
+add_executable(storing_groseries src/storing_groseries.cpp)
+add_dependencies(storing_groseries ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(storing_groseries ${catkin_LIBRARIES})

@@ -12,8 +12,9 @@ from face_recog.srv import *
 
 class FaceRecognitionNode:
     def __init__(self):
+        global cv_image
         rospy.init_node('face_recognition_service')
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_color', Image, self.image_callback)
         self.bridge = CvBridge()
         self.known_face_encodings = []
         self.known_face_names = []
@@ -22,9 +23,10 @@ class FaceRecognitionNode:
         self.face_names_recog = []
         
     def load_known_faces(self):
-        for filename in os.listdir("/home/robocup/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/"):
+        global cv_image
+        for filename in os.listdir("/home/joshua/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/"):
             name = os.path.splitext(filename)[0]
-            image_path = os.path.join("/home/robocup/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/", filename)
+            image_path = os.path.join("/home/joshua/FestinoPumas/PC_user/src/Vision/face_recog/Train_faces/Image/", filename)
             image = face_recognition.load_image_file(image_path)
             try:
                 face_encoding = face_recognition.face_encodings(image)[0]
