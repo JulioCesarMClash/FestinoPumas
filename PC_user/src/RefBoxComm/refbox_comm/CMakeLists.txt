@@ -243,3 +243,8 @@ target_link_libraries(${PROJECT_NAME}_node_navigation
   protobuf
   refbox_protobuf_msgs_proto
 )
+
+add_executable(robot_to_main_comm_node src/robot_to_main_comm_node.cpp)
+target_link_libraries(robot_to_main_comm_node
+  ${catkin_LIBRARIES}
+)
