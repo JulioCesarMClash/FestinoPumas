@@ -1,0 +1,12 @@
+		# dentro de la carpeta RosNav
+git clone https://github.com/ros-planning/navigation
+git checkout melodic-devel
+		# compilar repositorio e instalar dependencias
+sudo apt install ros-melodic-move-base-msgs
+sudo apt install ros-melodic-tf2-sensor-msgs
+		# en el archivo map_saver, en la linea 116 cambiar el ultimo termino que escribe en el archivo la coordenada en z
+		# ponerlo en 0 porque si no escribe nans, debe quedar asi:
+
+fprintf(yaml, "image: %s\nresolution: %f\norigin: [%f, %f, %f]\nnegate: 0\noccupied_thresh: 0.65\nfree_thresh: 0.196\n\n",
+              mapdatafile.c_str(), map->info.resolution, map->info.origin.position.x, map->info.origin.position.y, 0.0f);
+		#compilar de nuevo (deberia compilar bien, si no, dependera del problema en particular)
