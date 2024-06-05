@@ -28,7 +28,7 @@ rospy.init_node('prueba_launch', anonymous=True)
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
 
-ros_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/expore_n_map.launch"])
+ros_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/explore_n_map.launch"])
 doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/late_navigation.launch"])
 log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/Pos_control/movement_functions/launch/logisticsZones.launch"])
 

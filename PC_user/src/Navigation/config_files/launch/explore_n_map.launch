@@ -2,7 +2,7 @@
 
 	<!-- Some general parameters -->
 	<!--param name="use_sim_time" value="true" /-->
-	<rosparam file="$(find config_files)/rosnav_param/ros.yaml"/>
+	<rosparam file="$(find config_files)/rosnav_params/ros.yaml"/>
 
 	<!-- Start Stage simulator with a given environment -->
 	<!--node name="Stage" pkg="stage_ros" type="stageros" args="$(find nav2d_tutorials)/world/tutorial.world">
@@ -12,8 +12,8 @@
 	<!-- Start the Operator to control the simulated robot -->
 	<node name="Operator" pkg="nav2d_operator" type="operator" >
 		<!--remap from="scan" to="base_scan"/-->
-		<rosparam file="$(find config_files)/rosnav_param/operator.yaml"/>
-		<rosparam file="$(find config_files)/rosnav_param/costmap.yaml" ns="local_map" />
+		<rosparam file="$(find config_files)/rosnav_params/operator.yaml"/>
+		<rosparam file="$(find config_files)/rosnav_params/costmap.yaml" ns="local_map" />
 	</node>
 
 	<!-- Start Mapper to genreate map from laser scans -->
@@ -23,12 +23,12 @@
 	</node>
 
 	<!--node name="Mapper" pkg="gmapping" type="slam_gmapping">
-		<rosparam file="$(find nav2d_tutorials)/param/navigator.yaml"/>
+		<rosparam file="$(find config_files)/rosnav_params/navigator.yaml"/>
 	</node-->
 
 	<!-- Start the Navigator to move the robot autonomously -->
 	<node name="Navigator" pkg="nav2d_navigator" type="navigator">
-		<rosparam file="$(find config_files)/rosnav_param/navigator.yaml"/>
+		<rosparam file="$(find config_files)/rosnav_params/navigator.yaml"/>
 	</node>
 
 	<node name="GetMap" pkg="nav2d_navigator" type="get_map_client" />
@@ -38,11 +38,11 @@
 	<!-- Start the joystick-driver and remote-controller for operation-->
 	<!--node name="Joystick" pkg="joy" type="joy_node" />
 	<node name="Remote" pkg="nav2d_remote" type="remote_joy" >
-		<rosparam file="$(find nav2d_tutorials)/param/remote.yaml"/>
+		<rosparam file="$(find config_files)/rosnav_params/remote.yaml"/>
 	</node-->
 
 	<!-- RVIZ to view the visualization -->
-	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find config_files)/rosnav_param/step_nav.rviz" />
+	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find config_files)/rosnav_params/step_nav.rviz" />
 
 
 	<include file="$(find surge_et_ambula)/launch/robot_comm.launch"/>
