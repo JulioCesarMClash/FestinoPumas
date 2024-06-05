@@ -12,6 +12,8 @@ import math
 import numpy as np
 from geometry_msgs.msg import *
 
+path = "/home/pumas/FestinoPumas/PC_user/src/"
+
 tfBuffer = tf2_ros.Buffer()
 
 """def final_robot_pos():
@@ -26,9 +28,9 @@ rospy.init_node('prueba_launch', anonymous=True)
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
 
-ros_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, ["/home/robocup20/FestinoPumas/PC_user/src/Navigation/config_files/launch/expore_n_map.launch"])
-doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, ["/home/robocup20/FestinoPumas/PC_user/src/Navigation/config_files/launch/late_navigation.launch"])
-log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, ["/home/robocup20/FestinoPumas/PC_user/src/Navigation/Pos_control/movement_functions/launch/logisticsZones.launch"])
+ros_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/expore_n_map.launch"])
+doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/late_navigation.launch"])
+log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/Pos_control/movement_functions/launch/logisticsZones.launch"])
 
 position_pub = rospy.Publisher("/initialpose",PoseWithCovarianceStamped,queue_size=10)
 
@@ -53,8 +55,8 @@ listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
 (first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
 print("Robot a map - FIRST POS", first_trans, "\t", first_rot, "at %i", now.secs)
 
-os.system("rosrun map_server map_saver -f /home/robocup20/FestinoPumas/PC_user/src/Navigation/config_files/maps/dirty_latemap")
-os.system("rosrun map_server map_saver -f /home/robocup20/FestinoPumas/PC_user/src/Navigation/config_files/prohibition_maps/dirty_latemap_pro")
+os.system("rosrun map_server map_saver -f " + path + "Navigation/config_files/maps/dirty_latemap")
+os.system("rosrun map_server map_saver -f " + path + "Navigation/config_files/prohibition_maps/dirty_latemap_pro")
 rospy.loginfo("Map saved")
 
 now = rospy.get_rostime()
