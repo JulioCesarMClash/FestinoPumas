@@ -237,7 +237,7 @@ int main(int argc, char** argv)
             listener_rob.lookupTransform("/base_link","/map",   
                                    ros::Time(0), transform_rob);
         } catch (tf::TransformException ex){
-            ROS_ERROR("%s",ex.what());
+            ROS_ERROR("el error %s",ex.what());
             ros::Duration(1.0).sleep();
         }
 
