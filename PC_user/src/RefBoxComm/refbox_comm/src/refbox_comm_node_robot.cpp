@@ -17,7 +17,7 @@
 //#define HOST "172.26.255.255"
 //#define HOST "172.23.134.255"
 //Lab
-#define HOST "192.168.0.255"
+#define HOST "192.168.1.255"
 
 //#define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
@@ -195,7 +195,7 @@ class Handler {
 
                 msg->set_team_color(m_is_cyan ? Team::CYAN : Team::MAGENTA);
 
-                //ROS_INFO_STREAM("Sending: " << msg->ShortDebugString());
+                ROS_INFO_STREAM("Beacon Signal: " << msg->ShortDebugString());
 
                 m_public_peer->send(BeaconSignal::COMP_ID, BeaconSignal::MSG_TYPE, msg);
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));//ROS_INFO_STREAM("Sending: ");
