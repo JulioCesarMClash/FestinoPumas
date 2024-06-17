@@ -16,7 +16,7 @@
 //ROBOCUP
 //#define HOST "172.26.255.255"
 //#define HOST "172.23.134.255"
-//Lab
+
 #define HOST "192.168.1.255"
 
 //#define TEAM_COLOR "MAGENTA"
@@ -230,7 +230,7 @@ int main(int argc, char** argv)
         tf::StampedTransform transform_rob;
 
 
-        /*//real
+        //real
         try {
             listener_rob.waitForTransform("/base_link","/map",   
                                    ros::Time(0), ros::Duration(1000.0));
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
         } catch (tf::TransformException ex){
             ROS_ERROR("%s",ex.what());
             ros::Duration(1.0).sleep();
-        }*/
+        }
 
         /* Create Semaphore */
         while(!pose_sem_main.load()){
@@ -267,6 +267,7 @@ int main(int argc, char** argv)
         //std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
 
         ros::spinOnce();
+	r.sleep();
     }
     return 0;
 }
