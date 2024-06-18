@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   actionlib_msgs
+  geometry_msgs  
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,10 +72,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   nav_msgs#   std_msgs
-# )
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+ geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,7 +110,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES simple_move_pkg
-#  CATKIN_DEPENDS nav_msgs roscpp rospy std_msgs tf
+  CATKIN_DEPENDS nav_msgs roscpp rospy std_msgs tf geometry_msgs
 #  DEPENDS system_lib
 )
 
@@ -137,6 +139,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(simple_move_node src/simple_move_node.cpp)
+add_executable(shortmv_rosnav src/shortmv_rosnav.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,9 +150,16 @@ add_executable(simple_move_node src/simple_move_node.cpp)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(simple_move_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(shortmv_rosnav ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(simple_move_node
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(shortmv_rosnav
   ${catkin_LIBRARIES}
 )
 
