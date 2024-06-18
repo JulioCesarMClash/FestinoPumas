@@ -247,3 +247,7 @@ add_executable(grasping src/grasping.cpp)
 add_dependencies(grasping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(grasping ${catkin_LIBRARIES})
 
+add_executable(main_track_robot src/main_track_robot.cpp)
+add_dependencies(main_track_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(main_track_robot ${catkin_LIBRARIES})
+
