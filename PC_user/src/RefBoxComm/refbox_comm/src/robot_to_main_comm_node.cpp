@@ -1,16 +1,59 @@
 #include <ros/ros.h>
+#include "std_msgs/String.h"
 
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
+#define SERVER_IP "192.168.0.123"
 
 using namespace std;
 
+ros::Publisher pub_instruction;
+int client_fd;
+
+void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
+   //ROS_INFO("I heard: [%s]", msg->data.c_str());
+
+    /*
+        string msg_to_server;
+        std::ostringstream oss;
+        std::cout << "write a message to the server";
+        cin >> msg_to_server;
+        oss << msg_to_server;
+        write(client_fd, oss.str().c_str(), oss.str().size());
+    */
+
+        char buffer[20] = { 0 };
+        int valread = 0;
+
+        write(client_fd, "nxt", 3);//ask server for next instruction
+        valread = read(client_fd, buffer, 20);
+        printf("Server instruction: %s\n", buffer);
+
+        std::stringstream ss;
+        ss << buffer;
+
+        std_msgs::String msg_to_robot;
+        msg_to_robot.data = ss.str();
+
+        pub_instruction.publish(msg_to_robot);
+
+}
+
+//callback next_instruction
+/*
+    {//recv msg
+        write //ask server for next instruction
+        wait_for_server_response //thread????
+        publish instruction to ros
+    }
+
+ */
+
 int main(int argc, char** argv) {
 
-    int status, valread, client_fd;
+    int status;
     struct sockaddr_in serv_addr;
-    char buffer[1024] = { 0 };
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return -1;
@@ -21,7 +64,7 @@ int main(int argc, char** argv) {
  
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
-    if (inet_pton(AF_INET, "192.168.0.123", &serv_addr.sin_addr)
+    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr)
         <= 0) {
         printf(
             "\nInvalid address/ Address not supported \n");
@@ -41,25 +84,13 @@ int main(int argc, char** argv) {
 
     //CREATE SUBSCRIBERS AND PUBLISHERS TO COMUNICATE WITH ROBOTS
 
-    string msg_to_server;
-    std::ostringstream oss;
+    ros::Subscriber sub = n.subscribe("/request_instruction", 1000, request_next_instruction);
+    pub_instruction = n.advertise<std_msgs::String>("/instruction_msg", 1000);
 
     ros::Rate r(10);
     while (ros::ok()) {
-
-
-
-        std::cout << "write a message to the server";
-        cin >> msg_to_server;
-        oss << msg_to_server;
-
-        write(client_fd, oss.str().c_str(), oss.str().size());
-    
-        valread = read(client_fd, buffer,
-                    1024 - 1);
-        printf("Server message: %s\n", buffer);
-
         ros::spinOnce();
+        r.sleep();
     }
 
     // closing the connected socket
