@@ -267,7 +267,7 @@ int main(int argc, char** argv)
         //std::cout << "Pose x: " << pose_x << " y: " << pose_y << " orientation: " << pose_ori << std::endl;
 
         ros::spinOnce();
-	r.sleep();
+	    r.sleep();
     }
     return 0;
 }
