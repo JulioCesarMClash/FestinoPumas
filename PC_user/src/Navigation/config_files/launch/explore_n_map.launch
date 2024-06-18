@@ -46,5 +46,7 @@
 
 
 	<include file="$(find surge_et_ambula)/launch/robot_comm.launch"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="Zone_BC" args="-1 -1 0 0 0 -0.45 1 map M_Z12 100" />
     
 </launch>

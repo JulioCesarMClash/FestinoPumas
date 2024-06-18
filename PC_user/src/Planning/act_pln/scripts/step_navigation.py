@@ -48,7 +48,7 @@ rospy.loginfo("Robot-Server communication started")
 now = rospy.get_rostime()
 rospy.loginfo("Mapping started at %i", now.secs)
 
-rospy.sleep(30)
+rospy.sleep(10)
 
 now = rospy.Time.now()
 listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
