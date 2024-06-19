@@ -31,9 +31,13 @@
 //#define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-//#define CRYPTO_KEY "randomkey"
+#define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4445
 #define PUBLIC_PORT_R 4444
+#define CYAN_PORT_S 4446
+#define CYAN_PORT_R 4441
+#define MAGENTA_PORT_S 4447
+#define MAGENTA_PORT_R 4442
 
 #include <iostream>
 #include <typeinfo>
@@ -53,6 +57,9 @@ using PrepareMachine = llsf_msgs::PrepareMachine;
         std::atomic<bool> pose_sem_th;
         std::atomic<bool> pose_sem_main;
 //--------------------------------ROBOT POSE
+
+    std::shared_ptr<ProtobufBroadcastPeer> m_public_peer;
+    std::shared_ptr<ProtobufBroadcastPeer> m_private_peer;
 
 void callback_MachineInstructions(const std_msgs::String::ConstPtr& machine_instruction){
 
@@ -100,9 +107,9 @@ void callback_MachineInstructions(const std_msgs::String::ConstPtr& machine_inst
     // }
     
     //Hay que ver la forma para poder usar el public peer que ya está declarado
-    // if(m_public_peer != nullptr){
+    // if(m_private_peer != nullptr){
     //     ROS_INFO_STREAM("NOT NULL PTR, SENDING PRIVATE");
-    //     m_public_peer->send(PrepareMachine::COMP_ID, PrepareMachine::MSG_TYPE, prepare_instruction_message);
+    //     m_private_peer->send(PrepareMachine::COMP_ID, PrepareMachine::MSG_TYPE, prepare_instruction_message);
     // }
 }
 
@@ -122,7 +129,6 @@ class Handler {
         int m_port_r;
 
         MessageRegister *m_mr;
-        std::shared_ptr<ProtobufBroadcastPeer> m_public_peer;
 
         unsigned long int m_sequence_nr_;
 
@@ -206,11 +212,30 @@ class Handler {
                         ROS_INFO_STREAM("COLOR SET MAGENTA ");
                     }
                     team_color_set = true;
+
+                        ROS_INFO_STREAM("------          \n\n\n\n\nCRYPTO SETUP\n\n\n\n\n      --------- ");
+                        if(m_is_cyan){
+                            ROS_INFO_STREAM("------          \n\n\n\n\nCyan\n\n\n\n\n      --------- ");
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, CYAN_PORT_R, m_mr,CRYPTO_KEY);
+                        } else {
+                                ROS_INFO_STREAM("------          \n\n\n\n\n Magenta SETUP\n\n\n\n\n      --------- ");
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, MAGENTA_PORT_R, m_mr,CRYPTO_KEY);
+
+                        }
+
+                        m_private_peer->signal_received().connect(
+                            boost::bind(&Handler::handleRefboxMessagePrivate, this, _1, _2, _3, _4)
+                        );
+                    
                 }
                 
             }
         }
 
+        /*PRIVATE MESSAGES*/
+        void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
+            //Print??
+        }
         void handleRecvErrorPrivate(boost::asio::ip::udp::endpoint &endpoint, std::string msg) {
             ROS_ERROR_STREAM("Error receiving on private port : " << msg);
         }
