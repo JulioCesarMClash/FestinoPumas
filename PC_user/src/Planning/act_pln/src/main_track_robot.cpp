@@ -15,6 +15,10 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
+//Para encontrar piezas
+#include "img_proc/Find_piece_Srv.h"
+#include "img_proc/Align_Srv.h"
+
 //Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>	
@@ -51,6 +55,8 @@ std::vector<geometry_msgs::PoseStamped> zones_path;
 //String that storage instruction tokens
 std::vector<std::string> tokens;
 
+std::string zone;
+
 std::vector<std::string> real_refbox_names;
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
@@ -59,24 +65,80 @@ int simple_move_status_id = 0;
 bool request = false;
 
 
+// void compute_coordinates(){
+//     if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+//         tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(stoi(tokens[3])*(M_PI/180));
+//         tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(stoi(tokens[3])*(M_PI/180));                        
+//     }
+//     if(tokens[4] == "output"){
+//         tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - cos(stoi(tokens[3])*(M_PI/180));
+//         tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - sin(stoi(tokens[3])*(M_PI/180));
+//     }
+// }
+
 void compute_coordinates(){
-    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(stoi(tokens[3])*(M_PI/180));
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(stoi(tokens[3])*(M_PI/180));                        
-    }
-    if(tokens[4] == "output"){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - cos(stoi(tokens[3])*(M_PI/180));
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - sin(stoi(tokens[3])*(M_PI/180));
-    }
+    float quat;
+    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(std::stoi("135")*(M_PI/180));
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(std::stoi("135")*(M_PI/180));    
+
+    tf::Quaternion myQuaternion;
+
+    myQuaternion.setRPY(0,0,180*M_PI/180);
+
+    myQuaternion=myQuaternion.normalize();
+
+    tf_target_zone.pose.orientation.x = myQuaternion[0];
+    tf_target_zone.pose.orientation.y = myQuaternion[1];
+    tf_target_zone.pose.orientation.z = myQuaternion[2];
+    tf_target_zone.pose.orientation.w = myQuaternion[3];
+
+    std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+                    
 }
+
+// void transform_zone()
+// {
+// 	tf::TransformListener listener;
+//     tf::StampedTransform transform;
+
+//     //TF related stuff 
+//     std::cout << tokens[2] << std::endl;
+//     tf_target_zone.header.frame_id = "/map";
+//     tf_target_zone.pose.position.x = 0.0;
+//     tf_target_zone.pose.position.y = 0.0;
+//     tf_target_zone.pose.position.z = 0.0;
+//     tf_target_zone.pose.orientation.x = 0.0;
+//     tf_target_zone.pose.orientation.y = 0.0;
+//     tf_target_zone.pose.orientation.z = 0.0;
+//     tf_target_zone.pose.orientation.w = 0.0;
+
+//     std::cout << "entró al transform zones" << std::endl;
+
+//     try{
+//         std::cout << "entró al try" << std::endl;
+//         listener.waitForTransform(tokens.at(2), "/map", ros::Time(0), ros::Duration(1000.0));
+//         listener.lookupTransform(tokens.at(2), "/map", ros::Time(0), transform);
+//     }
+//     catch (tf::TransformException ex){
+//         ROS_ERROR("%s",ex.what());
+//         ros::Duration(1.0).sleep();
+//     }
+
+//     tf_target_zone.pose.position.x = -transform.getOrigin().x();
+//     tf_target_zone.pose.position.y = -transform.getOrigin().y();
+
+//     std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+
+// }
 
 void transform_zone()
 {
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
+    zone = "M_Z45";
+
     //TF related stuff 
-    std::cout << tokens[2] << std::endl;
     tf_target_zone.header.frame_id = "/map";
     tf_target_zone.pose.position.x = 0.0;
     tf_target_zone.pose.position.y = 0.0;
@@ -90,19 +152,31 @@ void transform_zone()
 
     try{
         std::cout << "entró al try" << std::endl;
-        listener.waitForTransform(tokens.at(2), "/map", ros::Time(0), ros::Duration(1000.0));
-        listener.lookupTransform(tokens.at(2), "/map", ros::Time(0), transform);
+        listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(1000.0));
+        listener.lookupTransform("/map",zone, ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
         ROS_ERROR("%s",ex.what());
         ros::Duration(1.0).sleep();
     }
 
-    tf_target_zone.pose.position.x = -transform.getOrigin().x();
-    tf_target_zone.pose.position.y = -transform.getOrigin().y();
+    //tf_target_zone.pose.position.x = -transform.getOrigin().x();
+    //tf_target_zone.pose.position.y = -transform.getOrigin().y();
 
-    std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+    tf_target_zone.pose.position.x = transform.getOrigin().x();
+    tf_target_zone.pose.position.y = transform.getOrigin().y();
+	tf_target_zone.pose.position.z = transform.getOrigin().z();
+	tf_target_zone.pose.orientation.x = transform.getRotation().x();
+	tf_target_zone.pose.orientation.y = transform.getRotation().y();
+	tf_target_zone.pose.orientation.z = transform.getRotation().z();
+	tf_target_zone.pose.orientation.w = transform.getRotation().w();
 
+    //std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+    std::cout << "salió del try name:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+    std::cout << "Las rotaciones son" << " ori x:" << tf_target_zone.pose.orientation.x << std::endl;
+    std::cout << "Las rotaciones son" << " ori y:" << tf_target_zone.pose.orientation.y << std::endl;
+    std::cout << "Las rotaciones son" << " ori z:" << tf_target_zone.pose.orientation.z << std::endl;
+    std::cout << "Las rotaciones son" << " ori w:" << tf_target_zone.pose.orientation.w << std::endl;
 }
 
 void navigate_to_location(geometry_msgs::PoseStamped location)
@@ -172,11 +246,19 @@ int main(int argc, char** argv){
     ros::Subscriber subInstructions = n.subscribe("/instruction_msg", 10, callback_instructions);
     ros::Publisher pubRequest       = n.advertise<std_msgs::String>("/request_instruction", 1000);
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
+    ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
+
+    //Declarar servicio para encontrar pieza
+    ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+    img_proc::Find_piece_Srv piece_srv;
+
     ros::Rate loop(30);
 
     std::string voice;
     std_msgs::String request_string;
     request_string.data = "Ola khe ase";
+
+    std_msgs::String machine_instruction;
 
     int cont = 0;
 
@@ -187,7 +269,8 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
-	    		state = SM_WAIT_FOR_INSTRUCTION;
+	    		//state = SM_WAIT_FOR_INSTRUCTION;
+                state = SM_GO_TO;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -213,10 +296,16 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 
+                //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                 transform_zone();
+                //Dependiendo de la orientacion de la maquina y de si se quiere ir a la entrada o salida se obtienen las coordenadas
+                //tomando como base las coordenadas x,y de la zona, que representan el centro.
                 compute_coordinates();
 
+                //Navegacion Marco
                 //navigate_to_location(tf_target_zone);
+
+                //Navegacion ROS para hacer pruebas
                 pub_rosnav_goal.publish(tf_target_zone);
 				ros::Duration(10, 0).sleep();
 
@@ -224,19 +313,30 @@ int main(int argc, char** argv){
 	    		break;
 
 	    	case SM_FIND:
-            	//Wait for finished navigation
 	            std::cout << "State machine: SM_FIND" << std::endl;
-	            voice = "Navigating to destination point";
+	            voice = "Finding the piece";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-            
-                
 
-                state = SM_WAIT_FOR_INSTRUCTION;
+                piece_srv.request.is_find_piece_enabled = true;
+				piece_srv.request.piece = "Red";
+				piece_client.call(piece_srv);
+				if(piece_srv.response.success){
+					std::cout << "Found, dise" << std::endl;
+					std::cout << "Resting pose" << std::endl;
+					
+                    //Mover brazo 
+
+					state = SM_WAIT_FOR_INSTRUCTION;	
+				}
+				else{
+					std::cout << "NotFound" << std::endl;
+					state = SM_FIND;
+				}
+                
 	            break;
 	        
 			case SM_TAKE:
-	    		//Navigate case
 	    		std::cout << "State machine: SM_TAKE" << std::endl;	
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
@@ -246,7 +346,6 @@ int main(int argc, char** argv){
 	    		break;
 
 			case SM_MOVE:
-	    		//Navigate case
 	    		std::cout << "State machine: SM_MOVE" << std::endl;	
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
@@ -256,7 +355,6 @@ int main(int argc, char** argv){
 	    		break;
 
 			case SM_DROP:
-	    		//Navigate case
 	    		std::cout << "State machine: SM_DROP" << std::endl;	
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
@@ -266,12 +364,15 @@ int main(int argc, char** argv){
 	    		break;
 
 			case SM_ASK:
-	    		//Navigate case
 	    		std::cout << "State machine: SM_ASK" << std::endl;	
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
+
+                //Envía la concatenada la acción y el color de la base si se trata de la BS
+                machine_instruction.data = tokens[1]  + " " + tokens[2];
 	    		
+                pubMachineInst.publish(machine_instruction);
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
