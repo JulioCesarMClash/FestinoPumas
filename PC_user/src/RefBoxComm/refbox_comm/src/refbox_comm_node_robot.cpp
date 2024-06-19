@@ -5,11 +5,20 @@
 #include <refbox_protobuf_msgs/Pose2D.pb.h>
 #include <refbox_protobuf_msgs/Team.pb.h>
 #include <refbox_protobuf_msgs/Time.pb.h>
+#include <refbox_protobuf_msgs/MachineInstructions.pb.h>
 
 #include <refbox_protobuf_msgs/GameState.pb.h>
 
 #include "geometry_msgs/PoseStamped.h"
 #include <tf/transform_listener.h>
+
+#include "std_msgs/String.h"
+
+//Biblioteca para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+
 
 //LOCALHOST
 //#define HOST "localhost"
@@ -32,6 +41,11 @@
 using namespace std;
 using namespace protobuf_comm;
 
+using PrepareInstructionCS = llsf_msgs::PrepareInstructionCS;
+using PrepareInstructionBS = llsf_msgs::PrepareInstructionBS;
+
+using PrepareMachine = llsf_msgs::PrepareMachine;
+
 //--------------------------------ROBOT POSE
         float pose_x = 3.0f;
         float pose_y = 2.0f;
@@ -39,6 +53,58 @@ using namespace protobuf_comm;
         std::atomic<bool> pose_sem_th;
         std::atomic<bool> pose_sem_main;
 //--------------------------------ROBOT POSE
+
+void callback_MachineInstructions(const std_msgs::String::ConstPtr& machine_instruction){
+
+    std::vector<std::string> tokens;
+    tokens.clear();
+    boost::algorithm::split(tokens, machine_instruction->data, boost::algorithm::is_any_of(","));
+
+    for(std::string token : tokens){
+        ROS_INFO_STREAM("Un token: " << token);
+    }
+
+    std::shared_ptr<PrepareMachine> prepare_instruction_message(new PrepareMachine());
+
+    if(tokens[0] == "take"){
+        PrepareInstructionCS new_machine_instruction_cs = prepare_instruction_message->instruction_cs();
+        new_machine_instruction_cs.set_operation(llsf_msgs::CSOp::RETRIEVE_CAP);
+    }
+    
+    if(tokens[0] == "put"){
+        PrepareInstructionCS new_machine_instruction_cs = prepare_instruction_message->instruction_cs();
+        new_machine_instruction_cs.set_operation(llsf_msgs::CSOp::MOUNT_CAP);
+    }
+
+    if(tokens[0] == "base"){
+        PrepareInstructionBS new_machine_instruction_bs = prepare_instruction_message->instruction_bs();
+        new_machine_instruction_bs.set_side(llsf_msgs::MachineSide::OUTPUT);
+        if(tokens[1] == "BASE_SILVER"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_SILVER);
+        }
+        if(tokens[1] == "BASE_BLACK"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_BLACK);
+        }
+        if(tokens[1] == "BASE_CLEAR"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_CLEAR);
+        }
+        if(tokens[1] == "BASE_RED"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_RED);
+        }
+    }
+    //TO DO color
+    // if("CYAN" == TEAM_COLOR){
+    //     machine_report_message->set_team_color(Team::CYAN);
+    // } else {
+    //     machine_report_message->set_team_color(Team::MAGENTA);
+    // }
+    
+    //Hay que ver la forma para poder usar el public peer que ya está declarado
+    // if(m_public_peer != nullptr){
+    //     ROS_INFO_STREAM("NOT NULL PTR, SENDING PRIVATE");
+    //     m_public_peer->send(PrepareMachine::COMP_ID, PrepareMachine::MSG_TYPE, prepare_instruction_message);
+    // }
+}
 
 class Handler {
 
@@ -89,6 +155,7 @@ class Handler {
 
             m_mr->add_message_type<BeaconSignal>();
             m_mr->add_message_type<GameState>();
+            m_mr->add_message_type<PrepareMachine>();
 
             m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port_s, m_port_r, m_mr);
 
@@ -220,6 +287,8 @@ int main(int argc, char** argv)
     pose_sem_th.store(false);
         
     p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
+
+    ros::Subscriber subMachineInstructions = n.subscribe("/machine_instruction_msg", 10, callback_MachineInstructions);
 
     ros::Rate r(10);
     while (ros::ok()) {
