@@ -247,3 +247,7 @@ add_executable(grasping src/grasping.cpp)
 add_dependencies(grasping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(grasping ${catkin_LIBRARIES})
 
+add_executable(exploration_stage src/exploration_stage.cpp)
+add_dependencies(exploration_stage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(exploration_stage ${catkin_LIBRARIES})
+
