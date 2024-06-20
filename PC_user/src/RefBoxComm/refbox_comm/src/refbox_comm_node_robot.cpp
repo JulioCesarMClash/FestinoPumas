@@ -5,11 +5,20 @@
 #include <refbox_protobuf_msgs/Pose2D.pb.h>
 #include <refbox_protobuf_msgs/Team.pb.h>
 #include <refbox_protobuf_msgs/Time.pb.h>
+#include <refbox_protobuf_msgs/MachineInstructions.pb.h>
 
 #include <refbox_protobuf_msgs/GameState.pb.h>
 
 #include "geometry_msgs/PoseStamped.h"
 #include <tf/transform_listener.h>
+
+#include "std_msgs/String.h"
+
+//Biblioteca para tokenizar
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+
 
 //LOCALHOST
 //#define HOST "localhost"
@@ -22,15 +31,24 @@
 //#define TEAM_COLOR "MAGENTA"
 //#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
-//#define CRYPTO_KEY "randomkey"
+#define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4445
 #define PUBLIC_PORT_R 4444
+#define CYAN_PORT_S 4446
+#define CYAN_PORT_R 4441
+#define MAGENTA_PORT_S 4447
+#define MAGENTA_PORT_R 4442
 
 #include <iostream>
 #include <typeinfo>
 
 using namespace std;
 using namespace protobuf_comm;
+
+using PrepareInstructionCS = llsf_msgs::PrepareInstructionCS;
+using PrepareInstructionBS = llsf_msgs::PrepareInstructionBS;
+
+using PrepareMachine = llsf_msgs::PrepareMachine;
 
 //--------------------------------ROBOT POSE
         float pose_x = 3.0f;
@@ -39,6 +57,61 @@ using namespace protobuf_comm;
         std::atomic<bool> pose_sem_th;
         std::atomic<bool> pose_sem_main;
 //--------------------------------ROBOT POSE
+
+    std::shared_ptr<ProtobufBroadcastPeer> m_public_peer;
+    std::shared_ptr<ProtobufBroadcastPeer> m_private_peer;
+
+void callback_MachineInstructions(const std_msgs::String::ConstPtr& machine_instruction){
+
+    std::vector<std::string> tokens;
+    tokens.clear();
+    boost::algorithm::split(tokens, machine_instruction->data, boost::algorithm::is_any_of(","));
+
+    for(std::string token : tokens){
+        ROS_INFO_STREAM("Un token: " << token);
+    }
+
+    std::shared_ptr<PrepareMachine> prepare_instruction_message(new PrepareMachine());
+
+    if(tokens[0] == "take"){
+        PrepareInstructionCS new_machine_instruction_cs = prepare_instruction_message->instruction_cs();
+        new_machine_instruction_cs.set_operation(llsf_msgs::CSOp::RETRIEVE_CAP);
+    }
+    
+    if(tokens[0] == "put"){
+        PrepareInstructionCS new_machine_instruction_cs = prepare_instruction_message->instruction_cs();
+        new_machine_instruction_cs.set_operation(llsf_msgs::CSOp::MOUNT_CAP);
+    }
+
+    if(tokens[0] == "base"){
+        PrepareInstructionBS new_machine_instruction_bs = prepare_instruction_message->instruction_bs();
+        new_machine_instruction_bs.set_side(llsf_msgs::MachineSide::OUTPUT);
+        if(tokens[1] == "BASE_SILVER"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_SILVER);
+        }
+        if(tokens[1] == "BASE_BLACK"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_BLACK);
+        }
+        if(tokens[1] == "BASE_CLEAR"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_CLEAR);
+        }
+        if(tokens[1] == "BASE_RED"){
+            new_machine_instruction_bs.set_color(llsf_msgs::BaseColor::BASE_RED);
+        }
+    }
+    //TO DO color
+    // if("CYAN" == TEAM_COLOR){
+    //     machine_report_message->set_team_color(Team::CYAN);
+    // } else {
+    //     machine_report_message->set_team_color(Team::MAGENTA);
+    // }
+    
+    //Hay que ver la forma para poder usar el public peer que ya está declarado
+    // if(m_private_peer != nullptr){
+    //     ROS_INFO_STREAM("NOT NULL PTR, SENDING PRIVATE");
+    //     m_private_peer->send(PrepareMachine::COMP_ID, PrepareMachine::MSG_TYPE, prepare_instruction_message);
+    // }
+}
 
 class Handler {
 
@@ -56,7 +129,6 @@ class Handler {
         int m_port_r;
 
         MessageRegister *m_mr;
-        std::shared_ptr<ProtobufBroadcastPeer> m_public_peer;
 
         unsigned long int m_sequence_nr_;
 
@@ -89,6 +161,7 @@ class Handler {
 
             m_mr->add_message_type<BeaconSignal>();
             m_mr->add_message_type<GameState>();
+            m_mr->add_message_type<PrepareMachine>();
 
             m_public_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, m_port_s, m_port_r, m_mr);
 
@@ -139,11 +212,30 @@ class Handler {
                         ROS_INFO_STREAM("COLOR SET MAGENTA ");
                     }
                     team_color_set = true;
+
+                        ROS_INFO_STREAM("------          \n\n\n\n\nCRYPTO SETUP\n\n\n\n\n      --------- ");
+                        if(m_is_cyan){
+                            ROS_INFO_STREAM("------          \n\n\n\n\nCyan\n\n\n\n\n      --------- ");
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, CYAN_PORT_S, CYAN_PORT_R, m_mr,CRYPTO_KEY);
+                        } else {
+                                ROS_INFO_STREAM("------          \n\n\n\n\n Magenta SETUP\n\n\n\n\n      --------- ");
+                                m_private_peer =  std::make_shared<ProtobufBroadcastPeer>(m_host, MAGENTA_PORT_S, MAGENTA_PORT_R, m_mr,CRYPTO_KEY);
+
+                        }
+
+                        m_private_peer->signal_received().connect(
+                            boost::bind(&Handler::handleRefboxMessagePrivate, this, _1, _2, _3, _4)
+                        );
+                    
                 }
                 
             }
         }
 
+        /*PRIVATE MESSAGES*/
+        void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
+            //Print??
+        }
         void handleRecvErrorPrivate(boost::asio::ip::udp::endpoint &endpoint, std::string msg) {
             ROS_ERROR_STREAM("Error receiving on private port : " << msg);
         }
@@ -220,6 +312,8 @@ int main(int argc, char** argv)
     pose_sem_th.store(false);
         
     p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
+
+    ros::Subscriber subMachineInstructions = n.subscribe("/machine_instruction_msg", 10, callback_MachineInstructions);
 
     ros::Rate r(10);
     while (ros::ok()) {

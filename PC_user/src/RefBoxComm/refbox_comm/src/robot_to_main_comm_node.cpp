@@ -23,11 +23,11 @@ void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
         write(client_fd, oss.str().c_str(), oss.str().size());
     */
 
-        char buffer[20] = { ' ' };
+        char buffer[30] = { ' ' };
         int valread = 0;
 
         write(client_fd, "nxt", 3);//ask server for next instruction
-        valread = read(client_fd, buffer, 20);
+        valread = read(client_fd, buffer, 30);
         printf("Server instruction: %s\n", buffer);
 
         std::stringstream ss;
