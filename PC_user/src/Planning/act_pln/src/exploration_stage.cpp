@@ -46,7 +46,7 @@ using namespace std;
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
-	SM_FIRSTEXP,
+	SM_FIRSTMAPPING,
 	SM_NAV_HOME,
 	SM_NAV_PIPS,
 	SM_TURN_AROUND_PIPS,
@@ -55,12 +55,10 @@ enum SMState {
 	SM_TAG_DETECTED,
 	SM_NAV_INPUT,
 	SM_GO_ZONE,
-	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
 	SM_TAG_SEARCH,
 	SM_GIRO,
-    SM_FINAL_STATE,
-    SM_SCAN_SPACE
+    SM_FINAL_STATE
 };
 
 template <typename T>
@@ -541,25 +539,31 @@ void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
 	std::cout <<"Aquí voy a publicar :D"<<std::endl;
 }
 
-void go_n_turn(ros::Publisher pub_cmd_vel, bool act)
+bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
+	std::cout << "\n First Mapping Start " << std::endl;
 	ros::Rate r(10);
-	//std::cout << "timee \t" << ros::Time::now() << std::endl;
-	//float now = ros::Time::now();
-	//std::cout << "timee \t" << now << std::endl;
-	tw_tomap.linear.x=10.0;
+	ros::Time end;
+	tw_tomap.linear.x=1.0;
 	tw_tomap.linear.y=0.0;
 	tw_tomap.linear.z=0.0;
 	tw_tomap.angular.x=0.0;
 	tw_tomap.angular.y=0.0;
 	tw_tomap.angular.z=0.0;
-	std::cout << "avanza pls \t" << act << std::endl;
-	/*while(ros::Time::now()<now){
-		std::cout << "\n Entra al while " << std::endl;
+	end = ros::Time::now() + ros::Duration(t_fwd);
+	while(ros::Time::now() < end){
+		//std::cout << "\n Forward " << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
-		r.sleep();
-	}*/	
-	std::cout << "\n Sale del while " << std::endl;
+	}
+	tw_tomap.linear.x=0.0;
+	tw_tomap.angular.z=1.0;
+	end = ros::Time::now() + ros::Duration(t_turn);
+	while(ros::Time::now() < end){
+		//std::cout << "\n Turn Left" << std::endl;
+		pub_cmd_vel.publish(tw_tomap);
+	}
+	std::cout << "\n First Mapping Done " << std::endl;
+	return true;
 }
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -609,7 +613,7 @@ int main(int argc, char** argv){
     ros::Publisher pub_goal 		= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 	ros::Publisher pub_mps_name 	= n.advertise<std_msgs::String>("/mps_name", 1000, true);
 	ros::Publisher pub_mps_pos 		= n.advertise<geometry_msgs::PoseStamped>("/mps_pos", 1000); //, latch=True);
-	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>("/cmd_vel_1", 1000);
+	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 	ros::Publisher pub_zone_goal 	= n.advertise<std_msgs::String>("/zone_goal", 1000, true);
 	ros::Publisher pub_rosnav_goal 	= n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
 	
@@ -725,27 +729,27 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 				ros::Duration(2, 0).sleep();
-	    		state = SM_FIRSTEXP;
+	    		state = SM_FIRSTMAPPING;
 	    		break;
 			}
 
-			case SM_FIRSTEXP:{
-				std::cout << "\n State machine: SM_FIRSTEXP" << std::endl;
-				std::cout << "Avanza y da giro de 90 deg" << std::endl;
-				go_n_turn(pub_cmd_vel, true);
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_PIPS;
+			case SM_FIRSTMAPPING:{
+				std::cout << "\n State machine: SM_FIRSTMAPPING" << std::endl;
+				if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+				{
+					std::cout << "Movement Done" << std::endl;
+				}
+				state = SM_NAV_HOME;
 				break;
 			}
 
 			case SM_NAV_HOME:{
 				std::cout << "\n State machine: SM_NAV_HOME" << std::endl;
-				std::cout << "Avanza y da giro de 90 deg" << std::endl;
-				navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
+				//navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
 				std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
 				//navigate_to_location(pips_poses.at(0));
 				pub_zone_goal.publish(pips_as_zones[0]);
+				ros::Duration(6,0).sleep();
 				curr_pip++;
 				curr_pii++;
 				state = SM_NAV_PIPS;
@@ -758,9 +762,10 @@ int main(int argc, char** argv){
 				//El contador es el índice que recorre el arreglo
 				//Si aún no se han recorrido los puntos de inspeccion sigue 
 				if(curr_pip <= n_pips){
-					std::cout << "Navigating PIP \t" << curr_pip << "\n" << pips_poses.at(curr_pip) << "\n" << std::endl;
+					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pip));
 					pub_zone_goal.publish(pips_as_zones[curr_pip]);
+					ros::Duration(6,0).sleep();
 					state = SM_NAV_PIIS;
 				}
 				else{

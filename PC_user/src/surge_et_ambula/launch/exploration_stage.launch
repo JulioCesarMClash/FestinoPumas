@@ -1,12 +1,11 @@
 <launch>
-	<!--LAUNCHES-->
 	<!--Simulacion-->
-	
-	<include file="$(find nav2d_tutorials)/launch/freenect.launch"> </include>	
-	<include file="$(find config_files)/launch/navigation_rcll_2023.launch"> </include>	
+	<!--LAUNCHES-->
+
+	<include file="$(find nav2d_tutorials)/launch/tutorial3.launch"> </include>	
+	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>	
 
 	<!--NODES-->
-	<!--node name="speaker" pkg="robotino_talk" type="speaker.py"/-->
-	<node name="find_tag_service" pkg="img_proc" type="aruco_det_srv_array.py"/>
+	<node name="shortmv" pkg="simple_move" type="shortmv_rosnav" output="screen"/>
 	
 </launch>
