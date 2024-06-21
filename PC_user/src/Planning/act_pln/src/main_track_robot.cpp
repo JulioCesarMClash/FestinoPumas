@@ -78,12 +78,22 @@ bool request = false;
 
 void compute_coordinates(){
     float quat;
+    int angulo = 315;
+
     tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(std::stoi("135")*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(std::stoi("135")*(M_PI/180));    
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(std::stoi("135")*(M_PI/180));  
+
+    //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
+    //Si es ir a la salida entonces se queda igual el ángulo
+    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+        angulo = angulo - 180;                     
+    }
+
+    std::cout << "el ángulo es: " << angulo << std::endl;
 
     tf::Quaternion myQuaternion;
 
-    myQuaternion.setRPY(0,0,180*M_PI/180);
+    myQuaternion.setRPY(0,0,angulo*M_PI/180);
 
     myQuaternion=myQuaternion.normalize();
 
