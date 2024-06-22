@@ -76,20 +76,28 @@ bool request = false;
 //     }
 // }
 
+float angulo = 135;
+float angulo_rad;
+
 void compute_coordinates(){
     float quat;
-    int angulo = 315;
+    
 
-    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(std::stoi("135")*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(std::stoi("135")*(M_PI/180));  
+    //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
+    //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
+
+tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(angulo*(M_PI/180));
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(angulo*(M_PI/180)); 
 
     //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
     //Si es ir a la salida entonces se queda igual el ángulo
-    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+    //if(tokens[4] == "entrance" || tokens[4] == "platform" ){
         angulo = angulo - 180;                     
-    }
+    //}
+	angulo_rad = angulo*M_PI/180;
 
-    std::cout << "el ángulo es: " << angulo << std::endl;
+    std::cout << "el ángulo en grados es: " << angulo << std::endl;
+    std::cout << "el ángulo en rad es: " << angulo*M_PI/180 << std::endl;
 
     tf::Quaternion myQuaternion;
 
@@ -146,7 +154,7 @@ void transform_zone()
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
-    zone = "M_Z45";
+    zone = "C_Z23";
 
     //TF related stuff 
     tf_target_zone.header.frame_id = "/map";
@@ -313,10 +321,11 @@ int main(int argc, char** argv){
                 compute_coordinates();
 
                 //Navegacion Marco
-                //navigate_to_location(tf_target_zone);
+                navigate_to_location(tf_target_zone);
+		FestinoNavigation::moveDistAngle(0.0, angulo_rad, 10000);
 
                 //Navegacion ROS para hacer pruebas
-                pub_rosnav_goal.publish(tf_target_zone);
+                //pub_rosnav_goal.publish(tf_target_zone);
 				ros::Duration(10, 0).sleep();
 
                 state = SM_WAIT_FOR_INSTRUCTION;
