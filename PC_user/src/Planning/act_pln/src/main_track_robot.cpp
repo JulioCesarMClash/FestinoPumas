@@ -19,6 +19,9 @@
 #include "img_proc/Find_piece_Srv.h"
 #include "img_proc/Align_Srv.h"
 
+//Para encontrar aruco
+#include "img_proc/Find_tag_Srv.h"
+
 //Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>	
@@ -35,6 +38,7 @@ enum SMState {
     SM_INIT,
 	SM_WAIT_FOR_INSTRUCTION,
 	SM_GO_TO,
+    SM_ALIGN,
 	SM_FIND,
     SM_TAKE,
     SM_MOVE,
@@ -208,7 +212,6 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
     }
 }
 
-
 void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
     std::cout << "Entré al callback" << msg->data.c_str() <<std::endl;	
@@ -249,6 +252,30 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
     }
 }
 
+// void callback_slope(const std_msgs::Float32::ConstPtr& msg)
+// {
+//     float slope = (*msg).data;
+
+//     float th = 0.03f;
+
+//     float Kp = -6.0f
+//     float Kp_m = 6.0f
+
+//     if(slope < th && slope > -th){
+//         std::cout << "Alineado!!!" << std::endl;
+//     }
+//     else{
+//         std::cout << "Ño alineado" << std::endl;
+//         if (slope < 0 && slope != 1){
+//             FestinoNavigation::moveDistAngle(0.0, Kp_m*slope, 10000);
+//         }
+//         else if (slope > 0 && slope != 1){
+//             FestinoNavigation::moveDistAngle(0.0, Kp*abs(error), 10000);
+//         }
+//     }
+// }
+
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -262,13 +289,17 @@ int main(int argc, char** argv){
 
     //Subscribers and Publishers
     ros::Subscriber subInstructions = n.subscribe("/instruction_msg", 10, callback_instructions);
+    //ros::Subscriber subSlope        = n.subscribe("/slope_data", 10, callback_slope);
     ros::Publisher pubRequest       = n.advertise<std_msgs::String>("/request_instruction", 1000);
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
 
     //Declarar servicio para encontrar pieza
     ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+    ros::ServiceClient aruco_client 		= n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
+
     img_proc::Find_piece_Srv piece_srv;
+    img_proc::Find_tag_Srv aruco_srv;
 
     ros::Rate loop(30);
 
@@ -288,7 +319,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_GO_TO;
+                state = SM_ALIGN;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -310,7 +341,7 @@ int main(int argc, char** argv){
 
 	    	case SM_GO_TO:
 	    		std::cout << "State machine: SM_GO_TO" << std::endl;
-	            voice = "Navigating to destination point";
+	            voice = "Navigating to// error = slope";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 
@@ -322,7 +353,7 @@ int main(int argc, char** argv){
 
                 //Navegacion Marco
                 navigate_to_location(tf_target_zone);
-		FestinoNavigation::moveDistAngle(0.0, angulo_rad, 10000);
+		        FestinoNavigation::moveDistAngle(0.0, angulo_rad, 10000);
 
                 //Navegacion ROS para hacer pruebas
                 //pub_rosnav_goal.publish(tf_target_zone);
@@ -330,6 +361,27 @@ int main(int argc, char** argv){
 
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
+
+            case SM_ALIGN:
+                std::cout << "State machine: SM_ALIGN" << std::endl;
+	            voice = "Aligning";
+	            std::cout << voice << std::endl;
+				FestinoHRI::say(voice,3);
+
+                aruco_srv.request.is_find_tag_enabled = true;
+				aruco_client.call(aruco_srv);
+				if(aruco_srv.response.success){
+					std::cout << "Alineado!!!" << std::endl;
+					FestinoNavigation::moveDistAngle(0.43, 0, 10000);
+					state = SM_WAIT_FOR_INSTRUCTION;	
+				}
+				else{
+					std::cout << "NotFound" << std::endl;
+					state = SM_FIND;
+				}
+
+                state = SM_ALIGN;
+                break;
 
 	    	case SM_FIND:
 	            std::cout << "State machine: SM_FIND" << std::endl;

@@ -251,7 +251,10 @@ add_executable(exploration_stage src/exploration_stage.cpp)
 add_dependencies(exploration_stage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(exploration_stage ${catkin_LIBRARIES})
 
+add_executable(exploration_stage_laser src/exploration_stage_laser.cpp)
+add_dependencies(exploration_stage_laser ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(exploration_stage_laser ${catkin_LIBRARIES})
+
 add_executable(main_track_robot src/main_track_robot.cpp)
 add_dependencies(main_track_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_track_robot ${catkin_LIBRARIES})
-
