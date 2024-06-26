@@ -25,7 +25,6 @@
 #include <algorithm>
 #include "img_proc/Find_tag_Srv.h"
 #include "sensor_msgs/Range.h"
-#include "sensor_msgs/LaserScan.h"
 
 #include <festino_arm_moveit_demos/srv_arm.h>
 #include <img_proc/MPS_Detector.h>
@@ -47,6 +46,9 @@ using namespace std;
 enum SMState {
 	SM_INIT,
 	SM_FIRSTMAPPING,
+	SM_VER_FREE_PATH,
+	SM_TURN_LEFT,
+	SM_TURN_RIGHT,
 	SM_NAV_HOME,
 	SM_NAV_PIPS,
 	SM_TURN_AROUND_PIPS,
@@ -55,10 +57,12 @@ enum SMState {
 	SM_TAG_DETECTED,
 	SM_NAV_INPUT,
 	SM_GO_ZONE,
+	SM_NAV_FWD,
 	SM_NAV_AROUND_OBST,
 	SM_TAG_SEARCH,
 	SM_GIRO,
-    SM_FINAL_STATE
+    SM_FINAL_STATE,
+    SM_SCAN_SPACE
 };
 
 template <typename T>
@@ -120,7 +124,7 @@ std::vector<geometry_msgs::PoseStamped> piis_poses;
 geometry_msgs::PoseStamped tf_piis;
 
 sensor_msgs::LaserScan laserScan;
-bool flag_door = true;
+bool flag_free_path = false;
 
 geometry_msgs::Twist tw_tomap;
 
@@ -193,11 +197,11 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     laserScan = *msg;
-
-    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+	int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+	int range_left = 0, range_right = 0;
     float laser_l=0;
     range=laserScan.ranges.size();
-    //std::cout<<laserScan.ranges.size()<<std::endl;
+    std::cout<<laserScan.ranges.size()<<std::endl;
     range_c=range/2;
     range_i=range_c-(range/10);
     range_f=range_c+(range/10);
@@ -205,6 +209,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     //std::cout<<"Range Central: "<< range_c << "\n ";
     //std::cout<<"Range Initial: "<< range_i << "\n ";
     //std::cout<<"Range Final: "<< range_f << "\n ";
+
 
     cont_laser=0;
     laser_l=0;
@@ -219,13 +224,13 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
     if(laser_l/cont_laser > 0.50)
     {
-        flag_door = true;
-        //std::cout<<"door open"<<std::endl;
+        flag_free_path = true;
+        //std::cout<<"fwd"<<std::endl;
     }
     else
     {
-        flag_door = false;
-        //std::cout<<"door closed"<<std::endl;
+        flag_free_path = false;
+        //std::cout<<"not"<<std::endl;
     }
 }
 
@@ -527,7 +532,7 @@ bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_t
 		std::cout << "Station \t" << mps_name[0] << std::endl;
 		det_mps.pose.position.x = transform.getOrigin().x();
 		det_mps.pose.position.y = transform.getOrigin().y();
-		det_mps.pose.position.z = transform.getOrigin().z();
+		det_mps.pose.position.z = transform.getOrigin().z(); 
 		std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl; //<< det_mps << std::endl;
 		define_zone(det_mps);
 		std::cout << "\n MPS_Zone " << zone_name << std::endl;
@@ -541,7 +546,7 @@ void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
-	std::cout << "\n First Mapping Start " << std::endl;
+	std::cout << "\n FWD for " << t_fwd << "secs" << std::endl;
 	ros::Rate r(10);
 	ros::Time end;
 	tw_tomap.linear.x=1.0;
@@ -555,6 +560,7 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Forward " << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
+	std::cout << "\n TURN for " << t_turn << "secs" << std::endl;
 	tw_tomap.linear.x=0.0;
 	tw_tomap.angular.z=1.0;
 	end = ros::Time::now() + ros::Duration(t_turn);
@@ -562,7 +568,6 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Turn Left" << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
-	std::cout << "\n First Mapping Done " << std::endl;
 	return true;
 }
 int main(int argc, char** argv){
@@ -603,7 +608,7 @@ int main(int argc, char** argv){
     //ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     //ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
-    //ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
+    ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
 	//MitChanges (Last slot)
     //ros::Subscriber sub_mps_name     		= n.subscribe("/mps_name", 10, callback_mps_name);
 	//ros::Subscriber sub_mps_data     		= n.subscribe("/mps_data", 10, callback_mps_data);
@@ -640,6 +645,8 @@ int main(int argc, char** argv){
     std::string mps_type;
 
     std_msgs::String mps_info2send;
+	bool from_left = false;
+	bool from_right = false;
 
     //Robados
     /*std::vector<std::string> mps_name;
@@ -729,7 +736,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 				ros::Duration(2, 0).sleep();
-	    		state = SM_FIRSTMAPPING;
+	    		state = SM_VER_FREE_PATH;
 	    		break;
 			}
 
@@ -739,20 +746,48 @@ int main(int argc, char** argv){
 				{
 					std::cout << "Movement Done" << std::endl;
 				}
-				state = SM_NAV_HOME;
+				state = SM_VER_FREE_PATH;
 				break;
 			}
 
-			case SM_NAV_HOME:{
-				std::cout << "\n State machine: SM_NAV_HOME" << std::endl;
-				//navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
-				std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(6,0).sleep();
+			case SM_VER_FREE_PATH:{
+				std::cout << "\n State machine: SM_VER_FREE_PATH" << std::endl;
+				if(flag_free_path)
+				{
+					std::cout << "FWD" << std::endl;
+					state = SM_NAV_FWD;	
+				}
+				else
+				{
+					std::cout << "RIGHT" << std::endl;
+					state = SM_TURN_RIGHT;
+				}
+				break;
+			}
+
+			case SM_NAV_FWD:{
+				std::cout << "\n State machine: SM_NAV_FWD" << std::endl;
+				std::cout << "Avanza" << std::endl;
+				fwd_n_turn(pub_cmd_vel, 2.0, 0.0);
 				curr_pip++;
 				curr_pii++;
-				state = SM_NAV_PIPS;
+				state = SM_VER_FREE_PATH;
+				break;
+			}
+
+			case SM_TURN_LEFT:{
+				std::cout << "\n State machine: SM_TURN" << std::endl;
+				from_left = true;
+				fwd_n_turn(pub_cmd_vel, 0.0, 2.0);
+				state = SM_VER_FREE_PATH;
+				break;
+			}
+
+			case SM_TURN_RIGHT:{
+				std::cout << "\n State machine: SM_TURN" << std::endl;
+				from_right = true;
+				fwd_n_turn(pub_cmd_vel, 0.0, 4.0);
+				state = SM_VER_FREE_PATH;
 				break;
 			}
 
@@ -762,11 +797,10 @@ int main(int argc, char** argv){
 				//El contador es el índice que recorre el arreglo
 				//Si aún no se han recorrido los puntos de inspeccion sigue 
 				if(curr_pip <= n_pips){
-					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
+					std::cout << "Navigating PIP \t" << curr_pip << "\n" << pips_poses.at(curr_pip) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pip));
 					pub_zone_goal.publish(pips_as_zones[curr_pip]);
-					ros::Duration(6,0).sleep();
-					state = SM_TURN_AROUND_PIPS;
+					state = SM_NAV_PIIS;
 				}
 				else{
 					std::cout << "All PIPS Visited - Finishing SM \t" << std::endl;
@@ -794,11 +828,7 @@ int main(int argc, char** argv){
 					angle = step_size*direction;
 					
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
+						FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
 						ros::Duration(2, 0).sleep();
@@ -824,11 +854,7 @@ int main(int argc, char** argv){
 					direction = 1;
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
+						FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
 						ros::Duration(2, 0).sleep();
@@ -851,19 +877,11 @@ int main(int argc, char** argv){
 					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
 					// MC: viendo hacia el frente, giro a la izq 90 grad sin steps
 					// MC: luego otros 45 a la izq, con 2 steps
-					//FestinoNavigation::moveDistAngle(0.0, 2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-					{
-						std::cout << "Movement Done" << std::endl;
-					}
+					FestinoNavigation::moveDistAngle(0.0, 2*turn_step_pip, 1000);
 					direction = 1;
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
+						FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
 						ros::Duration(2, 0).sleep();
@@ -886,19 +904,11 @@ int main(int argc, char** argv){
 					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
 					// MC: viendo hacia el frente, giro a la der 90 grad sin steps
 					// MC: luego otros 45 a la der, con 2 steps
-					//FestinoNavigation::moveDistAngle(0.0, -2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-					{
-						std::cout << "Movement Done" << std::endl;
-					}
+					FestinoNavigation::moveDistAngle(0.0, -2*turn_step_pip, 1000);
 					direction = -1;
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
+						FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
 						ros::Duration(2, 0).sleep();
@@ -927,7 +937,7 @@ int main(int argc, char** argv){
 					std::cout << "Coords del pii" << x_piis_m[curr_pii] <<","<< y_piis_m[curr_pii] << std::endl;
 					std::cout << "Navigating PII \t" << curr_pii << "\n" << piis_poses.at(curr_pii) << "\n" << std::endl;
 					navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
-					state = SM_TURN_AROUND_PIIS;
+					state = SM_FINAL_STATE;
 				}
 				else{
 					std::cout << "All PIIS Visited \t" << std::endl;
@@ -947,11 +957,7 @@ int main(int argc, char** argv){
 	 			from_pip = false;
 	 			std::cout << "Turn arooound for PII \t" << curr_pii << std::endl;
 				for(turn_step_pii = 0; turn_step_pii <= n_steps_pii; turn_step_pii++){
-					//FestinoNavigation::moveDistAngle(0.0, step_size, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
-					{
-						std::cout << "Movement Done" << std::endl;
-					}
+					FestinoNavigation::moveDistAngle(0.0, step_size, 1000);
 					std::cout << "Step \t" << turn_step_pii << "\t Angle \t" << step_size*turn_step_pii << std::endl;
 					std::cout << "Looking for ARUCO   " << std::endl;
 					ros::Duration(2, 0).sleep();
