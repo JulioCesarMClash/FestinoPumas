@@ -541,7 +541,7 @@ void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
-	std::cout << "\n First Mapping Start " << std::endl;
+	std::cout << "\n Movement Start " << std::endl;
 	ros::Rate r(10);
 	ros::Time end;
 	tw_tomap.linear.x=1.0;
@@ -555,6 +555,7 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Forward " << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
+	ros::Duration(3);
 	tw_tomap.linear.x=0.0;
 	tw_tomap.angular.z=1.0;
 	end = ros::Time::now() + ros::Duration(t_turn);
@@ -562,7 +563,8 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Turn Left" << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
-	std::cout << "\n First Mapping Done " << std::endl;
+	ros::Duration(3);
+	std::cout << "\n Movement Finished " << std::endl;
 	return true;
 }
 int main(int argc, char** argv){
@@ -777,25 +779,18 @@ int main(int argc, char** argv){
 
 			case SM_TURN_AROUND_PIPS:{
 				std::cout << "\n State machine: SM_TURN_AROUND_PIPS" << std::endl;
-				// MitComment: Da un giro de 90 grados (2pi) para escanear un cuadrante
-				// MC: la direccion depende del cuadrante
-				// MC: 3 steps ==> 2*pi/8 = 0.7854
-				// MC: ¿porqué pusimos 0.715?  creo que vimos que el robot
-	 			// MC: no giraba los 45 grados y encontramos que lo hacía 
-	 			// MC: con ese num
 	 			step_size = 0.715;
 	 			from_pip = true;
 	 			std::cout << "Turn arooound for PIP \t" << curr_pip << std::endl;
 				if(curr_pip == 1){// || curr_pip == 8){ // Para Magenta y Cyan descomentar la segunda condición // Y probar c:c
 					quadrant = 1;
 					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
-					// MC: viendo hacia el frente, giro a la der en 2 steps de 45 grad
 					direction = -1;
 					angle = step_size*direction;
 					
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
 						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 						{
 							std::cout << "Movement Done" << std::endl;
 						}
@@ -825,7 +820,7 @@ int main(int argc, char** argv){
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
 						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 						{
 							std::cout << "Movement Done" << std::endl;
 						}
@@ -852,7 +847,7 @@ int main(int argc, char** argv){
 					// MC: viendo hacia el frente, giro a la izq 90 grad sin steps
 					// MC: luego otros 45 a la izq, con 2 steps
 					//FestinoNavigation::moveDistAngle(0.0, 2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 					{
 						std::cout << "Movement Done" << std::endl;
 					}
@@ -860,7 +855,7 @@ int main(int argc, char** argv){
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
 						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 						{
 							std::cout << "Movement Done" << std::endl;
 						}
@@ -887,7 +882,7 @@ int main(int argc, char** argv){
 					// MC: viendo hacia el frente, giro a la der 90 grad sin steps
 					// MC: luego otros 45 a la der, con 2 steps
 					//FestinoNavigation::moveDistAngle(0.0, -2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 					{
 						std::cout << "Movement Done" << std::endl;
 					}
@@ -895,7 +890,7 @@ int main(int argc, char** argv){
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
 						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 						{
 							std::cout << "Movement Done" << std::endl;
 						}
@@ -948,7 +943,7 @@ int main(int argc, char** argv){
 	 			std::cout << "Turn arooound for PII \t" << curr_pii << std::endl;
 				for(turn_step_pii = 0; turn_step_pii <= n_steps_pii; turn_step_pii++){
 					//FestinoNavigation::moveDistAngle(0.0, step_size, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
 					{
 						std::cout << "Movement Done" << std::endl;
 					}
