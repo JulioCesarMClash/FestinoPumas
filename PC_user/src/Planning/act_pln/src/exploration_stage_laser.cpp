@@ -124,7 +124,9 @@ std::vector<geometry_msgs::PoseStamped> piis_poses;
 geometry_msgs::PoseStamped tf_piis;
 
 sensor_msgs::LaserScan laserScan;
-bool flag_free_path = false;
+bool free_path_fwd = false;
+bool free_path_rght = false;
+bool free_path_lft = false;
 
 geometry_msgs::Twist tw_tomap;
 
@@ -197,11 +199,11 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     laserScan = *msg;
-	int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+	int range=0,range_i=0,range_f=0,range_c=0,cont_cntr=0,cont_lft=0,cont_rght=0;
 	int range_left = 0, range_right = 0;
-    float laser_l=0;
+    float laser_sum_cntr=0,laser_sum_rght=0,laser_sum_lft=0;
     range=laserScan.ranges.size();
-    std::cout<<laserScan.ranges.size()<<std::endl;
+    //std::cout<<laserScan.ranges.size()<<std::endl;
     range_c=range/2;
     range_i=range_c-(range/10);
     range_f=range_c+(range/10);
@@ -211,26 +213,57 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     //std::cout<<"Range Final: "<< range_f << "\n ";
 
 
-    cont_laser=0;
-    laser_l=0;
+    cont_cntr=0;
+	cont_lft=0;
+	cont_rght=0;
     for(int i=range_c-(range/10); i < range_c+(range/10); i++)
     {
         if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
         { 
-            laser_l=laser_l+laserScan.ranges[i]; 
-            cont_laser++;
+            laser_sum_cntr=laser_sum_cntr+laserScan.ranges[i]; 
+            cont_cntr++;
         }
     }
-    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
-    if(laser_l/cont_laser > 0.50)
+
+	for(int i=0; i < range_c-(range/10); i++)
     {
-        flag_free_path = true;
-        //std::cout<<"fwd"<<std::endl;
+        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+        { 
+            laser_sum_lft=laser_sum_lft+laserScan.ranges[i]; 
+            cont_lft++;
+        }
+    }
+
+	for(int i=range_c+(range/10); i < range; i++)
+    {
+        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+        { 
+            laser_sum_rght=laser_sum_rght+laserScan.ranges[i]; 
+            cont_rght++;
+        }
+    }
+
+	if(laser_sum_rght/cont_rght > 0.50)
+    {
+        free_path_rght = true;
+        std::cout<<"derecha libre"<<std::endl;
+    }
+
+	if(laser_sum_lft/cont_lft > 0.50)
+    {
+        free_path_lft = true;
+        std::cout<<"izquierda libre"<<std::endl;
+    }
+
+    if(laser_sum_cntr/cont_cntr > 0.50)
+    {
+        free_path_fwd = true;
+        std::cout<<"fwd"<<std::endl;
     }
     else
     {
-        flag_free_path = false;
-        //std::cout<<"not"<<std::endl;
+		
+        std::cout<<"not"<<std::endl;
     }
 }
 
@@ -736,7 +769,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 				ros::Duration(2, 0).sleep();
-	    		state = SM_VER_FREE_PATH;
+	    		state = SM_INIT;
 	    		break;
 			}
 
@@ -752,15 +785,20 @@ int main(int argc, char** argv){
 
 			case SM_VER_FREE_PATH:{
 				std::cout << "\n State machine: SM_VER_FREE_PATH" << std::endl;
-				if(flag_free_path)
+				if(free_path_fwd)
 				{
 					std::cout << "FWD" << std::endl;
 					state = SM_NAV_FWD;	
 				}
-				else
+				else if(free_path_rght)
 				{
 					std::cout << "RIGHT" << std::endl;
 					state = SM_TURN_RIGHT;
+				}
+				else if(free_path_lft)
+				{
+					std::cout << "LEFT" << std::endl;
+					state = SM_TURN_LEFT;
 				}
 				break;
 			}
@@ -881,7 +919,7 @@ int main(int argc, char** argv){
 					direction = 1;
 					angle = step_size*direction;
 					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
+						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
 						ros::Duration(2, 0).sleep();
@@ -934,9 +972,8 @@ int main(int argc, char** argv){
 				if(curr_pii <= n_piis){
 					std::cout << "Navigating PII \t" << curr_pii << "\n" << piis_poses.at(curr_pii) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pii));
-					std::cout << "Coords del pii" << x_piis_m[curr_pii] <<","<< y_piis_m[curr_pii] << std::endl;
-					std::cout << "Navigating PII \t" << curr_pii << "\n" << piis_poses.at(curr_pii) << "\n" << std::endl;
-					navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
+					//std::cout << "Coords del pii" << x_piis_m[curr_pii] <<","<< y_piis_m[curr_pii] << std::endl;
+					//navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
 					state = SM_FINAL_STATE;
 				}
 				else{
