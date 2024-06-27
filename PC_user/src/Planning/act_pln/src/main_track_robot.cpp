@@ -319,7 +319,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_ALIGN;
+                state = SM_GO_TO;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -359,7 +359,7 @@ int main(int argc, char** argv){
                 //pub_rosnav_goal.publish(tf_target_zone);
 				ros::Duration(10, 0).sleep();
 
-                state = SM_WAIT_FOR_INSTRUCTION;
+                state = SM_ALIGN;
 	    		break;
 
             case SM_ALIGN:
@@ -372,7 +372,7 @@ int main(int argc, char** argv){
 				aruco_client.call(aruco_srv);
 				if(aruco_srv.response.success){
 					std::cout << "Alineado!!!" << std::endl;
-					FestinoNavigation::moveDistAngle(0.43, 0, 10000);
+					FestinoNavigation::moveDistAngle(0.50, 0, 10000);
 					state = SM_WAIT_FOR_INSTRUCTION;	
 				}
 				else{
