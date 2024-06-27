@@ -236,8 +236,9 @@ class FindTagNode:
                     yaw_z = math.degrees(yaw_z)"""
                     #print(roll_x, pitch_y, yaw_z)
 		    
-		    
+                    #Se publica al cmd_vel el giro angular que se requiera
                     pub_vel.publish(vel)
+                    #Delay para que le de tiempo al robot de girar
                     rospy.sleep(2)
 
                     # print("Siii")
