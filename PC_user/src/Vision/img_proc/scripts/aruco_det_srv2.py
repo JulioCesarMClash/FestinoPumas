@@ -43,10 +43,12 @@ class FindTagNode:
     rate = rospy.Rate(10)
     self.bridge = CvBridge()
 
+    #Este suscriptor recibe la nube de puntos del kinect, mediante el topico "/camera/depth_registered/points"
     self.depth_points_sub  = rospy.Subscriber("/camera/depth_registered/points",PointCloud2,self.callback_depth_points)
 
     self.find_tag_service = rospy.Service('/vision/find_tag/point_stamped', Find_tag_Srv, self.find_tag)
 
+  #Este callback es el que recibe la nube de puntos y se guarda el frame en la variable arr
   def callback_depth_points(self, data):
     global arr
     arr = ros_numpy.point_cloud2.pointcloud2_to_array(data)
@@ -61,14 +63,18 @@ class FindTagNode:
     name_list = []
     aruco_list = PointStamped()
     aruco_list = []
+    #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
+    #Cuando se cumpla eso ya se ejecutará lo que esta adentro del if
     if request.is_find_tag_enabled:
       while(slope > 0.01 or slope < -0.01):
         tfBuffer = tf2_ros.Buffer()
         depth_img_bgr = np.zeros((480, 640))
         mps_name = [0,0]
+        #A partir de la nube de puntos se obtiene el RGB
         rgb_arr = arr['rgb'].copy()
         rgb_arr.dtype = np.uint32
         r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
+        #Se hace un Merge de los 3 canales para obtener la imagen final que se analizara, que es aruco_img
         aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
         ######## Filling msg for aruco_pose publisher ########
         frame_id = "camera_link"
@@ -86,6 +92,7 @@ class FindTagNode:
         thickness = 2
         aruco_det_flag = False
         mps_name = "Not Identified"
+
         """with open('/home/pumas/FestinoPumas/PC_user/src/Vision/img_proc/scripts/cameraMatrix.pkl', 'rb') as f:
             mtx = pickle.load(f)
 
@@ -121,12 +128,14 @@ class FindTagNode:
                     # Draw a diagonal green line with thickness of 9 px 
                     image = cv2.line(aruco_img, start_point, end_point, color, thickness) 
 
+                    #Se obtiene la pendiente de la recta 
                     slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
                     print("la pendiente es: ", slope)
 
                     vel = Twist()
                     Kp = -3.0
                     Kp_m = 3.0
+
 
                     if(slope > 0.01):
                         vel.angular.z = Kp*abs(slope)
@@ -227,8 +236,9 @@ class FindTagNode:
                     yaw_z = math.degrees(yaw_z)"""
                     #print(roll_x, pitch_y, yaw_z)
 		    
-		    
+                    #Se publica al cmd_vel el giro angular que se requiera
                     pub_vel.publish(vel)
+                    #Delay para que le de tiempo al robot de girar
                     rospy.sleep(2)
 
                     # print("Siii")
