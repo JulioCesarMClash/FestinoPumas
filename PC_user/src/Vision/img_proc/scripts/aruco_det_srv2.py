@@ -3,10 +3,10 @@ from __future__ import print_function
 
 import time
 
-#Para desempacar la matriz de la cámara y los coeficientes de distor
+#Para desempacar la matriz de la camara y los coeficientes de distor
 import pickle
 
-from scipy.spatial.transform import Rotation
+#from scipy.spatial.transform import Rotation
 
 import roslib
 import sys
@@ -66,9 +66,7 @@ class FindTagNode:
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutará lo que esta adentro del if
     if request.is_find_tag_enabled:
-      #Mientras que la pendiente supere el umbral significa que el robot no esta alineado
-      #y debe de seguir girando para hacerlo
-      while(slope > 0.03 or slope < -0.03):
+      while(slope > 0.01 or slope < -0.01):
         tfBuffer = tf2_ros.Buffer()
         depth_img_bgr = np.zeros((480, 640))
         mps_name = [0,0]
@@ -95,13 +93,12 @@ class FindTagNode:
         aruco_det_flag = False
         mps_name = "Not Identified"
 
-        #Se lee el archivo .pkl que contiene la matriz de la camara (Kinect)
-        with open('/home/robocup20/FestinoPumas/PC_user/src/Vision/img_proc/scripts/cameraMatrix.pkl', 'rb') as f:
+        """with open('/home/pumas/FestinoPumas/PC_user/src/Vision/img_proc/scripts/cameraMatrix.pkl', 'rb') as f:
             mtx = pickle.load(f)
 
-        #Se lee el archivo .pkl que contiene los parametros de distor de la camara (Kinect)
-        with open('/home/robocup20/FestinoPumas/PC_user/src/Vision/img_proc/scripts/dist.pkl', 'rb') as f:
-            dst = pickle.load(f)
+        
+        with open('/home/pumas/FestinoPumas/PC_user/src/Vision/img_proc/scripts/dist.pkl', 'rb') as f:
+            dst = pickle.load(f)"""
 
         try:
             if(markerIds.shape[0] >= 1):
@@ -136,17 +133,16 @@ class FindTagNode:
                     print("la pendiente es: ", slope)
 
                     vel = Twist()
-                    Kp = -5.0
-                    Kp_m = 5.0
+                    Kp = -3.0
+                    Kp_m = 3.0
 
-                    #Si la pendiente es positiva gira para un lado
-                    if(slope > 0.03):
+
+                    if(slope > 0.01):
                         vel.angular.z = Kp*abs(slope)
-                    #Si la pendiente es negativa gira para el otro lado
-                    elif (slope < -0.03):
+                    elif (slope < -0.01):
                         vel.angular.z = Kp_m*abs(slope)
                         
-                    print("ño")
+                    print("no")
 
                     #corners = markerCorners[i]
 
@@ -197,7 +193,7 @@ class FindTagNode:
                     # # Get the rotation and translation vectors
                     aruco_marker_side_length = 0.123 
                     #12.3 cm o 0.123 m
-                    rvecs, tvecs, obj_points = cv2.aruco.estimatePoseSingleMarkers(corners,aruco_marker_side_length,mtx,dst)
+                    #rvecs, tvecs, obj_points = cv2.aruco.estimatePoseSingleMarkers(corners,aruco_marker_side_length,mtx,dst)
                         
                     # Print the pose for the ArUco marker
                     # The pose of the marker is with respect to the camera lens frame.
@@ -209,18 +205,18 @@ class FindTagNode:
                     #for i, marker_id in enumerate(marker_ids):
                         
                     #Store the translation (i.e. position) information
-                    transform_translation_x = tvecs[0][0][0]
-                    transform_translation_y = tvecs[0][0][1]
-                    transform_translation_z = tvecs[0][0][2]
+                    #transform_translation_x = tvecs[0][0][0]
+                    #transform_translation_y = tvecs[0][0][1]
+                    #transform_translation_z = tvecs[0][0][2]
 
                     #Store the rotation information
-                    rotation_matrix = np.eye(4)
-                    rotation_matrix[0:3, 0:3] = cv2.Rodrigues(np.array(rvecs[0]))[0]
-                    try: 
+                    #rotation_matrix = np.eye(4)
+                    #rotation_matrix[0:3, 0:3] = cv2.Rodrigues(np.array(rvecs[0]))[0]
+                    """try: 
                         r = Rotation.from_dcm(rotation_matrix[0:3, 0:3])
                     except Exception as e: 
                         print(e)
-                        print('No se pudo por alguna razón :(')
+                        print('No se pudo por alguna razon :(')
 
                     #cv2.drawFrameAxes(aruco_img, mtx, dst, rvecs, tvecs, 0.123 * 1.5, 2)
                     #cv2.solvePnP(obj_points, corners, mtx, dst, rvecs, tvecs)
@@ -237,11 +233,12 @@ class FindTagNode:
                             
                     roll_x = math.degrees(roll_x)
                     pitch_y = math.degrees(pitch_y)
-                    yaw_z = math.degrees(yaw_z)
+                    yaw_z = math.degrees(yaw_z)"""
                     #print(roll_x, pitch_y, yaw_z)
-
+		    
+		    
                     pub_vel.publish(vel)
-                    rospy.sleep(0.05)
+                    rospy.sleep(2)
 
                     # print("Siii")
                     # cv2.drawFrameAxes(aruco_img, mtx, dst, rvecs, tvecs, 0.123 * 1.5, 2)

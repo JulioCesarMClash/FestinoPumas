@@ -751,7 +751,7 @@ int main(int argc, char** argv){
 				std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
 				//navigate_to_location(pips_poses.at(0));
 				pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(6,0).sleep();
+				ros::Duration(7,0).sleep();
 				curr_pip++;
 				curr_pii++;
 				state = SM_NAV_PIPS;
@@ -767,7 +767,7 @@ int main(int argc, char** argv){
 					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pip));
 					pub_zone_goal.publish(pips_as_zones[curr_pip]);
-					ros::Duration(6,0).sleep();
+					ros::Duration(7,0).sleep();
 					state = SM_TURN_AROUND_PIPS;
 				}
 				else{
@@ -796,7 +796,7 @@ int main(int argc, char** argv){
 						}
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(2, 0).sleep();
+						ros::Duration(6, 0).sleep();
 						tag_flag = look_for_tag(n, client, srv);
 						if(tag_flag){
 							publish_info(pub_mps_pos, pub_mps_name);
@@ -826,7 +826,7 @@ int main(int argc, char** argv){
 						}
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(2, 0).sleep();
+						ros::Duration(6, 0).sleep();
 						tag_flag = look_for_tag(n, client, srv);
 						if(tag_flag){
 							state = SM_TAG_DETECTED;
@@ -861,7 +861,7 @@ int main(int argc, char** argv){
 						}
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(2, 0).sleep();
+						ros::Duration(6, 0).sleep();
 						tag_flag = look_for_tag(n, client, srv);
 						if(tag_flag){
 							state = SM_TAG_DETECTED;
@@ -896,7 +896,7 @@ int main(int argc, char** argv){
 						}
 						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
 						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(2, 0).sleep();
+						ros::Duration(6, 0).sleep();
 						tag_flag = look_for_tag(n, client, srv);
 						if(tag_flag){
 							state = SM_TAG_DETECTED;
@@ -917,10 +917,9 @@ int main(int argc, char** argv){
 			case SM_NAV_PIIS:{
 				std::cout << "\n State machine: SM_NAV_PIIS" << std::endl;
 				if(curr_pii <= n_piis){
-					std::cout << "Navigating PII \t" << curr_pii << "\n" << piis_poses.at(curr_pii) << "\n" << std::endl;
+					std::cout << "Navigating PII \t" << curr_pii << "\n" << std::endl;// piis_poses.at(curr_pii) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pii));
 					std::cout << "Coords del pii" << x_piis_m[curr_pii] <<","<< y_piis_m[curr_pii] << std::endl;
-					std::cout << "Navigating PII \t" << curr_pii << "\n" << piis_poses.at(curr_pii) << "\n" << std::endl;
 					navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
 					state = SM_TURN_AROUND_PIIS;
 				}
