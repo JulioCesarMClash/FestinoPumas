@@ -319,7 +319,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_GO_TO;
+                state = SM_ALIGN;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -371,7 +371,8 @@ int main(int argc, char** argv){
                 aruco_srv.request.is_find_tag_enabled = true;
 				aruco_client.call(aruco_srv);
 				if(aruco_srv.response.success){
-
+                    std::cout << "Ya se alineo en angulo" << std::endl;
+                    aruco_srv.request.is_find_tag_enabled = false;
                     aruco_srv.request.is_aling_enabled = true;
 				    aruco_client.call(aruco_srv);
 

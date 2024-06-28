@@ -56,114 +56,6 @@ class FindTagNode:
 
   def spin(self):
     rospy.spin()
-
-  def aling_tag(self, request):
-    global arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, mps_name_pub
-    slope = 0.04
-    name_list = []
-    aruco_list = PointStamped()
-    aruco_list = []
-    #Cuando se haga un request a este servicio se debe de poner is_aling_enabled=true
-    #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
-    if request.is_aling_enabled:
-      tfBuffer = tf2_ros.Buffer()
-      depth_img_bgr = np.zeros((480, 640))
-      mps_name = [0,0]
-      #A partir de la nube de puntos se obtiene el RGB
-      rgb_arr = arr['rgb'].copy()
-      rgb_arr.dtype = np.uint32
-      r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
-      #Se hace un Merge de los 3 canales para obtener la imagen final que se analizara, que es aruco_img
-      aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
-      ######## Filling msg for aruco_pose publisher ########
-      frame_id = "camera_link"
-      aruco_pose = PointStamped()
-      aruco_pose.header.stamp = rospy.Time.now()
-      aruco_pose.header.frame_id = frame_id
-      aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = 0,0,0
-
-      ######## Looking for ARUCO TAG ########
-      dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
-      parameters = cv2.aruco.DetectorParameters_create()
-      corners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(aruco_img, dictionary, parameters=parameters)
-
-      color = (255, 0, 0)
-      thickness = 2
-      aruco_det_flag = False
-      mps_name = "Not Identified"
-
-      try:
-          if(markerIds.shape[0] >= 1):
-    
-              for i in range (markerIds.shape[0]):
-                  corneru = corners[0]
-                  first_corner = (corneru[(0,0,0)],corneru[(0,0,1)])
-                  last_corner = (corneru[(0,2,0)],corneru[(0,2,1)])
-                  known_markers = ([101,102,103,104,111,112,113,114,121,122,131,132,141,142,201,202,203,204,211,212,213,214,221,222,231,232,241,242])
-
-                  if markerIds[i] in known_markers:
-                    aruco_det_flag = True
-                    #aruco_flag_pub.publish(aruco_det_flag)
-                    max_x = np.max([last_corner[0],first_corner[0]])
-                    min_x = np.min([last_corner[0],first_corner[0]])
-
-                    max_y = np.max([last_corner[1],first_corner[1]])
-                    min_y = np.min([last_corner[1],first_corner[1]])
-                    
-                    cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
-                    cent_img = aruco_img.shape[0]
-                    diff = cent_img - cent[0]
-                    vel = Twist()
-
-                    if diff > 0:
-                      vel.linear.x = diff
-                    else:
-                      vel.linear.x = -diff
-        
-                    """try:
-                      pos_x = float(arr[cent][0])
-                      pos_y = float(arr[cent][1])
-                      pos_z = float(arr[cent][2])
-
-                      if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
-                        #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
-                        aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
-                        br_ar = tf.TransformBroadcaster()
-                        br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
-                        print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
-                    except IndexError:
-                      print('Not identified')"""  
-      
-                  #Se publica al cmd_vel el movimiento en x del robot
-                  pub_vel.publish(vel)
-                  #Delay para que le de tiempo al robot de moverse
-                  rospy.sleep(2)
-
-
-      except AttributeError:
-          print('No Tag')
-
-      print(name_list)
-      print(aruco_list)
-      response = Find_tag_SrvResponse()
-      response.success = True
-      response.mps_name = name_list
-      response.point_stamped = aruco_list
-
-      return response
-    
-    else:
-
-      response = Find_tag_SrvResponse()
-      response.success = False
-      aruco_pose_fake = PointStamped()
-      aruco_pose_fake.point.x = 0.0
-      aruco_pose_fake.point.y = 0.0
-      aruco_pose_fake.point.z = 0.0
-      response.point_stamped.append(aruco_pose_fake)
-      name = " "
-      response.mps_name.append(name)  
-      return response
     
   def find_tag(self, request):
     global arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, mps_name_pub
@@ -395,6 +287,101 @@ class FindTagNode:
 
       return response
     
+    elif request.is_aling_enabled:
+      print("Ya entro a la segunda parte del alineado")
+      diff = 5
+      while(diff > 3 or diff < -3):
+        tfBuffer = tf2_ros.Buffer()
+        depth_img_bgr = np.zeros((480, 640))
+        mps_name = [0,0]
+        #A partir de la nube de puntos se obtiene el RGB
+        rgb_arr = arr['rgb'].copy()
+        rgb_arr.dtype = np.uint32
+        r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
+        #Se hace un Merge de los 3 canales para obtener la imagen final que se analizara, que es aruco_img
+        aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
+        ######## Filling msg for aruco_pose publisher ########
+        frame_id = "camera_link"
+        aruco_pose = PointStamped()
+        aruco_pose.header.stamp = rospy.Time.now()
+        aruco_pose.header.frame_id = frame_id
+        aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = 0,0,0
+
+        ######## Looking for ARUCO TAG ########
+        dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
+        parameters = cv2.aruco.DetectorParameters_create()
+        corners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(aruco_img, dictionary, parameters=parameters)
+
+        color = (255, 0, 0)
+        thickness = 2
+        aruco_det_flag = False
+        mps_name = "Not Identified"
+
+        try:
+            if(markerIds.shape[0] >= 1):
+      
+                for i in range (markerIds.shape[0]):
+                    corneru = corners[0]
+                    first_corner = (corneru[(0,0,0)],corneru[(0,0,1)])
+                    last_corner = (corneru[(0,2,0)],corneru[(0,2,1)])
+                    known_markers = ([101,102,103,104,111,112,113,114,121,122,131,132,141,142,201,202,203,204,211,212,213,214,221,222,231,232,241,242])
+
+                    if markerIds[i] in known_markers:
+                      aruco_det_flag = True
+                      #aruco_flag_pub.publish(aruco_det_flag)
+                      max_x = np.max([last_corner[0],first_corner[0]])
+                      min_x = np.min([last_corner[0],first_corner[0]])
+
+                      max_y = np.max([last_corner[1],first_corner[1]])
+                      min_y = np.min([last_corner[1],first_corner[1]])
+                      
+                      print("tamano de imagen es: ", aruco_img.shape)
+                      cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+                      print("El centro del aruco es: ", cent)
+                      cent_img = aruco_img.shape[1]/2
+                      diff = cent_img - cent[0]
+                      print("La mitad de la imagen es: ", cent_img)
+                      print("La diff es: ", diff)
+                      vel = Twist()
+
+                      if diff > 0:
+                        vel.linear.x = diff
+                      else:
+                        vel.linear.x = -diff
+          
+                      """try:
+                        pos_x = float(arr[cent][0])
+                        pos_y = float(arr[cent][1])
+                        pos_z = float(arr[cent][2])
+
+                        if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
+                          #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                          aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
+                          br_ar = tf.TransformBroadcaster()
+                          br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
+                          print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
+                      except IndexError:
+                        print('Not identified')"""  
+        
+                    #Se publica al cmd_vel el movimiento en x del robot
+                    pub_vel.publish(vel)
+                    #Delay para que le de tiempo al robot de moverse
+                    rospy.sleep(2)
+
+
+        except AttributeError:
+            print('No Tag')
+
+      print(name_list)
+      print(aruco_list)
+      response = Find_tag_SrvResponse()
+      response.success = True
+      response.mps_name = name_list
+      response.point_stamped = aruco_list
+
+      return response
+    
+  
     else:
 
         response = Find_tag_SrvResponse()
