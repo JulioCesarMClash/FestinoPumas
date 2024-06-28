@@ -34,7 +34,7 @@ log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/P
 
 position_pub = rospy.Publisher("/initialpose",PoseWithCovarianceStamped,queue_size=10)
 
-listener = tf.TransformListener()
+listener = tf.TransformListener(1)
 
 robot_init_pose = PoseWithCovarianceStamped()
 robot_init_pose.header.seq = 1
