@@ -132,7 +132,7 @@ geometry_msgs::Twist tw_tomap;
 
 bool act = false;
 
-void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout)
+/*void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout)
 {
     std::cout << "Coords recieved, publishing coords to navigate \n" << x_piis << "," << y_piis << std::endl;
     tf::TransformListener listener;
@@ -194,7 +194,7 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 		std::cout << "No llegué, lo siento :c" << std::endl;
 	}
 
-}
+}*/
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -243,19 +243,19 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
         }
     }
 
-	if(laser_sum_rght/cont_rght > 0.50)
+	if(laser_sum_rght/cont_rght > 1.0)
     {
         free_path_rght = true;
         std::cout<<"derecha libre"<<std::endl;
     }
 
-	if(laser_sum_lft/cont_lft > 0.50)
+	if(laser_sum_lft/cont_lft > 1.0)
     {
         free_path_lft = true;
         std::cout<<"izquierda libre"<<std::endl;
     }
 
-    if(laser_sum_cntr/cont_cntr > 0.50)
+    if(laser_sum_cntr/cont_cntr > 1.0)
     {
         free_path_fwd = true;
         std::cout<<"fwd"<<std::endl;
@@ -406,7 +406,7 @@ void transform_mps()
 	}
 }
 
-/*void navigate_to_location(geometry_msgs::PoseStamped location)
+void navigate_to_location(geometry_msgs::PoseStamped location)
 {
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
@@ -417,7 +417,7 @@ void transform_mps()
                 //FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
         }
     }
-}*/
+}
 
 //Estas coordenadas son M_Z32, ahi sabemos que no habra maquina
 std::vector<float> arreglo_x = {-2.5, 0.0, 0.0, 0.0, 0.0};
@@ -579,7 +579,7 @@ void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
-	std::cout << "\n FWD for " << t_fwd << "secs" << std::endl;
+	//std::cout << "\n FWD for " << t_fwd << "secs" << std::endl;
 	ros::Rate r(10);
 	ros::Time end;
 	tw_tomap.linear.x=1.0;
@@ -593,7 +593,7 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Forward " << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
-	std::cout << "\n TURN for " << t_turn << "secs" << std::endl;
+	//std::cout << "\n TURN for " << t_turn << "secs" << std::endl;
 	tw_tomap.linear.x=0.0;
 	tw_tomap.angular.z=1.0;
 	end = ros::Time::now() + ros::Duration(t_turn);
@@ -769,7 +769,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 				ros::Duration(2, 0).sleep();
-	    		state = SM_INIT;
+	    		state = SM_FIRSTMAPPING;
 	    		break;
 			}
 
@@ -788,7 +788,7 @@ int main(int argc, char** argv){
 				if(free_path_fwd)
 				{
 					std::cout << "FWD" << std::endl;
-					state = SM_NAV_FWD;	
+					state = SM_NAV_FWD;
 				}
 				else if(free_path_rght)
 				{
@@ -800,13 +800,19 @@ int main(int argc, char** argv){
 					std::cout << "LEFT" << std::endl;
 					state = SM_TURN_LEFT;
 				}
+				else
+				{
+					std::cout << "None" << std::endl;
+					fwd_n_turn(pub_cmd_vel, 0.0, 0.0);
+					state = SM_TURN_RIGHT;
+				}
 				break;
 			}
 
 			case SM_NAV_FWD:{
 				std::cout << "\n State machine: SM_NAV_FWD" << std::endl;
 				std::cout << "Avanza" << std::endl;
-				fwd_n_turn(pub_cmd_vel, 2.0, 0.0);
+				fwd_n_turn(pub_cmd_vel, 1.0, 0.0);
 				curr_pip++;
 				curr_pii++;
 				state = SM_VER_FREE_PATH;
@@ -814,7 +820,7 @@ int main(int argc, char** argv){
 			}
 
 			case SM_TURN_LEFT:{
-				std::cout << "\n State machine: SM_TURN" << std::endl;
+				std::cout << "\n State machine: SM_TURN_LEFT" << std::endl;
 				from_left = true;
 				fwd_n_turn(pub_cmd_vel, 0.0, 2.0);
 				state = SM_VER_FREE_PATH;
@@ -822,7 +828,7 @@ int main(int argc, char** argv){
 			}
 
 			case SM_TURN_RIGHT:{
-				std::cout << "\n State machine: SM_TURN" << std::endl;
+				std::cout << "\n State machine: SM_TURN_RIGHT" << std::endl;
 				from_right = true;
 				fwd_n_turn(pub_cmd_vel, 0.0, 4.0);
 				state = SM_VER_FREE_PATH;
