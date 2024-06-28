@@ -1,4 +1,5 @@
 bool is_find_tag_enabled
+bool is_aling_enabled
 ---
 bool success       
 string[] mps_name
