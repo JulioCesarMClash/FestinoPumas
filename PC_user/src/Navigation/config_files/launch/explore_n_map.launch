@@ -45,8 +45,6 @@
 	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find config_files)/rosnav_params/step_nav.rviz" />
 
 
-	<include file="$(find surge_et_ambula)/launch/robot_comm.launch"/>
-
-	<node pkg="tf" type="static_transform_publisher" name="Zone_BC" args="-1 -1 0 0 0 -0.45 1 map M_Z12 100" />
+	<!--include file="$(find surge_et_ambula)/launch/robot_comm.launch"/-->
     
 </launch>
