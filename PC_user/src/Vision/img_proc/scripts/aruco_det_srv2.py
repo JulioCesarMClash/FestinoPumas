@@ -64,7 +64,7 @@ class FindTagNode:
     aruco_list = PointStamped()
     aruco_list = []
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
-    #Cuando se cumpla eso ya se ejecutará lo que esta adentro del if
+    #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
       while(slope > 0.01 or slope < -0.01):
         tfBuffer = tf2_ros.Buffer()
@@ -105,7 +105,7 @@ class FindTagNode:
       
                 for i in range (markerIds.shape[0]):
                     corneru = corners[0]
-                    first_corner = (corneru[(0,0,0)],corneru[(0,0,1)])
+                    """first_corner = (corneru[(0,0,0)],corneru[(0,0,1)])
                     last_corner = (corneru[(0,2,0)],corneru[(0,2,1)])
                     known_markers = ([101,102,103,104,111,112,113,114,121,122,131,132,141,142,201,202,203,204,211,212,213,214,221,222,231,232,241,242])
 
@@ -135,7 +135,7 @@ class FindTagNode:
                           br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                           print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                       except IndexError:
-                        print('Not identified')
+                        print('Not identified')"""
 
                     start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 

@@ -12,11 +12,19 @@ import math
 import numpy as np
 from geometry_msgs.msg import *
 
-path = "/home/robocup20/FestinoPumas/PC_user/src/"
+path = '/home/pumas/FestinoPumas/PC_user/src/'
 
 tfBuffer = tf2_ros.Buffer()
 
-rospy.init_node('prueba_launch', anonymous=True)
+"""def final_robot_pos():
+	listener = tf.TransformListener()
+	now = rospy.Time.now()
+	listener.waitForTransform("/map", "/base_link", now, rospy.Duration(4.0))
+	(trans,rot) = listener.lookupTransform("/map", "/base_link", now)
+	print("Robot a map", trans)"""
+
+
+rospy.init_node('step_navigation', anonymous=True)
 uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 roslaunch.configure_logging(uuid)
 
@@ -40,7 +48,7 @@ rospy.loginfo("Robot-Server communication started")
 now = rospy.get_rostime()
 rospy.loginfo("Mapping started at %i", now.secs)
 
-rospy.sleep(90)
+rospy.sleep(60)
 
 now = rospy.Time.now()
 listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
