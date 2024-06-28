@@ -371,16 +371,27 @@ int main(int argc, char** argv){
                 aruco_srv.request.is_find_tag_enabled = true;
 				aruco_client.call(aruco_srv);
 				if(aruco_srv.response.success){
-					std::cout << "Alineado!!!" << std::endl;
-					FestinoNavigation::moveDistAngle(0.50, 0, 10000);
-					state = SM_WAIT_FOR_INSTRUCTION;	
+
+                    aruco_srv.request.is_aling_enabled = true;
+				    aruco_client.call(aruco_srv);
+
+                    if(aruco_srv.response.success){
+                        std::cout << "Alineado!!!" << std::endl;
+                    
+					    FestinoNavigation::moveDistAngle(0.50, 0, 10000);
+					    state = SM_WAIT_FOR_INSTRUCTION;	
+                    }
+                    else{
+                        std::cout << "NotFound" << std::endl;
+					    state = SM_FIND;
+                    }
 				}
 				else{
 					std::cout << "NotFound" << std::endl;
 					state = SM_FIND;
 				}
 
-                state = SM_ALIGN;
+                state = SM_FINAL_STATE;
                 break;
 
 	    	case SM_FIND:
@@ -454,7 +465,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 	    		
-                state = SM_WAIT_FOR_INSTRUCTION;
+                state = SM_FINAL_STATE;
 	    		break;
 		}
         ros::Duration(1, 0).sleep();
