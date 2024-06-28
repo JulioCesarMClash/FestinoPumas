@@ -1,11 +1,12 @@
 Panels:
   - Class: rviz/Displays
-    Help Height: 78
+    Help Height: 85
     Name: Displays
     Property Tree Widget:
-      Expanded: ~
-      Splitter Ratio: 0.542328
-    Tree Height: 696
+      Expanded:
+        - /LaserScan1
+      Splitter Ratio: 0.5423280000686646
+    Tree Height: 397
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -14,17 +15,20 @@ Panels:
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
-    Splitter Ratio: 0.588679
+    Splitter Ratio: 0.5886790156364441
   - Class: rviz/Views
     Expanded:
       - /Current View1
     Name: Views
-    Splitter Ratio: 0.568773
+    Splitter Ratio: 0.5687729716300964
   - Class: rviz/Time
-    Experimental: false
     Name: Time
     SyncMode: 0
     SyncSource: LaserScan
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
 Visualization Manager:
   Class: ""
   Displays:
@@ -34,7 +38,7 @@ Visualization Manager:
       Color: 160; 160; 164
       Enabled: true
       Line Style:
-        Line Width: 0.03
+        Line Width: 0.029999999329447746
         Value: Lines
       Name: Grid
       Normal Cell Count: 0
@@ -51,30 +55,64 @@ Visualization Manager:
       Color: 0; 0; 255
       Enabled: true
       Name: Desired
+      Queue Size: 10
       Topic: /Operator/desired
+      Unreliable: false
       Value: true
     - Alpha: 1
       Class: rviz/GridCells
       Color: 25; 255; 0
       Enabled: true
       Name: Corrected
+      Queue Size: 10
       Topic: /Operator/route
+      Unreliable: false
       Value: true
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        laser_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        platform_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel0_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel1_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        wheel2_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -91,34 +129,37 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 1
       Min Color: 0; 0; 0
-      Min Intensity: 1
       Name: LaserScan
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.01
+      Size (m): 0.009999999776482582
       Style: Points
-      Topic: /base_scan
+      Topic: /scan
+      Unreliable: false
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
-    - Alpha: 0.7
+    - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
       Enabled: true
       Name: Map
       Topic: /map
+      Unreliable: false
+      Use Timestamp: false
       Value: true
     - Alpha: 1
       Class: rviz/GridCells
       Color: 255; 0; 255
       Enabled: true
       Name: Path
+      Queue Size: 10
       Topic: /Navigator/plan
+      Unreliable: false
       Value: true
     - Class: rviz/Marker
       Enabled: true
@@ -133,19 +174,245 @@ Visualization Manager:
       Marker Topic: /Mapper/edges
       Name: PoseGraph:Edges
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_footprint:
+        C_Z11:
           Value: true
-        base_laser_link:
+        C_Z12:
+          Value: true
+        C_Z13:
+          Value: true
+        C_Z14:
+          Value: true
+        C_Z15:
+          Value: true
+        C_Z16:
+          Value: true
+        C_Z17:
+          Value: true
+        C_Z18:
+          Value: true
+        C_Z21:
+          Value: true
+        C_Z22:
+          Value: true
+        C_Z23:
+          Value: true
+        C_Z24:
+          Value: true
+        C_Z25:
+          Value: true
+        C_Z26:
+          Value: true
+        C_Z27:
+          Value: true
+        C_Z28:
+          Value: true
+        C_Z31:
+          Value: true
+        C_Z32:
+          Value: true
+        C_Z33:
+          Value: true
+        C_Z34:
+          Value: true
+        C_Z35:
+          Value: true
+        C_Z36:
+          Value: true
+        C_Z37:
+          Value: true
+        C_Z38:
+          Value: true
+        C_Z41:
+          Value: true
+        C_Z42:
+          Value: true
+        C_Z43:
+          Value: true
+        C_Z44:
+          Value: true
+        C_Z45:
+          Value: true
+        C_Z46:
+          Value: true
+        C_Z47:
+          Value: true
+        C_Z48:
+          Value: true
+        C_Z51:
+          Value: true
+        C_Z52:
+          Value: true
+        C_Z53:
+          Value: true
+        C_Z54:
+          Value: true
+        C_Z55:
+          Value: true
+        C_Z56:
+          Value: true
+        C_Z57:
+          Value: true
+        C_Z58:
+          Value: true
+        C_Z61:
+          Value: true
+        C_Z62:
+          Value: true
+        C_Z63:
+          Value: true
+        C_Z64:
+          Value: true
+        C_Z65:
+          Value: true
+        C_Z66:
+          Value: true
+        C_Z67:
+          Value: true
+        C_Z68:
+          Value: true
+        C_Z71:
+          Value: true
+        C_Z72:
+          Value: true
+        C_Z73:
+          Value: true
+        C_Z74:
+          Value: true
+        C_Z75:
+          Value: true
+        C_Z76:
+          Value: true
+        C_Z77:
+          Value: true
+        C_Z78:
+          Value: true
+        Log_origin:
+          Value: true
+        M_Z11:
+          Value: true
+        M_Z12:
+          Value: true
+        M_Z13:
+          Value: true
+        M_Z14:
+          Value: true
+        M_Z15:
+          Value: true
+        M_Z16:
+          Value: true
+        M_Z17:
+          Value: true
+        M_Z18:
+          Value: true
+        M_Z21:
+          Value: true
+        M_Z22:
+          Value: true
+        M_Z23:
+          Value: true
+        M_Z24:
+          Value: true
+        M_Z25:
+          Value: true
+        M_Z26:
+          Value: true
+        M_Z27:
+          Value: true
+        M_Z28:
+          Value: true
+        M_Z31:
+          Value: true
+        M_Z32:
+          Value: true
+        M_Z33:
+          Value: true
+        M_Z34:
+          Value: true
+        M_Z35:
+          Value: true
+        M_Z36:
+          Value: true
+        M_Z37:
+          Value: true
+        M_Z38:
+          Value: true
+        M_Z41:
+          Value: true
+        M_Z42:
+          Value: true
+        M_Z43:
+          Value: true
+        M_Z44:
+          Value: true
+        M_Z45:
+          Value: true
+        M_Z46:
+          Value: true
+        M_Z47:
+          Value: true
+        M_Z48:
+          Value: true
+        M_Z51:
+          Value: true
+        M_Z52:
+          Value: true
+        M_Z53:
+          Value: true
+        M_Z54:
+          Value: true
+        M_Z55:
+          Value: true
+        M_Z56:
+          Value: true
+        M_Z57:
+          Value: true
+        M_Z58:
+          Value: true
+        M_Z61:
+          Value: true
+        M_Z62:
+          Value: true
+        M_Z63:
+          Value: true
+        M_Z64:
+          Value: true
+        M_Z65:
+          Value: true
+        M_Z66:
+          Value: true
+        M_Z67:
+          Value: true
+        M_Z68:
+          Value: true
+        M_Z71:
+          Value: true
+        M_Z72:
+          Value: true
+        M_Z73:
+          Value: true
+        M_Z74:
+          Value: true
+        M_Z75:
+          Value: true
+        M_Z76:
+          Value: true
+        M_Z77:
+          Value: true
+        M_Z78:
           Value: true
         base_link:
+          Value: true
+        laser_link:
           Value: true
         map:
           Value: true
@@ -153,6 +420,15 @@ Visualization Manager:
           Value: true
         offset:
           Value: true
+        platform_link:
+          Value: true
+        wheel0_link:
+          Value: true
+        wheel1_link:
+          Value: true
+        wheel2_link:
+          Value: true
+      Marker Alpha: 1
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -160,17 +436,250 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
+          Log_origin:
+            C_Z11:
+              {}
+            C_Z12:
+              {}
+            C_Z13:
+              {}
+            C_Z14:
+              {}
+            C_Z15:
+              {}
+            C_Z16:
+              {}
+            C_Z17:
+              {}
+            C_Z18:
+              {}
+            C_Z21:
+              {}
+            C_Z22:
+              {}
+            C_Z23:
+              {}
+            C_Z24:
+              {}
+            C_Z25:
+              {}
+            C_Z26:
+              {}
+            C_Z27:
+              {}
+            C_Z28:
+              {}
+            C_Z31:
+              {}
+            C_Z32:
+              {}
+            C_Z33:
+              {}
+            C_Z34:
+              {}
+            C_Z35:
+              {}
+            C_Z36:
+              {}
+            C_Z37:
+              {}
+            C_Z38:
+              {}
+            C_Z41:
+              {}
+            C_Z42:
+              {}
+            C_Z43:
+              {}
+            C_Z44:
+              {}
+            C_Z45:
+              {}
+            C_Z46:
+              {}
+            C_Z47:
+              {}
+            C_Z48:
+              {}
+            C_Z51:
+              {}
+            C_Z52:
+              {}
+            C_Z53:
+              {}
+            C_Z54:
+              {}
+            C_Z55:
+              {}
+            C_Z56:
+              {}
+            C_Z57:
+              {}
+            C_Z58:
+              {}
+            C_Z61:
+              {}
+            C_Z62:
+              {}
+            C_Z63:
+              {}
+            C_Z64:
+              {}
+            C_Z65:
+              {}
+            C_Z66:
+              {}
+            C_Z67:
+              {}
+            C_Z68:
+              {}
+            C_Z71:
+              {}
+            C_Z72:
+              {}
+            C_Z73:
+              {}
+            C_Z74:
+              {}
+            C_Z75:
+              {}
+            C_Z76:
+              {}
+            C_Z77:
+              {}
+            C_Z78:
+              {}
+            M_Z11:
+              {}
+            M_Z12:
+              {}
+            M_Z13:
+              {}
+            M_Z14:
+              {}
+            M_Z15:
+              {}
+            M_Z16:
+              {}
+            M_Z17:
+              {}
+            M_Z18:
+              {}
+            M_Z21:
+              {}
+            M_Z22:
+              {}
+            M_Z23:
+              {}
+            M_Z24:
+              {}
+            M_Z25:
+              {}
+            M_Z26:
+              {}
+            M_Z27:
+              {}
+            M_Z28:
+              {}
+            M_Z31:
+              {}
+            M_Z32:
+              {}
+            M_Z33:
+              {}
+            M_Z34:
+              {}
+            M_Z35:
+              {}
+            M_Z36:
+              {}
+            M_Z37:
+              {}
+            M_Z38:
+              {}
+            M_Z41:
+              {}
+            M_Z42:
+              {}
+            M_Z43:
+              {}
+            M_Z44:
+              {}
+            M_Z45:
+              {}
+            M_Z46:
+              {}
+            M_Z47:
+              {}
+            M_Z48:
+              {}
+            M_Z51:
+              {}
+            M_Z52:
+              {}
+            M_Z53:
+              {}
+            M_Z54:
+              {}
+            M_Z55:
+              {}
+            M_Z56:
+              {}
+            M_Z57:
+              {}
+            M_Z58:
+              {}
+            M_Z61:
+              {}
+            M_Z62:
+              {}
+            M_Z63:
+              {}
+            M_Z64:
+              {}
+            M_Z65:
+              {}
+            M_Z66:
+              {}
+            M_Z67:
+              {}
+            M_Z68:
+              {}
+            M_Z71:
+              {}
+            M_Z72:
+              {}
+            M_Z73:
+              {}
+            M_Z74:
+              {}
+            M_Z75:
+              {}
+            M_Z76:
+              {}
+            M_Z77:
+              {}
+            M_Z78:
+              {}
           offset:
             odom:
-              base_footprint:
-                base_link:
-                  base_laser_link:
-                    {}
+              base_link:
+                laser_link:
+                  {}
+                platform_link:
+                  {}
+                wheel0_link:
+                  {}
+                wheel1_link:
+                  {}
+                wheel2_link:
+                  {}
       Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
+    Default Light: true
     Fixed Frame: map
     Frame Rate: 30
   Name: root
@@ -182,7 +691,10 @@ Visualization Manager:
     - Class: rviz/FocusCamera
     - Class: rviz/Measure
     - Class: rviz/SetInitialPose
+      Theta std deviation: 0.2617993950843811
       Topic: /initialpose
+      X std deviation: 0.5
+      Y std deviation: 0.5
     - Class: rviz/SetGoal
       Topic: /goal
     - Class: rviz/PublishPoint
@@ -194,25 +706,25 @@ Visualization Manager:
       Angle: 0
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
-        Stereo Eye Separation: 0.06
+        Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Invert Z Axis: false
       Name: Current View
-      Near Clip Distance: 0.01
-      Scale: 31.8862
+      Near Clip Distance: 0.009999999776482582
+      Scale: 84.50700378417969
       Target Frame: base_link
-      Value: TopDownOrtho (rviz)
       X: 0
       Y: 0
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1021
+  Height: 747
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000017c0000034efc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006700fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000450000034e000000e400fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000034efc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000045000000680000006700fffffffc000000b3000002e0000000bb00fffffffa000000010100000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000000000000000fb0000000a0056006900650077007301000006710000010f0000010f00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000042fc0100000002fb0000000800540069006d00650100000000000007800000025900fffffffb0000000800540069006d00650100000000000004500000000000000000000004e90000034e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000018a0000022ffc0200000007fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000007100fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000004a0000022f000000f700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000011a0000022ffc0200000003fb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000004a000000710000007100fffffffc000000c2000001b7000000cb00fffffffa000000010100000002fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000000ffffffff0000000000000000fb0000000a0056006900650077007301000006710000010f0000011a00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000056100000047fc0100000002fb0000000800540069006d00650100000000000005610000048600fffffffb0000000800540069006d00650100000000000004500000000000000000000002af0000022f00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -221,6 +733,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1920
-  X: 0
-  Y: 27
+  Width: 1377
+  X: 169
+  Y: 100
