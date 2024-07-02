@@ -123,12 +123,10 @@ void transform_zones()
           ros::Duration(1.0).sleep();
         }
 
-        
-
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
 
-std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
+		std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
 
     	std::cout << "pasó las tfs" << std::endl;
     }
@@ -188,7 +186,8 @@ void nearest_neighbour()
 			//Finding the min distance 
 	    	if(dist < min_dist){
 	    		min_dist = dist;
-	    		tf_nearest_zone = tf_zone;
+	    		tf_nearest_zone = tf_zone;}
+				//Se guarda el indice de la zona mas pequeña para borrarla despues del vector
 	    		min_indx = i;
 	    	}
 	    }
