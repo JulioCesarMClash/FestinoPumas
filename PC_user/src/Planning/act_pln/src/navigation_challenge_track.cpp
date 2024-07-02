@@ -186,7 +186,7 @@ void nearest_neighbour()
 			//Finding the min distance 
 	    	if(dist < min_dist){
 	    		min_dist = dist;
-	    		tf_nearest_zone = tf_zone;}
+	    		tf_nearest_zone = tf_zone;
 				//Se guarda el indice de la zona mas pequeña para borrarla despues del vector
 	    		min_indx = i;
 	    	}
