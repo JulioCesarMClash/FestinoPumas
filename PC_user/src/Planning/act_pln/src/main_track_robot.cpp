@@ -90,7 +90,6 @@ float param_y = 0.8;
 
 void compute_coordinates(){
     float quat;
-    
 
     //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
     //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
@@ -123,49 +122,14 @@ tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(an
                     
 }
 
-// void transform_zone()
-// {
-// 	tf::TransformListener listener;
-//     tf::StampedTransform transform;
-
-//     //TF related stuff 
-//     std::cout << tokens[2] << std::endl;
-//     tf_target_zone.header.frame_id = "/map";
-//     tf_target_zone.pose.position.x = 0.0;
-//     tf_target_zone.pose.position.y = 0.0;
-//     tf_target_zone.pose.position.z = 0.0;
-//     tf_target_zone.pose.orientation.x = 0.0;
-//     tf_target_zone.pose.orientation.y = 0.0;
-//     tf_target_zone.pose.orientation.z = 0.0;
-//     tf_target_zone.pose.orientation.w = 0.0;
-
-//     std::cout << "entró al transform zones" << std::endl;
-
-//     try{
-//         std::cout << "entró al try" << std::endl;
-//         listener.waitForTransform(tokens.at(2), "/map", ros::Time(0), ros::Duration(1000.0));
-//         listener.lookupTransform(tokens.at(2), "/map", ros::Time(0), transform);
-//     }
-//     catch (tf::TransformException ex){
-//         ROS_ERROR("%s",ex.what());
-//         ros::Duration(1.0).sleep();
-//     }
-
-//     tf_target_zone.pose.position.x = -transform.getOrigin().x();
-//     tf_target_zone.pose.position.y = -transform.getOrigin().y();
-
-//     std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-
-// }
-
+//Funcion para ya hacer pruebas con el refbox
 void transform_zone()
 {
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
-    zone = "C_Z42";
-
     //TF related stuff 
+    std::cout << tokens[2] << std::endl;
     tf_target_zone.header.frame_id = "/map";
     tf_target_zone.pose.position.x = 0.0;
     tf_target_zone.pose.position.y = 0.0;
@@ -179,16 +143,13 @@ void transform_zone()
 
     try{
         std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(1000.0));
-        listener.lookupTransform("/map",zone, ros::Time(0), transform);
+        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(1000.0));
+        listener.lookupTransform("/map", tokens.at(2), ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
         ROS_ERROR("%s",ex.what());
         ros::Duration(1.0).sleep();
     }
-
-    //tf_target_zone.pose.position.x = -transform.getOrigin().x();
-    //tf_target_zone.pose.position.y = -transform.getOrigin().y();
 
     tf_target_zone.pose.position.x = transform.getOrigin().x();
     tf_target_zone.pose.position.y = transform.getOrigin().y();
@@ -198,13 +159,58 @@ void transform_zone()
 	tf_target_zone.pose.orientation.z = transform.getRotation().z();
 	tf_target_zone.pose.orientation.w = transform.getRotation().w();
 
-    //std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-    std::cout << "salió del try name:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-    std::cout << "Las rotaciones son" << " ori x:" << tf_target_zone.pose.orientation.x << std::endl;
-    std::cout << "Las rotaciones son" << " ori y:" << tf_target_zone.pose.orientation.y << std::endl;
-    std::cout << "Las rotaciones son" << " ori z:" << tf_target_zone.pose.orientation.z << std::endl;
-    std::cout << "Las rotaciones son" << " ori w:" << tf_target_zone.pose.orientation.w << std::endl;
+    std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
 }
+
+//Funcion hardcodeada para hacer pruebas rapidas
+
+// void transform_zone()
+// {
+// 	tf::TransformListener listener;
+//     tf::StampedTransform transform;
+
+//     zone = "C_Z42";
+
+//     //TF related stuff 
+//     tf_target_zone.header.frame_id = "/map";
+//     tf_target_zone.pose.position.x = 0.0;
+//     tf_target_zone.pose.position.y = 0.0;
+//     tf_target_zone.pose.position.z = 0.0;
+//     tf_target_zone.pose.orientation.x = 0.0;
+//     tf_target_zone.pose.orientation.y = 0.0;
+//     tf_target_zone.pose.orientation.z = 0.0;
+//     tf_target_zone.pose.orientation.w = 0.0;
+
+//     std::cout << "entró al transform zones" << std::endl;
+
+//     try{
+//         std::cout << "entró al try" << std::endl;
+//         listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(1000.0));
+//         listener.lookupTransform("/map",zone, ros::Time(0), transform);
+//     }
+//     catch (tf::TransformException ex){
+//         ROS_ERROR("%s",ex.what());
+//         ros::Duration(1.0).sleep();
+//     }
+
+//     //tf_target_zone.pose.position.x = -transform.getOrigin().x();
+//     //tf_target_zone.pose.position.y = -transform.getOrigin().y();
+
+//     tf_target_zone.pose.position.x = transform.getOrigin().x();
+//     tf_target_zone.pose.position.y = transform.getOrigin().y();
+// 	tf_target_zone.pose.position.z = transform.getOrigin().z();
+// 	tf_target_zone.pose.orientation.x = transform.getRotation().x();
+// 	tf_target_zone.pose.orientation.y = transform.getRotation().y();
+// 	tf_target_zone.pose.orientation.z = transform.getRotation().z();
+// 	tf_target_zone.pose.orientation.w = transform.getRotation().w();
+
+//     //std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+//     std::cout << "salió del try name:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+//     std::cout << "Las rotaciones son" << " ori x:" << tf_target_zone.pose.orientation.x << std::endl;
+//     std::cout << "Las rotaciones son" << " ori y:" << tf_target_zone.pose.orientation.y << std::endl;
+//     std::cout << "Las rotaciones son" << " ori z:" << tf_target_zone.pose.orientation.z << std::endl;
+//     std::cout << "Las rotaciones son" << " ori w:" << tf_target_zone.pose.orientation.w << std::endl;
+// }
 
 void navigate_to_location(geometry_msgs::PoseStamped location)
 {
@@ -219,9 +225,10 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 
 void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
-    std::cout << "Entré al callback" << msg->data.c_str() <<std::endl;	
+    std::cout << "Entré al callback de instrucciones" << msg->data.c_str() <<std::endl;	
     //Tokenize instruction string
     target_zone = *msg;
+    std::cout << "La instrucción es: " <<  target_zone <<std::endl;	
     tokens.clear();
     boost::algorithm::split(tokens, target_zone.data, boost::algorithm::is_any_of(" "));
     request = false;
@@ -323,8 +330,8 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
-	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_GO_TO;
+	    		state = SM_WAIT_FOR_INSTRUCTION;
+                //state = SM_GO_TO;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
