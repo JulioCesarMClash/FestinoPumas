@@ -56,16 +56,27 @@ def main():
     #mps_state_gen()
 
     #zone_strings = ['M_Z64 ','M_Z63 ','M_Z62 ','M_Z61 ','M_Z53 ','M_Z43 ','M_Z34 ','M_Z24 ','M_Z15 ','C_Z75 ','C_Z65 ','C_Z54 ','C_Z45 ','C_Z44 ','C_Z35 ','C_Z34 ']
-    zone_strings = ['M_Z11 ','M_Z12 ','M_Z13 ','M_Z14 ','M_Z15 ','M_Z21 ','M_Z22 ','M_Z23 ','M_Z24 ','M_Z25 ','M_Z31 ','M_Z32 ','M_Z33 ','M_Z34 ','M_Z35 ','M_Z41 ', 'M_Z42 ', 'M_Z43 ', 'M_Z44 ','M_Z45 ', 'M_Z51 ','M_Z52 ','M_Z53 ','M_Z54 ','M_Z55 ']
+
+    #Del arreglo zone_strings se toman 12 zonas de manera aleatoria (Descomentar si se necesita)
+    """zone_strings = ['M_Z11 ','M_Z12 ','M_Z13 ','M_Z14 ','M_Z15 ','M_Z21 ','M_Z22 ','M_Z23 ','M_Z24 ','M_Z25 ','M_Z31 ','M_Z32 ','M_Z33 ','M_Z34 ','M_Z35 ','M_Z41 ', 'M_Z42 ', 'M_Z43 ', 'M_Z44 ','M_Z45 ', 'M_Z51 ','M_Z52 ','M_Z53 ','M_Z54 ','M_Z55 ']
     rnd_zones = np.random.choice(zone_strings, 12, replace = False)
-    print("".join(rnd_zones))
+    print("".join(rnd_zones))"""
+
+    #Arreglo con zonas elegidas disponibles dentro del lab (logisticsZones)
+    zone_strings = ['M_Z41 ','M_Z22 ','M_Z13 ','C_Z23 ','C_Z32 ','C_Z42']
+    
 
     while not rospy.is_shutdown():
-    	zone_msg_pub(pub_zone, "".join(rnd_zones))
-    	rate.sleep()
+        #Descomentar cuando se use el arreglo de zonas aleatorias
+        #zone_msg_pub(pub_zone, "".join(rnd_zones))
+
+        #Descomentar cuando se use directamente zone_strings
+        zone_msg_pub(pub_zone, "".join(zone_strings))
+
+        rate.sleep()
         
-	'''
-        while used_zones.shape[0] < 12 and not rospy.is_shutdown():
+	    
+        """while used_zones.shape[0] < 12 and not rospy.is_shutdown():
             zone_indx = random.randint(0,len(zone_strings)-1)
             if not (zone_indx in used_zones_indx) and zone_indx != -1:
                 used_zones_indx = np.append(used_zones_indx, [int(zone_indx)])
@@ -74,7 +85,7 @@ def main():
             if(used_zones.shape[0] == 12):
                 zone_msg_pub(pub_zone, used_zones)
                 rate.sleep()
-	rate.sleep() '''
+        rate.sleep()"""
             
         '''
         order_indx = random.randint(0,order_arr.shape[0]) -1

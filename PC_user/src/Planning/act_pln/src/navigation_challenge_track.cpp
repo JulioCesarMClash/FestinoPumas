@@ -241,6 +241,11 @@ int main(int argc, char** argv){
 
     ros::Rate loop(30);
 
+	//Numero se zonas recibidas
+	//Para la competencia fijar en 12
+	//Para pruebas puede ser otro valor
+	int num_zones = 6;
+
     std::string voice;
 
     int cont = 0;
@@ -286,7 +291,7 @@ int main(int argc, char** argv){
 				ros::Duration(10, 0).sleep();
 	            cont++;
 
-				if(cont == 12){
+				if(cont == num_zones){
 					state = SM_FINAL_STATE;
 				}
 
