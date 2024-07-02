@@ -48,6 +48,13 @@ enum SMState {
 	SM_INIT,
 	SM_FIRSTMAPPING,
 	SM_NAV_HOME,
+	SM_OBT_CURR_POS,
+	SM_NAV_2,
+	SM_NAV_3,
+	SM_NAV_4,
+	SM_NAV_5,
+	SM_NAV_6,
+	SM_NAV_7,
 	SM_NAV_PIPS,
 	SM_TURN_AROUND_PIPS,
 	SM_NAV_PIIS,
@@ -84,6 +91,10 @@ SMState state = SM_INIT;
 bool flag_zones = false;
 std::vector<std_msgs::String> target_zones;
 geometry_msgs::PoseStamped det_mps;
+geometry_msgs::PoseStamped robot_curr_pos;
+geometry_msgs::PoseStamped robot_next_pos;
+geometry_msgs::PoseStamped robot_first_pos;
+
 std_msgs::String new_zone;
 std_msgs::String mps_name_anterior;
 actionlib_msgs::GoalStatus simple_move_goal_status;
@@ -221,9 +232,9 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 	robot_pos.pose.orientation.y = transform.getRotation().y();
 	robot_pos.pose.orientation.z = transform.getRotation().z();
 	robot_pos.pose.orientation.w = transform.getRotation().w();
-	std::cout << goal_tosend.pose << std::endl;
+	std::cout << robot_pos.pose << std::endl;
 
-	if((goal_tosend.pose.position.x - robot_pos.pose.position.x) < 1.0 && (goal_tosend.pose.position.y - robot_pos.pose.position.y) < 1.0)
+	if((goal_tosend.pose.position.x - robot_pos.pose.position.x) < 0.1 && (goal_tosend.pose.position.y - robot_pos.pose.position.y) < 0.1)
 	{
 		std::cout << "Sí llegué" << std::endl;
 		std::cout << "Coords goal \n" << goal_tosend.pose.position << "Coords robot \n" << robot_pos.pose.position << std::endl;
@@ -233,6 +244,8 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 	else
 	{
 		std::cout << "No llegué, lo siento :c" << std::endl;
+		std::cout << "Diff en x: " << goal_tosend.pose.position.x - robot_pos.pose.position.x << std::endl;
+		std::cout << "Diff en y: " << goal_tosend.pose.position.y - robot_pos.pose.position.y << std::endl;
 	}
 
 }
@@ -636,10 +649,10 @@ int main(int argc, char** argv){
 	float step_size = 0;
 	float angle = 0;
 
-	pips_as_zones[0].data = "/M_Z72";
-	pips_as_zones[1].data = "/M_Z18";
-	pips_as_zones[2].data = "/M_Z78";
-	pips_as_zones[3].data = "/M_Z12";
+	pips_as_zones[0].data = "/M_Z11";
+	pips_as_zones[1].data = "/M_Z22";
+	pips_as_zones[2].data = "/M_Z33";
+	pips_as_zones[3].data = "/M_Z44";
 	
 	std::cout << "INITIALIZING EXPLORATION NODE... " << std::endl;
     ros::init(argc, argv, "SM");
@@ -770,6 +783,31 @@ int main(int argc, char** argv){
 	robot_base_pos.pose.orientation.z = 0.0;
 	robot_base_pos.pose.orientation.w = 0.0;
 
+	robot_curr_pos.pose.position.x = 0.0;
+	robot_curr_pos.pose.position.y = 0.0;
+	robot_curr_pos.pose.position.z = 0.0;
+	robot_curr_pos.pose.orientation.x = 0.0;
+	robot_curr_pos.pose.orientation.y = 0.0;
+	robot_curr_pos.pose.orientation.z = 0.0;
+	robot_curr_pos.pose.orientation.w = 0.0;
+
+	robot_next_pos.pose.position.x = 0.0;
+	robot_next_pos.pose.position.y = 0.0;
+	robot_next_pos.pose.position.z = 0.0;
+	robot_next_pos.pose.orientation.x = 0.0;
+	robot_next_pos.pose.orientation.y = 0.0;
+	robot_next_pos.pose.orientation.z = 0.0;
+	robot_next_pos.pose.orientation.w = 0.0;
+
+	robot_first_pos.pose.position.x = 0.0;
+	robot_first_pos.pose.position.y = 0.0;
+	robot_first_pos.pose.position.z = 0.0;
+	robot_first_pos.pose.orientation.x = 0.0;
+	robot_first_pos.pose.orientation.y = 0.0;
+	robot_first_pos.pose.orientation.z = 0.0;
+	robot_first_pos.pose.orientation.w = 0.0;
+
+
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:{
@@ -777,31 +815,184 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the exploration stage";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-				ros::Duration(2, 0).sleep();
+				try{
+					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
+					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
+				}
+				catch(tf::TransformException ex){
+					ROS_ERROR("%s",ex.what());
+					ros::Duration(1.0).sleep();
+				}
+				robot_first_pos.pose.position.x = transform.getOrigin().x();
+				robot_first_pos.pose.position.y = transform.getOrigin().y();
+				robot_first_pos.pose.position.z = transform.getOrigin().z();
+				std::cout << "First Pose" << robot_first_pos.pose << std::endl;
 	    		state = SM_FIRSTMAPPING;
 	    		break;
 			}
 
 			case SM_FIRSTMAPPING:{
 				std::cout << "\n State machine: SM_FIRSTMAPPING" << std::endl;
-				if(fwd_n_turn(pub_cmd_vel, 1.0,2.5))
+				if(fwd_n_turn(pub_cmd_vel, 1.5,0.0))
 				{
 					std::cout << "Movement Done" << std::endl;
 				}
-				state = SM_NAV_HOME;
+				state = SM_OBT_CURR_POS;
 				break;
 			}
 
+			 case SM_OBT_CURR_POS:{
+			 	std::cout << "\n State machine: SM_OBT_CURR_POS" << std::endl;
+				//Encuentra la posición del robot respecto al mapa, para darle goals cercanas
+				try{
+					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
+					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
+				}
+				catch(tf::TransformException ex){
+					ROS_ERROR("%s",ex.what());
+					ros::Duration(1.0).sleep();
+				}
+				robot_curr_pos.pose.position.x = transform.getOrigin().x();
+				robot_curr_pos.pose.position.y = transform.getOrigin().y();
+				robot_curr_pos.pose.position.z = transform.getOrigin().z();
+				std::cout << "Curr Pose" << robot_curr_pos.pose << std::endl;
+				state = SM_NAV_HOME;
+				break;
+			 }
+
 			case SM_NAV_HOME:{
 				std::cout << "\n State machine: SM_NAV_HOME" << std::endl;
-				navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
-				std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//De acuerdo a la posición inicial del robot, le envía una dos metros al frente
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 1.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
 				//navigate_to_location(pips_poses.at(0));
 				//pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(7,0).sleep();
+
+				ros::Duration(10,0).sleep();
 				curr_pip++;
 				curr_pii++;
-				state = SM_NAV_HOME;
+				state = SM_NAV_2;
+				break;
+			}
+
+			case SM_NAV_2:{
+				std::cout << "\n State machine: SM_NAV_2" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 2.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 2.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_NAV_3;
+				break;
+			}
+
+			case SM_NAV_3:{
+				std::cout << "\n State machine: SM_NAV_3" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 3.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 3.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_NAV_4;
+				break;
+			}
+
+			case SM_NAV_4:{
+				std::cout << "\n State machine: SM_NAV_4" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 2.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 4.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_NAV_5;
+				break;
+			}
+
+			case SM_NAV_5:{
+				std::cout << "\n State machine: SM_NAV_4" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 5.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_NAV_6;
+				break;
+			}
+
+			case SM_NAV_6:{
+				std::cout << "\n State machine: SM_NAV_6" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 5.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_NAV_7;
+				break;
+			}
+
+			case SM_NAV_7:{
+				std::cout << "\n State machine: SM_NAV_7" << std::endl;
+				//De acuerdo a la posición inicial del robot
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 0.0;
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 4.0;
+				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
+
+				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
+				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
+				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
+				//navigate_to_location(pips_poses.at(0));
+				//pub_zone_goal.publish(pips_as_zones[0]);
+				ros::Duration(10,0).sleep();
+				curr_pip++;
+				curr_pii++;
+				state = SM_FINAL_STATE;
 				break;
 			}
 
@@ -814,7 +1005,7 @@ int main(int argc, char** argv){
 					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pip));
 					pub_zone_goal.publish(pips_as_zones[curr_pip]);
-					ros::Duration(7,0).sleep();
+					ros::Duration(10,0).sleep();
 					state = SM_TURN_AROUND_PIPS;
 				}
 				else{
