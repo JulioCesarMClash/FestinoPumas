@@ -500,9 +500,9 @@ int main(int argc, char** argv)
 
         //real
         try {
-            listener_rob.waitForTransform("/base_link","/map",   
+            listener_rob.waitForTransform("/map", "/base_link",   
                                    ros::Time(0), ros::Duration(1000.0));
-            listener_rob.lookupTransform("/base_link","/map",   
+            listener_rob.lookupTransform("/map", "/base_link",   
                                    ros::Time(0), transform_rob);
         } catch (tf::TransformException ex){
             ROS_ERROR("%s",ex.what());
