@@ -63,7 +63,10 @@ def main():
     print("".join(rnd_zones))"""
 
     #Arreglo con zonas elegidas disponibles dentro del lab (logisticsZones)
-    zone_strings = ['M_Z41 ','M_Z22 ','M_Z13 ','C_Z23 ','C_Z32 ','C_Z42']
+    #Zonas en orden de entrada al lab hasta el fondo
+    #zone_strings = ['M_Z41 ','M_Z22 ','M_Z13 ','C_Z23 ','C_Z32 ','C_Z42']
+    #Zonas en desorden
+    zone_strings = ['C_Z32 ','M_Z22 ','C_Z42 ','C_Z23 ','M_Z41 ','M_Z13']
     
 
     while not rospy.is_shutdown():
