@@ -60,9 +60,11 @@ class FindTagNode:
   def find_tag(self, request):
     global arr, depth_img_bgr, aruco_pos_pub, depth_points_sub, mps_name_pub
     slope = 0.04
+    vel = Twist()
     name_list = []
     aruco_list = PointStamped()
     aruco_list = []
+    dire = -1
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
@@ -162,7 +164,7 @@ class FindTagNode:
                     slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
                     print("la pendiente es: ", slope)
 
-                    vel = Twist()
+                   
                     Kp = -3.0
                     Kp_m = 3.0
 
@@ -276,7 +278,13 @@ class FindTagNode:
                     # print("Siiix2")
 
         except AttributeError:
+	    
+	    #vel.angular.z = dire*0.7854
+	    #dire = dire*-1
+	    #pub_vel.publish(vel)
+            
             print('No Tag')
+	    #rospy.sleep(4)
 
       print(name_list)
       print(aruco_list)
@@ -289,8 +297,8 @@ class FindTagNode:
     
     elif request.is_aling_enabled:
       print("Ya entro a la segunda parte del alineado")
-      diff = 5
-      while(diff > 3 or diff < -3):
+      diff = 25
+      while(diff > 20 or diff < -20):
         tfBuffer = tf2_ros.Buffer()
         depth_img_bgr = np.zeros((480, 640))
         mps_name = [0,0]
@@ -338,16 +346,18 @@ class FindTagNode:
                       print("tamano de imagen es: ", aruco_img.shape)
                       cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
                       print("El centro del aruco es: ", cent)
-                      cent_img = aruco_img.shape[1]/2
+                      cent_img = aruco_img.shape[1]/2+5
                       diff = cent_img - cent[0]
                       print("La mitad de la imagen es: ", cent_img)
                       print("La diff es: ", diff)
-                      vel = Twist()
+
+		      Kp = -0.02
+                      Kp_m = 0.02
 
                       if diff > 0:
-                        vel.linear.x = diff
+                        vel.linear.y = Kp_m*abs(diff)
                       else:
-                        vel.linear.x = -diff
+                        vel.linear.y = Kp*abs(diff)
           
                       """try:
                         pos_x = float(arr[cent][0])
@@ -366,10 +376,11 @@ class FindTagNode:
                     #Se publica al cmd_vel el movimiento en x del robot
                     pub_vel.publish(vel)
                     #Delay para que le de tiempo al robot de moverse
-                    rospy.sleep(2)
+                    rospy.sleep(3)
 
 
         except AttributeError:
+          
             print('No Tag')
 
       print(name_list)

@@ -83,6 +83,11 @@ bool request = false;
 float angulo = 135;
 float angulo_rad;
 
+//Parametro que multiplica al coseno 
+float param_x = 0.5;
+//Parametro que multiplica al seno
+float param_y = 0.8;
+
 void compute_coordinates(){
     float quat;
     
@@ -90,8 +95,8 @@ void compute_coordinates(){
     //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
     //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
 
-tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(angulo*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(angulo*(M_PI/180)); 
+tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
 
     //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
     //Si es ir a la salida entonces se queda igual el ángulo
@@ -158,7 +163,7 @@ void transform_zone()
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
-    zone = "C_Z23";
+    zone = "C_Z42";
 
     //TF related stuff 
     tf_target_zone.header.frame_id = "/map";
@@ -319,7 +324,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_ALIGN;
+                state = SM_GO_TO;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
