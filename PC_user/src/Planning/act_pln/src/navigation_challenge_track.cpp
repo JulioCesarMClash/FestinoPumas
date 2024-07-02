@@ -136,6 +136,7 @@ void transform_zones()
 
 void nearest_neighbour()
 {
+	std::cout << "Entro al vecino mas cercano" << std::endl;
 	//Inicialización de variables
 	double min_dist;
 	int min_indx;
@@ -162,10 +163,12 @@ void nearest_neighbour()
       ros::Duration(1.0).sleep();
     }
 
+std::cout << "Obtuvo pos del robot" << std::endl;
+
     tf_robot_pose.pose.position.x = transform_rob.getOrigin().x();
 	tf_robot_pose.pose.position.y = transform_rob.getOrigin().y();
 
-	std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
+	//std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
 	std::cout << "Coords x: " << tf_robot_pose.pose.position.x << " y:" << tf_robot_pose.pose.position.y << std::endl;
 
 	//Mientras el tamaño del vector de zonas sea mayor a cero seguirá recorriendo
@@ -209,6 +212,7 @@ void nearest_neighbour()
 		tf_robot_pose.pose.position.y = tf_nearest_zone.pose.position.y;
 
 	}
+	std::cout << "Salio del while" << std::endl;
 
 }
 
