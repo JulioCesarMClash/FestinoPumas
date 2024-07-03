@@ -499,6 +499,7 @@ int main(int argc, char** argv)
 
 
         //real
+	//Para obtener la transformada bien primero va map y luego base_link
         try {
             listener_rob.waitForTransform("/map", "/base_link",   
                                    ros::Time(0), ros::Duration(1000.0));
