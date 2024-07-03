@@ -6,6 +6,7 @@
 #include <vector> 
 #include <string>
 #include "std_msgs/String.h"
+#include <std_msgs/Int32.h>
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/PoseStamped.h"
 #include <tf/transform_listener.h>
@@ -68,18 +69,6 @@ int simple_move_status_id = 0;
 
 bool request = false;
 
-
-// void compute_coordinates(){
-//     if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-//         tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + cos(stoi(tokens[3])*(M_PI/180));
-//         tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + sin(stoi(tokens[3])*(M_PI/180));                        
-//     }
-//     if(tokens[4] == "output"){
-//         tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - cos(stoi(tokens[3])*(M_PI/180));
-//         tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - sin(stoi(tokens[3])*(M_PI/180));
-//     }
-// }
-
 float angulo = 135;
 float angulo_rad;
 
@@ -88,24 +77,18 @@ float param_x = 0.5;
 //Parametro que multiplica al seno
 float param_y = 0.8;
 
+//Función para ya hacer pruebas con el Refbox
 void compute_coordinates(){
-    float quat;
-
-    //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
-    //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
-
-tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
-
-    //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
-    //Si es ir a la salida entonces se queda igual el ángulo
-    //if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-        angulo = angulo - 180;                     
-    //}
-	angulo_rad = angulo*M_PI/180;
-
-    std::cout << "el ángulo en grados es: " << angulo << std::endl;
-    std::cout << "el ángulo en rad es: " << angulo*M_PI/180 << std::endl;
+    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(std::stoi(tokens[3])*(M_PI/180));
+        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(std::stoi(tokens[3])*(M_PI/180)); 
+        angulo = angulo - 180;                       
+    }
+    if(tokens[4] == "output"){
+        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - param_x*cos(std::stoi(tokens[3])*(M_PI/180));
+        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - param_y*sin(std::stoi(tokens[3])*(M_PI/180));
+    }
+    angulo_rad = angulo*M_PI/180;
 
     tf::Quaternion myQuaternion;
 
@@ -117,10 +100,42 @@ tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(an
     tf_target_zone.pose.orientation.y = myQuaternion[1];
     tf_target_zone.pose.orientation.z = myQuaternion[2];
     tf_target_zone.pose.orientation.w = myQuaternion[3];
-
-    std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-                    
 }
+
+//Función hardcodeada para hacer pruebas rápidas
+// void compute_coordinates(){
+//     float quat;
+
+//     //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
+//     //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
+
+//     tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
+//     tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
+
+//     //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
+//     //Si es ir a la salida entonces se queda igual el ángulo
+//     //if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+//         angulo = angulo - 180;                     
+//     //}
+// 	angulo_rad = angulo*M_PI/180;
+
+//     std::cout << "el ángulo en grados es: " << angulo << std::endl;
+//     std::cout << "el ángulo en rad es: " << angulo*M_PI/180 << std::endl;
+
+//     tf::Quaternion myQuaternion;
+
+//     myQuaternion.setRPY(0,0,angulo*M_PI/180);
+
+//     myQuaternion=myQuaternion.normalize();
+
+//     tf_target_zone.pose.orientation.x = myQuaternion[0];
+//     tf_target_zone.pose.orientation.y = myQuaternion[1];
+//     tf_target_zone.pose.orientation.z = myQuaternion[2];
+//     tf_target_zone.pose.orientation.w = myQuaternion[3];
+
+//     std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+                    
+// }
 
 //Funcion para ya hacer pruebas con el refbox
 void transform_zone()
@@ -305,6 +320,7 @@ int main(int argc, char** argv){
     ros::Publisher pubRequest       = n.advertise<std_msgs::String>("/request_instruction", 1000);
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
+    ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
 
     //Declarar servicio para encontrar pieza
     ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
@@ -316,9 +332,15 @@ int main(int argc, char** argv){
     ros::Rate loop(30);
 
     std::string voice;
+
+    //String que se le envía al planeador para pedirle una instrucción 
     std_msgs::String request_string;
     request_string.data = "Ola khe ase";
 
+    //Entero que se le envía al nodo de la pinza 
+    std_msgs::Int32 manipulator_var;
+
+    //String que se le envía a las máquinas para pedirles cosas
     std_msgs::String machine_instruction;
 
     int cont = 0;
@@ -406,7 +428,6 @@ int main(int argc, char** argv){
 
                 state = SM_FINAL_STATE;
                 break;
-
 	    	case SM_FIND:
 	            std::cout << "State machine: SM_FIND" << std::endl;
 	            voice = "Finding the piece";
@@ -433,9 +454,15 @@ int main(int argc, char** argv){
 	        
 			case SM_TAKE:
 	    		std::cout << "State machine: SM_TAKE" << std::endl;	
-	            voice =  "I have finished test";
+	            voice = "Grasping the piece";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
+                //Reposo
+                //Reposo con pieza
+                //Pick
+                //Place 
+                manipulator_var.data = 1;
+                pubManipulator.publish(manipulator_var);
 	    		
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
@@ -451,10 +478,13 @@ int main(int argc, char** argv){
 
 			case SM_DROP:
 	    		std::cout << "State machine: SM_DROP" << std::endl;	
-	            voice =  "I have finished test";
+	            voice = "Droping the piece";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 	    		
+                manipulator_var.data = 2;
+                pubManipulator.publish(manipulator_var);
+
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
