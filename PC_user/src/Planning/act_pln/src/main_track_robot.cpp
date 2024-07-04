@@ -110,7 +110,7 @@ void compute_coordinates(){
 
     //Descomentar para prueba con la mesa del lab
     tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 1;
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - 0.5; 
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y; 
 
     //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
     //Si es ir a la salida entonces se queda igual el ángulo
@@ -383,7 +383,7 @@ int main(int argc, char** argv){
                     if(aruco_srv.response.success){
                         std::cout << "Alineado!!!" << std::endl;
                     
-					    FestinoNavigation::moveDistAngle(0.50, 0, 10000);
+					    FestinoNavigation::moveDistAngle(0.37, 0, 10000);
 					    //state = SM_WAIT_FOR_INSTRUCTION;	
                         state = SM_TAKE;	
                     }
@@ -397,7 +397,7 @@ int main(int argc, char** argv){
 					state = SM_ALIGN;
 				}
 
-                state = SM_FINAL_STATE;
+                //state = SM_FINAL_STATE;
                 break;
 			case SM_TAKE:
 	    		std::cout << "State machine: SM_TAKE" << std::endl;	
