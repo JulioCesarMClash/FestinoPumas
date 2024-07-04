@@ -67,7 +67,7 @@ int simple_move_status_id = 0;
 
 bool request = false;
 
-float angulo = 45;
+float angulo = 270;
 float angulo_rad;
 
 //Parametro que multiplica al coseno 
@@ -104,11 +104,13 @@ float param_y = 0.8;
 void compute_coordinates(){
     float quat;
 
-    //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 0.6*cos(std::stoi("135")*(M_PI/180));
-    //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + 0.6*sin(std::stoi("135")*(M_PI/180));  
+    //Descomentar para pruebas con los parámetros reales
+    //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
+    //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
 
-    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
+    //Descomentar para prueba con la mesa del lab
+    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 1;
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - 0.5; 
 
     //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
     //Si es ir a la salida entonces se queda igual el ángulo
@@ -182,7 +184,11 @@ void transform_zone()
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
-    zone = "C_Z42";
+    //Descomentar cuando se use la zona marcada del lab
+    //zone = "C_Z42";
+
+    //Descomentar cuando se quiera ir a la mesa en medio del lab
+    zone = "M_Z13";
 
     //TF related stuff 
     tf_target_zone.header.frame_id = "/map";
