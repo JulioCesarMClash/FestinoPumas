@@ -277,6 +277,48 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
     }
 }
 
+sensor_msgs::LaserScan laserScan;
+bool flag_door = true;
+void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
+{
+    laserScan = *msg;
+
+    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+    float laser_l=0;
+    range=laserScan.ranges.size();
+    //std::cout<<laserScan.ranges.size()<<std::endl;
+    range_c=range/2;
+    range_i=range_c-(range/10);
+    range_f=range_c+(range/10);
+    //std::cout<<"Range Size: "<< range << "\n ";
+    //std::cout<<"Range Central: "<< range_c << "\n ";
+    //std::cout<<"Range Initial: "<< range_i << "\n ";
+    //std::cout<<"Range Final: "<< range_f << "\n ";
+
+    cont_laser=0;
+    laser_l=0;
+    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
+    {
+        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+        { 
+            laser_l=laser_l+laserScan.ranges[i]; 
+            cont_laser++;
+        }
+    }
+    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
+    if(laser_l/cont_laser > 0.50)
+    {
+        flag_door = true;
+        //std::cout<<"door open"<<std::endl;
+    }
+    else
+    {
+        flag_door = false;
+        //std::cout<<"door closed"<<std::endl;
+    }
+}
+
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -290,6 +332,8 @@ int main(int argc, char** argv){
 
     //Subscribers and Publishers
     ros::Subscriber subInstructions = n.subscribe("/instruction_msg", 10, callback_instructions);
+    ros::Subscriber subLaserScan 	= n.subscribe("/scan", 1, callbackLaserScan);
+
     //ros::Subscriber subSlope        = n.subscribe("/slope_data", 10, callback_slope);
     ros::Publisher pubRequest       = n.advertise<std_msgs::String>("/request_instruction", 1000);
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
@@ -327,7 +371,8 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_GO_TO;
+                //state = SM_GO_TO;
+                state = SM_FINAL_STATE;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -465,6 +510,9 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 	    		
+
+                std::cout << "La bander es: " << flag_door << std::endl;
+
                 state = SM_FINAL_STATE;
 	    		break;
 		}
