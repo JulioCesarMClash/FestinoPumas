@@ -412,10 +412,23 @@ int main(int argc, char** argv){
                 //Place 
                 manipulator_var.data = 1;
                 pubManipulator.publish(manipulator_var);
-	    		ros::Duration(10, 0).sleep();
+	    		ros::Duration(20, 0).sleep();
                 
-                tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - 1;
-                navigate_to_location(tf_target_zone);
+                tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - 0.4;
+
+    		/*tf::Quaternion myQuaternion;
+
+    		myQuaternion.setRPY(0,0,90*M_PI/180);
+
+    		myQuaternion=myQuaternion.normalize();
+
+	    tf_target_zone.pose.orientation.x = myQuaternion[0];
+	    tf_target_zone.pose.orientation.y = myQuaternion[1];
+	    tf_target_zone.pose.orientation.z = myQuaternion[2];
+	    tf_target_zone.pose.orientation.w = myQuaternion[3];*/
+	          navigate_to_location(tf_target_zone);
+ 		FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
+		
 
                 //state = SM_WAIT_FOR_INSTRUCTION;
                 state = SM_DROP;
