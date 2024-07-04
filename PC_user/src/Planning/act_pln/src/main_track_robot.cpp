@@ -61,6 +61,10 @@ std::vector<std::string> tokens;
 std::string zone;
 
 std::vector<std::string> real_refbox_names;
+std::string instructions[] = {"ACT-PLN 1 1 Festina goto CS M_Z47 0 entrance",
+                              "ACT-PLN 1 2 Festina take CAP_GRAY",
+                              "ACT-PLN 1 1 Festina goto CS M_Z47 0 platform",
+                              "ACT-PLN 1 1 Festina drop CAP_GRAY"};
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
@@ -396,8 +400,6 @@ int main(int argc, char** argv){
 					std::cout << "NotFound" << std::endl;
 					state = SM_ALIGN;
 				}
-
-                //state = SM_FINAL_STATE;
                 break;
 			case SM_TAKE:
 	    		std::cout << "State machine: SM_TAKE" << std::endl;	
@@ -410,9 +412,13 @@ int main(int argc, char** argv){
                 //Place 
                 manipulator_var.data = 1;
                 pubManipulator.publish(manipulator_var);
-	    		
+	    		ros::Duration(10, 0).sleep();
+                
+                tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - 1;
+                navigate_to_location(tf_target_zone);
+
                 //state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_FINAL_STATE;
+                state = SM_DROP;
 	    		break;
 			case SM_DROP:
 	    		std::cout << "State machine: SM_DROP" << std::endl;	
@@ -420,10 +426,10 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 	    		
-                manipulator_var.data = 2;
+                manipulator_var.data = 0;
                 pubManipulator.publish(manipulator_var);
 
-                state = SM_WAIT_FOR_INSTRUCTION;
+                state = SM_FINAL_STATE;
 	    		break;
 
 			case SM_ASK:
