@@ -9,6 +9,7 @@
 #include <std_msgs/Int32.h>
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/Twist.h"
 #include <tf/transform_listener.h>
 #include "robotino_msgs/DigitalReadings.h"
 #include <sstream>
@@ -54,6 +55,9 @@ bool flag_zones = false;
 std_msgs::String target_zone;
 geometry_msgs::PoseStamped tf_target_zone;
 std::vector<geometry_msgs::PoseStamped> zones_path;
+
+//Para el cmd_vel
+geometry_msgs::Twist vel;
 
 //String that storage instruction tokens
 std::vector<std::string> tokens;
@@ -278,46 +282,54 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
 }
 
 sensor_msgs::LaserScan laserScan;
-bool flag_door = true;
+bool flag_wall = false;
+
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    laserScan = *msg;
 
-    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
-    float laser_l=0;
-    range=laserScan.ranges.size();
-    //std::cout<<laserScan.ranges.size()<<std::endl;
-    range_c=range/2;
-    range_i=range_c-(range/10);
-    range_f=range_c+(range/10);
-    //std::cout<<"Range Size: "<< range << "\n ";
-    //std::cout<<"Range Central: "<< range_c << "\n ";
-    //std::cout<<"Range Initial: "<< range_i << "\n ";
-    //std::cout<<"Range Final: "<< range_f << "\n ";
+    if(flag_wall == true){
+	    laserScan = *msg;
 
-    cont_laser=0;
-    laser_l=0;
-    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
-    {
-        if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
-        { 
-            laser_l=laser_l+laserScan.ranges[i]; 
-            cont_laser++;
-        }
-    }
-    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
-    if(laser_l/cont_laser > 0.50)
-    {
-        flag_door = true;
-        //std::cout<<"door open"<<std::endl;
-    }
-    else
-    {
-        flag_door = false;
-        //std::cout<<"door closed"<<std::endl;
-    }
+	    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+	    float laser_l=0;
+	    range=laserScan.ranges.size();
+	    //std::cout<<laserScan.ranges.size()<<std::endl;
+	    range_c=range/2;
+	    range_i=range_c-(range/10);
+	    range_f=range_c+(range/10);
+	    //std::cout<<"Range Size: "<< range << "\n ";
+	    //std::cout<<"Range Central: "<< range_c << "\n ";
+	    //std::cout<<"Range Initial: "<< range_i << "\n ";
+	    //std::cout<<"Range Final: "<< range_f << "\n ";
+
+	    cont_laser=0;
+	    laser_l=0;
+	    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
+	    {
+		if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+		{ 
+		    laser_l=laser_l+laserScan.ranges[i]; 
+		    cont_laser++;
+		}
+	    }
+	    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
+	    if(laser_l/cont_laser > 0.20)
+	    {
+		flag_wall = false;
+		FestinoNavigation::moveDistAngle(laser_l/cont_laser - 0.16, 0, 10000);
+		//std::cout<<"door open"<<std::endl;
+	    }
+    } 
 }
 
+
+/*void callbackMoveLat(const std_msgs::Float32::ConstPtr& msg){
+	
+	float mov_lat = (*msg).data;	
+	FestinoNavigation::moveLateral(mov_lat, 10000);
+	FestinoNavigation::moveDistAngle(0.2, 0, 10000);
+	std::cout << "Entro al callback lateral, mov_lat es: " << mov_lat << std::endl;
+}*/
 
 
 int main(int argc, char** argv){
@@ -333,13 +345,14 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
     ros::Subscriber subInstructions = n.subscribe("/instruction_msg", 10, callback_instructions);
     ros::Subscriber subLaserScan 	= n.subscribe("/scan", 1, callbackLaserScan);
+    //ros::Subscriber subLateral	= n.subscribe("/move_lateral", 1, callbackMoveLat);
 
     //ros::Subscriber subSlope        = n.subscribe("/slope_data", 10, callback_slope);
     ros::Publisher pubRequest       = n.advertise<std_msgs::String>("/request_instruction", 1000);
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
     ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
-
+	ros::Publisher pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     //Declarar servicio para encontrar pieza
     ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     ros::ServiceClient aruco_client 		= n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
@@ -366,13 +379,16 @@ int main(int argc, char** argv){
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:
+		//manipulator_var.data = 99;
+                //pubManipulator.publish(manipulator_var);
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
-				FestinoHRI::say(voice,5);
+				//FestinoHRI::say(voice,5);
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
                 //state = SM_GO_TO;
-                state = SM_FINAL_STATE;
+                //state = SM_FINAL_STATE;
+state = SM_ALIGN;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -427,14 +443,16 @@ int main(int argc, char** argv){
                     std::cout << "Ya se alineo en angulo" << std::endl;
                     aruco_srv.request.is_find_tag_enabled = false;
                     aruco_srv.request.is_aling_enabled = true;
-				    aruco_client.call(aruco_srv);
+		    aruco_client.call(aruco_srv);
 
                     if(aruco_srv.response.success){
                         std::cout << "Alineado!!!" << std::endl;
                     
-					    FestinoNavigation::moveDistAngle(0.37, 0, 10000);
+					    //FestinoNavigation::moveDistAngle(0.37, 0, 10000);
 					    //state = SM_WAIT_FOR_INSTRUCTION;	
-                        state = SM_TAKE;	
+			//flag_wall = true;
+                        //state = SM_TAKE;	
+			state = SM_FINAL_STATE;
                     }
                     else{
                         std::cout << "NotFound" << std::endl;
@@ -457,9 +475,14 @@ int main(int argc, char** argv){
                 //Place 
                 manipulator_var.data = 1;
                 pubManipulator.publish(manipulator_var);
-	    		ros::Duration(20, 0).sleep();
+		//manipulator_var.data = 99;
+                //pubManipulator.publish(manipulator_var);
+std::cout << "Estoy tomando" << std::endl;
+	    		ros::Duration(30, 0).sleep();
+std::cout << "Ya pasaron los 30 seg" << std::endl;
+		
                 
-                tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - 0.4;
+                //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - 0.4;
 
     		/*tf::Quaternion myQuaternion;
 
@@ -471,9 +494,15 @@ int main(int argc, char** argv){
 	    tf_target_zone.pose.orientation.y = myQuaternion[1];
 	    tf_target_zone.pose.orientation.z = myQuaternion[2];
 	    tf_target_zone.pose.orientation.w = myQuaternion[3];*/
-	          navigate_to_location(tf_target_zone);
- 		FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
-		
+	          //navigate_to_location(tf_target_zone);
+ 		//FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
+		 FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
+		FestinoNavigation::moveDistAngle(0.4, 0, 10000);
+		FestinoNavigation::moveDistAngle(0, -90*M_PI/180, 10000);
+		//vel.linear.y = 1;	
+		//pubVel.publish(vel);
+std::cout << "Me estoy moviendo" << std::endl;
+		ros::Duration(10, 0).sleep();
 
                 //state = SM_WAIT_FOR_INSTRUCTION;
                 state = SM_DROP;
@@ -484,7 +513,7 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
 	    		
-                manipulator_var.data = 0;
+                manipulator_var.data = 2;
                 pubManipulator.publish(manipulator_var);
 
                 state = SM_FINAL_STATE;
@@ -494,6 +523,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_ASK" << std::endl;	
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
+			
 				FestinoHRI::say(voice,3);
 
                 //Envía la concatenada la acción y el color de la base si se trata de la BS
@@ -509,9 +539,7 @@ int main(int argc, char** argv){
 	            voice =  "I have finished test";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-	    		
-
-                std::cout << "La bander es: " << flag_door << std::endl;
+	
 
                 state = SM_FINAL_STATE;
 	    		break;
