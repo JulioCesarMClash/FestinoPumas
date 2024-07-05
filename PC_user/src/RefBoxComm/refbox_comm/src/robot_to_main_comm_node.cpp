@@ -26,7 +26,7 @@ void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
         char buffer[30] = { ' ' };
         int valread = 0;
 
-        write(client_fd, "nxt", 3);//ask server for next instruction
+        write(client_fd, "n", 1);//ask server for next instruction
         valread = read(client_fd, buffer, 30);
         printf("Server instruction: %s\n", buffer);
 
