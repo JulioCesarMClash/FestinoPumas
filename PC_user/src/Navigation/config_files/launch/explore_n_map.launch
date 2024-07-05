@@ -41,15 +41,15 @@
 		<rosparam file="$(find config_files)/rosnav_params/remote.yaml"/>
 	</node-->
 
-	<!-- RVIZ to view the visualization -->
 	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find config_files)/rosnav_params/step_nav.rviz" />
 
 
 	<!--include file="$(find surge_et_ambula)/launch/robot_comm.launch"/-->
 
 	<!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="0 0 0 0 0 0 1 map Log_origin 100" /-->
-	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
-	<node name="shortmv" pkg="simple_move" type="shortmv_rosnav" output="screen"/>
-	<node name="exploration_stage" pkg="act_pln" type="exploration_stage" output="screen"/>
+	<!--include file="$(find movement_functions)/launch/logisticsZones.launch"> </include-->
+	<!--node name="shortmv" pkg="simple_move" type="shortmv_rosnav" output="screen"/-->
+	<!--node name="aruco_det_srv2" pkg="img_proc" type="aruco_det_srv2.py" output="screen"/>
+	<node name="exploration_stage" pkg="act_pln" type="exploration_stage" output="screen"/-->
     
 </launch>
