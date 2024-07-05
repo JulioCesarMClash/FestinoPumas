@@ -258,3 +258,7 @@ target_link_libraries(exploration_stage_laser ${catkin_LIBRARIES})
 add_executable(main_track_robot src/main_track_robot.cpp)
 add_dependencies(main_track_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_track_robot ${catkin_LIBRARIES})
+
+add_executable(scan_cleaner src/scan_cleaner.cpp)
+add_dependencies(scan_cleaner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(scan_cleaner ${catkin_LIBRARIES})
