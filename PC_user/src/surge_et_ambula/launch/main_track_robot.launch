@@ -1,0 +1,19 @@
+<launch>
+
+	<!--LAUNCHES-->
+
+    <!--navegación-->
+	<include file="$(find config_files)/launch/navigation.launch"> </include>
+    <!--Zonas logistics-->
+	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
+    <!--Kinect-->
+    <include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
+
+	<!--NODES-->
+
+    <!--Comunicación refbox-->
+	<!--node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/-->
+    <!--Detector de Arucos-->
+    <node name="find_tag_service" pkg="img_proc" type="aruco_det_srv2.py"/>
+	
+</launch>

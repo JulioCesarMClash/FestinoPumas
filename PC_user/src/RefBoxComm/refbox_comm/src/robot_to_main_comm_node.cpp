@@ -4,12 +4,14 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "192.168.0.123"
+#define SERVER_IP "127.0.0.1"//"192.168.0.123"
 
 using namespace std;
 
 ros::Publisher pub_instruction;
 int client_fd;
+
+char buffer[50];
 
 void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
    //ROS_INFO("I heard: [%s]", msg->data.c_str());
@@ -23,11 +25,16 @@ void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
         write(client_fd, oss.str().c_str(), oss.str().size());
     */
 
-        char buffer[30] = { ' ' };
         int valread = 0;
 
-        write(client_fd, "nxt", 3);//ask server for next instruction
-        valread = read(client_fd, buffer, 30);
+        //std::ostringstream instruction;
+
+        //instruction << "next" << '\0';
+
+        //write(client_fd, instruction.str(), sizeof(instruction));//ask server for next instruction
+        //std::cout << " ask next instruction " << std::endl;
+        write(client_fd, "n", 1);
+        valread = read(client_fd, buffer, sizeof(buffer));
         printf("Server instruction: %s\n", buffer);
 
         std::stringstream ss;
@@ -37,6 +44,8 @@ void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
         msg_to_robot.data = ss.str();
 
         pub_instruction.publish(msg_to_robot);
+
+        memset( &buffer, 0, sizeof(buffer));
 
 }
 
