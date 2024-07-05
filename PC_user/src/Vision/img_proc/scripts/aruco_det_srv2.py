@@ -297,11 +297,12 @@ class FindTagNode:
     
     elif request.is_aling_enabled:
       print("Ya entro a la segunda parte del alineado")
-      diff = 25
-      while(diff > 20 or diff < -20):
+      umbral = 20
+      diff = 35
+      while(diff > umbral or diff < -umbral):
         tfBuffer = tf2_ros.Buffer()
-        depth_img_bgr = np.zeros((480, 640))
-        mps_name = [0,0]
+	depth_img_bgr = np.zeros((480, 640))
+	mps_name = [0,0]
         #A partir de la nube de puntos se obtiene el RGB
         rgb_arr = arr['rgb'].copy()
         rgb_arr.dtype = np.uint32
@@ -353,12 +354,28 @@ class FindTagNode:
 
 		      Kp = -0.02
                       Kp_m = 0.02
+		      mov_lat = Float32()
 
-                      if diff > 0:
-                        vel.linear.y = Kp_m*abs(diff)
-                      else:
-                        vel.linear.y = Kp*abs(diff)
-          
+                      if diff > umbral:
+			#Se publica al cmd_vel el movimiento en y del robot
+			print("Entro al if de 20")
+			vel.linear.y = Kp_m*abs(diff)
+			#mov_lat.data = Kp_m*abs(diff)
+                    	#pubLateral.publish(mov_lat)
+			try: 
+                        	pub_vel.publish(vel)
+                        except Exception as e: 
+                        	print(e)
+                         	print('No se pudo por alguna razon :(')
+                      elif diff < -umbral:
+			print("Entro al if de -20")
+			vel.linear.y = Kp*abs(diff)
+			#mov_lat.data = Kp*abs(diff)
+			#Se publica al cmd_vel el movimiento en y del robot
+                    	#pubLateral.publish(mov_lat)
+			pub_vel.publish(vel)
+		      
+			print("Segun ya publico")
                       """try:
                         pos_x = float(arr[cent][0])
                         pos_y = float(arr[cent][1])
@@ -371,10 +388,9 @@ class FindTagNode:
                           br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                           print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                       except IndexError:
-                        print('Not identified')"""  
+                        print('Not identified')"""
         
-                    #Se publica al cmd_vel el movimiento en x del robot
-                    pub_vel.publish(vel)
+                    
                     #Delay para que le de tiempo al robot de moverse
                     rospy.sleep(3)
 
@@ -383,6 +399,8 @@ class FindTagNode:
           
             print('No Tag')
 
+      #vel.linear.x = 2*pos_z	
+      #vel.linear.y = 0
       print(name_list)
       print(aruco_list)
       response = Find_tag_SrvResponse()
@@ -492,5 +510,6 @@ if __name__ == '__main__':
   find_tag_node = FindTagNode()
   global pub_vel
   pub_vel  = rospy.Publisher("/cmd_vel",Twist,queue_size=1)
+  #pubLateral = rospy.Publisher("/move_lateral",Float32,queue_size=1)
 
   find_tag_node.spin()

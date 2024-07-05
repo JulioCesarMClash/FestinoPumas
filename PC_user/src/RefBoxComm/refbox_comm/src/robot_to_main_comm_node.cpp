@@ -4,7 +4,7 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "127.0.0.1"//"192.168.0.123"
+#define SERVER_IP "192.168.1.152"
 
 using namespace std;
 
@@ -14,6 +14,7 @@ int client_fd;
 char buffer[50];
 
 void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
+printf("request received \n");
    //ROS_INFO("I heard: [%s]", msg->data.c_str());
 
     /*
@@ -35,6 +36,7 @@ void request_next_instruction(const std_msgs::String::ConstPtr& msg_to_server) {
         //std::cout << " ask next instruction " << std::endl;
         write(client_fd, "n", 1);
         valread = read(client_fd, buffer, sizeof(buffer));
+
         printf("Server instruction: %s\n", buffer);
 
         std::stringstream ss;
@@ -87,7 +89,7 @@ int main(int argc, char** argv) {
         printf("\nConnection Failed \n");
         return -1;
     }
-
+printf("Connected \n");
     ros::init(argc, argv, "robot_to_main_comm_node");
     ros::NodeHandle n;
 
