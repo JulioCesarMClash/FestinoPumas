@@ -12,7 +12,7 @@ import math
 import numpy as np
 from geometry_msgs.msg import *
 
-path = '/home/pumas/FestinoPumas/PC_user/src/'
+path = '/home/robocup20/FestinoPumas/PC_user/src/'
 
 tfBuffer = tf2_ros.Buffer()
 
@@ -48,7 +48,7 @@ rospy.loginfo("Robot-Server communication started")
 now = rospy.get_rostime()
 rospy.loginfo("Mapping started at %i", now.secs)
 
-rospy.sleep(60)
+rospy.sleep(180)
 
 now = rospy.Time.now()
 listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))

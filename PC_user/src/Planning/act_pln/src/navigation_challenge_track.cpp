@@ -123,12 +123,10 @@ void transform_zones()
           ros::Duration(1.0).sleep();
         }
 
-        
-
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
 
-std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
+		std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zones.at(i).pose.position.x << " y:" << tf_target_zones.at(i).pose.position.y << std::endl;
 
     	std::cout << "pasó las tfs" << std::endl;
     }
@@ -138,6 +136,7 @@ std::cout << "salió del try name:" << tokens.at(i) << " tf x:" << tf_target_zon
 
 void nearest_neighbour()
 {
+	std::cout << "Entro al vecino mas cercano" << std::endl;
 	//Inicialización de variables
 	double min_dist;
 	int min_indx;
@@ -164,10 +163,12 @@ void nearest_neighbour()
       ros::Duration(1.0).sleep();
     }
 
+std::cout << "Obtuvo pos del robot" << std::endl;
+
     tf_robot_pose.pose.position.x = transform_rob.getOrigin().x();
 	tf_robot_pose.pose.position.y = transform_rob.getOrigin().y();
 
-	std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
+	//std::cout << "La pose del robot es: " << tokens.at(min_indx) << std::endl;
 	std::cout << "Coords x: " << tf_robot_pose.pose.position.x << " y:" << tf_robot_pose.pose.position.y << std::endl;
 
 	//Mientras el tamaño del vector de zonas sea mayor a cero seguirá recorriendo
@@ -189,6 +190,7 @@ void nearest_neighbour()
 	    	if(dist < min_dist){
 	    		min_dist = dist;
 	    		tf_nearest_zone = tf_zone;
+				//Se guarda el indice de la zona mas pequeña para borrarla despues del vector
 	    		min_indx = i;
 	    	}
 	    }
@@ -210,6 +212,7 @@ void nearest_neighbour()
 		tf_robot_pose.pose.position.y = tf_nearest_zone.pose.position.y;
 
 	}
+	std::cout << "Salio del while" << std::endl;
 
 }
 
@@ -241,6 +244,11 @@ int main(int argc, char** argv){
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 
     ros::Rate loop(30);
+
+	//Numero se zonas recibidas
+	//Para la competencia fijar en 12
+	//Para pruebas puede ser otro valor
+	int num_zones = 6;
 
     std::string voice;
 
@@ -287,7 +295,7 @@ int main(int argc, char** argv){
 				ros::Duration(10, 0).sleep();
 	            cont++;
 
-				if(cont == 12){
+				if(cont == num_zones){
 					state = SM_FINAL_STATE;
 				}
 
