@@ -75,13 +75,13 @@ int simple_move_status_id = 0;
 
 bool request = false;
 
-float angulo = 270;
+float angulo = 315;
 float angulo_rad;
 
 //Parametro que multiplica al coseno 
-float param_x = 0.7;
+float param_x = 0.9;
 //Parametro que multiplica al seno
-float param_y = 0.8;
+float param_y = 1;
 
 //Función para ya hacer pruebas con el Refbox
 // void compute_coordinates(){
@@ -131,7 +131,7 @@ void compute_coordinates(){
     std::cout << "el ángulo en grados es: " << angulo << std::endl;
     std::cout << "el ángulo en rad es: " << angulo*M_PI/180 << std::endl;
 
-    tf::Quaternion myQuaternion;
+    /*tf::Quaternion myQuaternion;
 
     myQuaternion.setRPY(0,0,angulo*M_PI/180);
 
@@ -140,7 +140,7 @@ void compute_coordinates(){
     tf_target_zone.pose.orientation.x = myQuaternion[0];
     tf_target_zone.pose.orientation.y = myQuaternion[1];
     tf_target_zone.pose.orientation.z = myQuaternion[2];
-    tf_target_zone.pose.orientation.w = myQuaternion[3];
+    tf_target_zone.pose.orientation.w = myQuaternion[3];*/
 
     std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
                     
@@ -213,7 +213,7 @@ void transform_zone()
 
     try{
         std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(1000.0));
+        listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(100.0));
         listener.lookupTransform("/map",zone, ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
@@ -391,9 +391,9 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,5);
 	    	//state = SM_WAIT_FOR_INSTRUCTION;
-                //state = SM_GO_TO;
+                state = SM_GO_TO;
                 //state = SM_FINAL_STATE;
-                state = SM_ALIGN;
+                //state = SM_ALIGN;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -417,10 +417,10 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_GO_TO" << std::endl;
 	            voice = "Navigating to destination point";
 	            std::cout << voice << std::endl;
-				FestinoHRI::say(voice,3);
+				//FestinoHRI::say(voice,3);
                 
                 //Si estamos en la misma zona solo muevete ahí mismo 
-                if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
+                /*if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
                     vel.linear.y = 2;
                     pubVel.publish(vel);
 		            ros::Duration(1, 0).sleep();
@@ -429,8 +429,8 @@ int main(int argc, char** argv){
 		            pubVel.publish(vel);
 
                     state = SM_WAIT_FOR_INSTRUCTION;
-                }
-                else{
+                }*/
+                //else{
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
                     //Dependiendo de la orientacion de la maquina y de si se quiere ir a la entrada o salida se obtienen las coordenadas
@@ -440,12 +440,12 @@ int main(int argc, char** argv){
                     //Navegacion Marco
                     navigate_to_location(tf_target_zone);
                     //Para que vea hacia la máquina
-		            FestinoNavigation::moveDistAngle(0.0, angulo_rad, 10000);
+		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 10000);
                     state = SM_ALIGN;
-                }
+                //}
                 
-                zone_buffer = tokens[2];
-                sec_buffer  = tokens[4];
+                //zone_buffer = tokens[2];
+                //sec_buffer  = tokens[4];
             
                 //Navegacion ROS para hacer pruebas
                 //pub_rosnav_goal.publish(tf_target_zone);
