@@ -79,7 +79,7 @@ float angulo = 270;
 float angulo_rad;
 
 //Parametro que multiplica al coseno 
-float param_x = 0.5;
+float param_x = 0.7;
 //Parametro que multiplica al seno
 float param_y = 0.8;
 
@@ -386,13 +386,11 @@ int main(int argc, char** argv){
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:
-		//manipulator_var.data = 99;
-                //pubManipulator.publish(manipulator_var);
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,5);
-	    		//state = SM_WAIT_FOR_INSTRUCTION;
+	    	//state = SM_WAIT_FOR_INSTRUCTION;
                 //state = SM_GO_TO;
                 //state = SM_FINAL_STATE;
                 state = SM_ALIGN;
@@ -423,8 +421,13 @@ int main(int argc, char** argv){
                 
                 //Si estamos en la misma zona solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
-                    vel.linear.y = -1;
+                    vel.linear.y = 2;
                     pubVel.publish(vel);
+		    ros::Duration(1, 0).sleep();
+	            pubVel.publish(vel);
+		    ros::Duration(1, 0).sleep();
+		    pubVel.publish(vel);
+
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
@@ -455,7 +458,6 @@ int main(int argc, char** argv){
 	            voice = "Aligning";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,3);
-
                 aruco_srv.request.is_find_tag_enabled = true;
 				aruco_client.call(aruco_srv);
 				if(aruco_srv.response.success){
@@ -465,16 +467,21 @@ int main(int argc, char** argv){
 		            aruco_client.call(aruco_srv);
                     if(aruco_srv.response.success){
                         if(tokens.at(4) == "platform"){
-                            vel.linear.y = 1;
+                            vel.linear.y = -2;
+			    std::cout << "Publico en vel" << std::endl;
                             pubVel.publish(vel);
+			    ros::Duration(1, 0).sleep();
+			    pubVel.publish(vel);
+			    ros::Duration(1, 0).sleep();
+			    pubVel.publish(vel);
                         }
                         std::cout << "Alineado!!!" << std::endl;
                         
 					    //FestinoNavigation::moveDistAngle(0.37, 0, 10000);
-					    state = SM_WAIT_FOR_INSTRUCTION;	
+					    //state = SM_WAIT_FOR_INSTRUCTION;	
 			            flag_wall = true;
                         //state = SM_TAKE;	
-			            //state = SM_FINAL_STATE;
+			            state = SM_FINAL_STATE;
                     }
                     else{
                         std::cout << "NotFound" << std::endl;
@@ -494,7 +501,7 @@ int main(int argc, char** argv){
 
                 if(tokens[0] == "takep"){
                     //Tomar de la plataforma
-                    manipulator_var.data = 3;
+                    manipulator_var.data = 1;
                 }
                 else{
                     //Tomar de la banda
