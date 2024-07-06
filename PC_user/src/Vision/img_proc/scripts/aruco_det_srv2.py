@@ -287,7 +287,7 @@ class FindTagNode:
 
             pub_vel.publish(vel)
             print('No Tag')
-	          rospy.sleep(4)
+            rospy.sleep(4)
 
       print(name_list)
       print(aruco_list)
@@ -304,8 +304,8 @@ class FindTagNode:
       diff = 35
       while(diff > umbral or diff < -umbral):
         tfBuffer = tf2_ros.Buffer()
-	depth_img_bgr = np.zeros((480, 640))
-	mps_name = [0,0]
+        depth_img_bgr = np.zeros((480, 640))
+        mps_name = [0,0]
         #A partir de la nube de puntos se obtiene el RGB
         rgb_arr = arr['rgb'].copy()
         rgb_arr.dtype = np.uint32
@@ -354,31 +354,21 @@ class FindTagNode:
                       diff = cent_img - cent[0]
                       print("La mitad de la imagen es: ", cent_img)
                       print("La diff es: ", diff)
-
-		      Kp = -0.02
+                      
+                      Kp = -0.02
                       Kp_m = 0.02
-		      mov_lat = Float32()
+                      mov_lat = Float32()
 
                       if diff > umbral:
-			#Se publica al cmd_vel el movimiento en y del robot
-			print("Entro al if de 20")
-			vel.linear.y = Kp_m*abs(diff)
-			#mov_lat.data = Kp_m*abs(diff)
-                    	#pubLateral.publish(mov_lat)
-			try: 
-                        	pub_vel.publish(vel)
-                        except Exception as e: 
-                        	print(e)
-                         	print('No se pudo por alguna razon :(')
+                         vel.linear.y = Kp_m*abs(diff)
+                         #Se publica al cmd_vel el movimiento en y del robot
+                         print("Entro al if de 20")
+                         pub_vel.publish(vel)
                       elif diff < -umbral:
-			print("Entro al if de -20")
-			vel.linear.y = Kp*abs(diff)
-			#mov_lat.data = Kp*abs(diff)
-			#Se publica al cmd_vel el movimiento en y del robot
-                    	#pubLateral.publish(mov_lat)
-			pub_vel.publish(vel)
-		      
-			print("Segun ya publico")
+                         print("Entro al if de -20")
+                         vel.linear.y = Kp*abs(diff)
+                         pub_vel.publish(vel)
+          
                       """try:
                         pos_x = float(arr[cent][0])
                         pos_y = float(arr[cent][1])
