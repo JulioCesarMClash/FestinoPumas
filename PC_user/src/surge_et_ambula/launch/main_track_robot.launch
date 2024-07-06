@@ -7,7 +7,7 @@
     <!--Zonas logistics-->
 	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
     <!--Kinect-->
-    <include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
+    <!--include file="$(find freenect_launch)/launch/freenect.launch"> </include-->	
 
 	<!--NODES-->
 
