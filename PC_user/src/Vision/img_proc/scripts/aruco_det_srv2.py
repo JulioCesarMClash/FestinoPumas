@@ -168,12 +168,15 @@ class FindTagNode:
                     print("la pendiente es: ", slope)
 
                     if not already_tag:
+                      print("Despues de no verlo ya lo vi")
                       if no_tag:
                         vel.linear.y = 1
                         pub_vel.publish(vel)
+                        print("Me muevo para un lado")
                       elif next_turn and not no_tag:
                         vel.linear.y = -1
                         pub_vel.publish(vel)
+                        print("Me muevo para un lado")
                      
                     Kp = -3.0
                     Kp_m = 3.0
@@ -291,8 +294,10 @@ class FindTagNode:
         except AttributeError:
             if next_turn:
                vel.angular.z = -0.7854
+               print("Giro para el otro")
                no_tag = True
             else:
+               print("Giro para un lado")
                vel.angular.z = 0.7854
                next_turn = True
 
