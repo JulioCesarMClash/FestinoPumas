@@ -65,6 +65,7 @@ class FindTagNode:
     aruco_list = PointStamped()
     aruco_list = []
     dire = -1
+    next_turn = False
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
@@ -278,13 +279,15 @@ class FindTagNode:
                     # print("Siiix2")
 
         except AttributeError:
-	    
-	    #vel.angular.z = dire*0.7854
-	    #dire = dire*-1
-	    #pub_vel.publish(vel)
-            
+            if next_turn:
+               vel.angular.z = -2*0.7854
+            else:
+               vel.angular.z = 0.7854
+               next_turn = True
+
+            pub_vel.publish(vel)
             print('No Tag')
-	    #rospy.sleep(4)
+	          rospy.sleep(4)
 
       print(name_list)
       print(aruco_list)

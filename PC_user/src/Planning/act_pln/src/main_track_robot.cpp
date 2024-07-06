@@ -65,10 +65,15 @@ std::vector<std::string> tokens;
 std::string zone;
 
 std::vector<std::string> real_refbox_names;
-std::string instructions[] = {"ACT-PLN 1 1 Festina goto CS M_Z47 0 entrance",
-                              "ACT-PLN 1 2 Festina take CAP_GRAY",
-                              "ACT-PLN 1 1 Festina goto CS M_Z47 0 platform",
-                              "ACT-PLN 1 1 Festina drop CAP_GRAY"};
+// std::string instructions[] = {"ACT-PLN 1 1 Festina goto CS M_Z47 0 entrance",
+//                               "ACT-PLN 1 2 Festina take CAP_GRAY",
+//                               "ACT-PLN 1 1 Festina goto CS M_Z47 0 platform",
+//                               "ACT-PLN 1 1 Festina drop CAP_GRAY"};
+
+std::string instructions[] = {"goto CS C_Z42 0 platform",
+                              "goto CS C_Z42 0 entrance",
+                              "goto CS C_Z42 0 output",
+                              "goto CS M_Z61 0 entrance"};
 std_msgs::String new_zone;
 actionlib_msgs::GoalStatus simple_move_goal_status;
 int simple_move_status_id = 0;
@@ -332,6 +337,35 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	std::cout << "Entro al callback lateral, mov_lat es: " << mov_lat << std::endl;
 }*/
 
+void debug_instructions(std::string instruction)
+{
+    std::cout << "Entré a la funció de instrucciones" <<std::endl;	
+    //Tokenize instruction string
+    std::cout << "La instrucción es: " <<  instruction <<std::endl;	
+    tokens.clear();
+    boost::algorithm::split(tokens, instruction, boost::algorithm::is_any_of(" "));
+    
+    if(tokens[0] == "goto"){
+        state = SM_GO_TO;
+        return;
+    }
+
+    if(tokens[0] == "take" || tokens[0] == "takep"){
+        state = SM_TAKE;
+        return;
+    }
+
+    if(tokens[0] == "drop" || tokens[0] == "dropp"){
+        state = SM_DROP;
+        return;
+    }
+
+    if(tokens[0] == "ask"){
+        state = SM_ASK;
+        return;
+    }
+}
+
 
 int main(int argc, char** argv){
 	ros::Time::init();
@@ -381,6 +415,8 @@ int main(int argc, char** argv){
     //String que guarda la seccion en la que estamos 
     std::string sec_buffer = "indef";
 
+    int cont_instructions = 0;
+
     int cont = 0;
 
 	while(ros::ok() && !fail && !success){
@@ -390,7 +426,7 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,5);
-	    	//state = SM_WAIT_FOR_INSTRUCTION;
+	    	    //state = SM_WAIT_FOR_INSTRUCTION;
                 state = SM_GO_TO;
                 //state = SM_FINAL_STATE;
                 //state = SM_ALIGN;
@@ -401,12 +437,17 @@ int main(int argc, char** argv){
 	            voice = "Waiting for instruction";
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
+
+                debug_instructions(instructions[cont_instructions]);
+                cont_instructions++;
+
+                //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
-                if(!request){
-                    pubRequest.publish(request_string);
-                    request = true;
-                    std::cout << "Ya mandé el request" << std::endl;	
-                }
+                // if(!request){
+                //     pubRequest.publish(request_string);
+                //     request = true;
+                //     std::cout << "Ya mandé el request" << std::endl;	
+                // }
 
 				//Waiting for instruction
 	
