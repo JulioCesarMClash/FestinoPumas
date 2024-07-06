@@ -47,24 +47,9 @@ using namespace std;
 enum SMState {
 	SM_INIT,
 	SM_FIRSTMAPPING,
-	SM_NAV_HOME,
-	SM_OBT_CURR_POS,
-	SM_NAV_2,
-	SM_NAV_3,
-	SM_NAV_4,
-	SM_NAV_5,
-	SM_NAV_6,
-	SM_NAV_7,
 	SM_NAV_PIPS,
-	SM_TURN_AROUND_PIPS,
-	SM_NAV_PIIS,
-	SM_TURN_AROUND_PIIS,
+	SM_TURN_AROUND,
 	SM_TAG_DETECTED,
-	SM_NAV_INPUT,
-	SM_GO_ZONE,
-	SM_NAV_AROUND_OBST,
-	SM_TAG_SEARCH,
-	SM_GIRO,
     SM_FINAL_STATE
 };
 
@@ -107,6 +92,7 @@ geometry_msgs::PoseStamped robot_base_pos;
 
 
 bool nav_flag = false;
+bool nav_success = false;
 
 //look for tag function
 bool tag_flag = false;
@@ -184,9 +170,9 @@ void nav_zone_to_cords(ros::NodeHandle n,std_msgs::String zone, ros::Publisher p
 	std::cout << goal_tosend.pose << std::endl;
 }
 
-void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout)
+bool navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout, geometry_msgs::PoseStamped robot_first_pos)
 {
-    std::cout << "Coords recieved, publishing coords to navigate \n" << x_piis << "," << y_piis << std::endl;
+    std::cout << "Coords recieved, publishing coords to navigate \n" << std::endl;
     tf::TransformListener listener;
 	tf::StampedTransform transform;
 
@@ -202,15 +188,15 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 
 	geometry_msgs::PoseStamped goal_tosend;
     goal_tosend.header.frame_id = "/map";
-    goal_tosend.pose.position.x = x_piis;
-	goal_tosend.pose.position.y = y_piis;
+    goal_tosend.pose.position.x = robot_first_pos.pose.position.x + x_piis;
+	goal_tosend.pose.position.y = robot_first_pos.pose.position.y + y_piis;
 	goal_tosend.pose.position.z = 0.0;
 	goal_tosend.pose.orientation.x = 0.0;
 	goal_tosend.pose.orientation.y = 0.0;
 	goal_tosend.pose.orientation.z = 0.0;
 	goal_tosend.pose.orientation.w = 0.0;
 
-	std::cout << goal_tosend.pose << std::endl;
+	std::cout << "Voy al punto \t" << goal_tosend.pose.position.x << "," << goal_tosend.pose.position.y << std::endl;
 	pub_rosnav_goal.publish(goal_tosend);
 
 
@@ -232,35 +218,46 @@ void navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 	robot_pos.pose.orientation.y = transform.getRotation().y();
 	robot_pos.pose.orientation.z = transform.getRotation().z();
 	robot_pos.pose.orientation.w = transform.getRotation().w();
-	std::cout << robot_pos.pose << std::endl;
+	//std::cout << robot_pos.pose << std::endl;
 
-	if((goal_tosend.pose.position.x - robot_pos.pose.position.x) < 0.1 && (goal_tosend.pose.position.y - robot_pos.pose.position.y) < 0.1)
+	if((goal_tosend.pose.position.x - robot_pos.pose.position.x) < 0.2 && (goal_tosend.pose.position.y - robot_pos.pose.position.y) < 0.2)
 	{
 		std::cout << "Sí llegué" << std::endl;
 		std::cout << "Coords goal \n" << goal_tosend.pose.position << "Coords robot \n" << robot_pos.pose.position << std::endl;
 		std::cout << "Diff en x: " << goal_tosend.pose.position.x - robot_pos.pose.position.x << std::endl;
 		std::cout << "Diff en y: " << goal_tosend.pose.position.y - robot_pos.pose.position.y << std::endl;
+		nav_success = true;
 	}
 	else
 	{
-		std::cout << "No llegué, lo siento :c" << std::endl;
+		std::cout << "No llegué, lo siento :c \t Voy a girar" << std::endl;
 		std::cout << "Diff en x: " << goal_tosend.pose.position.x - robot_pos.pose.position.x << std::endl;
 		std::cout << "Diff en y: " << goal_tosend.pose.position.y - robot_pos.pose.position.y << std::endl;
+		nav_success = false;
 	}
+	return nav_success;
 
 }
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
-{
+{	
     laserScan = *msg;
-
     int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
     float laser_l=0;
     range=laserScan.ranges.size();
-    //std::cout<<laserScan.ranges.size()<<std::endl;
+    //std::cout<< "lecturas Hokuyo" << range <<std::endl;
+
     range_c=range/2;
     range_i=range_c-(range/10);
     range_f=range_c+(range/10);
+    for(int i=0; i<20;i++){
+    	laserScan.ranges[i] = 10.0;
+    }
+    for(int i=1060; i<1081;i++){
+    	laserScan.ranges[i] = 10.0;
+    }
+
+    //std::cout<< laserScan << "\n ";
     //std::cout<<"Range Size: "<< range << "\n ";
     //std::cout<<"Range Central: "<< range_c << "\n ";
     //std::cout<<"Range Initial: "<< range_i << "\n ";
@@ -303,10 +300,15 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 //PIPs:    M_Z72,      M_Z18,      M_Z78,    M_Z12
 //PIPs: (-6.5,1.5), (-0.5,7.5), (-6.5,7.5), (-0.5,1.5)
 
-//X respecto al mapa
-std::vector<float> x_pips_m {-4.5, -6.5, -0.5, -6.5, -0.5};
+//X respecto al mapa de logistics
+//std::vector<float> x_pips_m {-4.5, -6.5, -0.5, -6.5, -0.5};
 //Y respecto al mapa
-std::vector<float> y_pips_m {0.5, 1.5, 7.5, 7.5, 1.5}; 
+//std::vector<float> y_pips_m {0.5, 1.5, 7.5, 7.5, 1.5}; 
+
+//X respecto a la posición inicial del robot M_Z51                       ->Cyan
+std::vector<float> x_pips_m {1.0,1.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,2.0};
+//Y respecto al mapa                                                             ->Cyan
+std::vector<float> y_pips_m {-1.0,-2.0,-3.0,-3.0,-3.0,-3.0,-2.0,-1.0,0.0,1.0,1.0,-7.0,-7.0,-7.0,-7.0,-7.0,-8.0,-9.0,-9.0,9.0,9.0}; 
 
 //PIIs: (-5,3), (-2,6), (-3.5,7.5), (-5,6), (-2,3)
 
@@ -322,10 +324,15 @@ std::vector<float> y_piis_m {0, 3, 6, 7.5, 6, 3, 4.5};
 //PIPs:    C_Z18,     C_Z72,    C_Z78,    C_Z12
 //PIPs: (0.5,7.5), (6.5,1.5), (6.5,7.5), (0.5,1.5)
 
-//X respecto al mapa
-std::vector<float> x_pips_c {4.5, 0.5, 6.5, 6.5, 0.5};
+//X respecto al mapa de logistics
+//std::vector<float> x_pips_c {4.5, 0.5, 6.5, 6.5, 0.5};
 //Y respecto al mapa
-std::vector<float> y_pips_c {0.5, 7.5, 1.5, 7.5, 1.5}; 
+//std::vector<float> y_pips_c {0.5, 7.5, 1.5, 7.5, 1.5}; 
+
+//X respecto a la posición inicial del robot M_Z51
+//std::vector<float> x_pips_c {1.0,  2.0, 3.0, 4.0, 5.0, 5.0, 5.0, 4.0,3.0,2.0};
+//Y respecto al mapa
+//std::vector<float> y_pips_c {-7.0,-7.0,-7.0,-7.0,-7.0,-8.0,-9.0,-9.0,9.0,9.0};
 
 //PIIs: (0,4.5), (2,6), (5,3), (6.5,4.5), (5,6), (2,3)
 //Estoy tomando el PII 41 para meterlo en la sección de los CYAN
@@ -572,31 +579,39 @@ bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_t
 		tag_flag = srv.response.success;
 		std::cout << "Request accepted" << std::endl;
 		if (tag_flag == true){
-			std::cout << "Tag found" << std::endl;
 			mps_name = srv.response.mps_name;
 			mps_PointStamped = srv.response.point_stamped;
+			std::cout << "Saving MPS info" << std::endl;
+			if(mps_name.size())
+			{
+				std::cout << "Station \t" << mps_name[0] << std::endl;
+				try{
+					listener.waitForTransform("/camera_link",mps_name[0], ros::Time(0), ros::Duration(1000.0));
+					listener.lookupTransform("/camera_link", mps_name[0],ros::Time(0), transform);
+					det_mps.pose.position.x = transform.getOrigin().x();
+					det_mps.pose.position.y = transform.getOrigin().y();
+					det_mps.pose.position.z = transform.getOrigin().z();
+					std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl; //<< det_mps << std::endl;
+					define_zone(det_mps);
+					std::cout << "\n MPS_Zone " << zone_name << std::endl;
+				}	
+				catch(tf::TransformException ex){
+					ROS_ERROR("%s",ex.what());
+					ros::Duration(1.0).sleep();
+				}
+			}
+			else
+			{
+				std::cout << "\n Not found " << zone_name << std::endl;
+			}
 		}
-		try{
-			listener.waitForTransform("/camera_link",mps_name[0], ros::Time(0), ros::Duration(1000.0));
-			listener.lookupTransform("/camera_link", mps_name[0],ros::Time(0), transform);
-		}	
-		catch(tf::TransformException ex){
-			ROS_ERROR("%s",ex.what());
-			ros::Duration(1.0).sleep();
-		}
-		std::cout << "Station \t" << mps_name[0] << std::endl;
-		det_mps.pose.position.x = transform.getOrigin().x();
-		det_mps.pose.position.y = transform.getOrigin().y();
-		det_mps.pose.position.z = transform.getOrigin().z();
-		std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl; //<< det_mps << std::endl;
-		define_zone(det_mps);
-		std::cout << "\n MPS_Zone " << zone_name << std::endl;
+		
     }
     return tag_flag;
 }
 
 void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
-	std::cout <<"Aquí voy a publicar :D"<<std::endl;
+	std::cout <<"Publish info"<<std::endl;
 }
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
@@ -629,25 +644,12 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 }
 int main(int argc, char** argv){
 	ros::Time::init();
-	bool latch;
-	bool giro =false;
-	bool from_pip = false;
-	int opcion = 0;
-	int num_giros = 0;
-	//int n_pips = 7;
-	//int n_piis = 10;
-	int n_pips = 4;
-	int n_piis = 6;
 	int curr_pip = 0;
-	int curr_pii = 0;
+	int pips_vis = 0;
 	int turn_step_pip = 0;
 	int turn_step_pii = 0;
-	int n_steps_pip = 2;
-	int n_steps_pii = 7;
-	int quadrant = 0;
-	float direction = 0;
-	float step_size = 0;
-	float angle = 0;
+	int n_steps_pip = 1;
+	float step_size = 0.715;
 
 	pips_as_zones[0].data = "/M_Z11";
 	pips_as_zones[1].data = "/M_Z22";
@@ -662,19 +664,11 @@ int main(int argc, char** argv){
 	FestinoHRI::setNodeHandle(&n);
 
     //Subscribers and Publishers
-    //ros::Subscriber subRefbox 				= n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    //ros::Subscriber sub_mps_flag     		= n.subscribe("/aruco_det", 10, callback_mps_flag);
     ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
-	//MitChanges (Last slot)
-    //ros::Subscriber sub_mps_name     		= n.subscribe("/mps_name", 10, callback_mps_name);
-	//ros::Subscriber sub_mps_data     		= n.subscribe("/mps_data", 10, callback_mps_data);
-	//MitChanges (Last slot)
 
-    
-    ros::Publisher pub_goal 		= n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 	ros::Publisher pub_mps_name 	= n.advertise<std_msgs::String>("/mps_name", 1000, true);
-	ros::Publisher pub_mps_pos 		= n.advertise<geometry_msgs::PoseStamped>("/mps_pos", 1000); //, latch=True);
+	ros::Publisher pub_mps_pos 		= n.advertise<geometry_msgs::PoseStamped>("/mps_pos", 1000);
 	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 	ros::Publisher pub_zone_goal 	= n.advertise<std_msgs::String>("/zone_goal", 1000, true);
 	ros::Publisher pub_rosnav_goal 	= n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
@@ -682,49 +676,8 @@ int main(int argc, char** argv){
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
 
-    ros::ServiceClient client2 = n.serviceClient<festino_arm_moveit_demos::srv_arm>("/srv_arm");
-    festino_arm_moveit_demos::srv_arm srv2;
-
     ros::Rate loop(10);
 
-    std::string voice;
-    
-    
-    std::stringstream stream;
-    std::string name;
-    std::string type;
-    std::string zone;
-    std::string rot;
-    std::string mps_info;
-
-
-    std::string mps_zone;
-    std::string mps_type;
-
-    std_msgs::String mps_info2send;
-
-    //Robados
-    /*std::vector<std::string> mps_name;
-    std::vector<geometry_msgs::PointStamped> mps_PointStamped;*/
-    //Robados
-
-	// TF initialization
-	// Se tiene que a fuerza inicializar las poseStamped porque marca error si no se hace
-    
-    // Anterior
-    for(int i=0; i<tf_x.size(); i++){
-    	tf_zone.header.frame_id = "/map";
-	    tf_zone.pose.position.x = tf_x.at(i);
-	    tf_zone.pose.position.y = tf_y.at(i);
-		tf_zone.pose.position.z = 0;
-		tf_zone.pose.orientation.x = 0;
-		tf_zone.pose.orientation.y = 0;
-		tf_zone.pose.orientation.z = 0;
-		tf_zone.pose.orientation.w = 0;
-		zones_poses.push_back(tf_zone);
-	}
-
-	// Lo dejaré por el momento solo con las coordenadas magentas
     // PIPs array
 	for(int i=0; i<x_pips_m.size(); i++){
     	tf_pips.header.frame_id = "/map";
@@ -738,25 +691,8 @@ int main(int argc, char** argv){
 		pips_poses.push_back(tf_pips);
 	}
 
-	// PIIs array
-	for(int i=0; i<x_piis_m.size(); i++){
-    	tf_piis.header.frame_id = "/map";
-	    tf_piis.pose.position.x = x_piis_m.at(i);
-	    tf_piis.pose.position.y = y_piis_m.at(i);
-		tf_piis.pose.position.z = 0;
-		tf_piis.pose.orientation.x = 0;
-		tf_piis.pose.orientation.y = 0;
-		tf_piis.pose.orientation.z = 0;
-		tf_piis.pose.orientation.w = 0;
-		piis_poses.push_back(tf_piis);
-	}
-
-	int rotacion = 0;
-
-	//Robados
 	tf::TransformListener listener;
 	tf::StampedTransform transform;
-	//Robados
 
 	//TF related stuff 
 	det_mps.pose.position.x = 0.0;
@@ -812,9 +748,7 @@ int main(int argc, char** argv){
 	    switch(state){
 			case SM_INIT:{
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;	
-	            voice = "I am ready for the exploration stage";
-	            std::cout << voice << std::endl;
-				FestinoHRI::say(voice,3);
+	            std::cout << "I am ready - Exploration route has  " << x_pips_m.size() << " points" << std::endl;
 				try{
 					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
 					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
@@ -823,395 +757,64 @@ int main(int argc, char** argv){
 					ROS_ERROR("%s",ex.what());
 					ros::Duration(1.0).sleep();
 				}
-				robot_first_pos.pose.position.x = transform.getOrigin().x();
-				robot_first_pos.pose.position.y = transform.getOrigin().y();
-				robot_first_pos.pose.position.z = transform.getOrigin().z();
-				std::cout << "First Pose" << robot_first_pos.pose << std::endl;
+				robot_first_pos.pose.position.x = 0;transform.getOrigin().x();
+				robot_first_pos.pose.position.y = 0;transform.getOrigin().y();
+				robot_first_pos.pose.position.z = 0;transform.getOrigin().z();
+				std::cout << "First Pose \n" << robot_first_pos.pose.position << std::endl;
 	    		state = SM_FIRSTMAPPING;
 	    		break;
 			}
 
 			case SM_FIRSTMAPPING:{
 				std::cout << "\n State machine: SM_FIRSTMAPPING" << std::endl;
-				if(fwd_n_turn(pub_cmd_vel, 1.5,0.0))
+				if(fwd_n_turn(pub_cmd_vel, 2.0,6.0))
 				{
 					std::cout << "Movement Done" << std::endl;
 				}
-				state = SM_OBT_CURR_POS;
-				break;
-			}
-
-			 case SM_OBT_CURR_POS:{
-			 	std::cout << "\n State machine: SM_OBT_CURR_POS" << std::endl;
-				//Encuentra la posición del robot respecto al mapa, para darle goals cercanas
-				try{
-					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
-				}
-				catch(tf::TransformException ex){
-					ROS_ERROR("%s",ex.what());
-					ros::Duration(1.0).sleep();
-				}
-				robot_curr_pos.pose.position.x = transform.getOrigin().x();
-				robot_curr_pos.pose.position.y = transform.getOrigin().y();
-				robot_curr_pos.pose.position.z = transform.getOrigin().z();
-				std::cout << "Curr Pose" << robot_curr_pos.pose << std::endl;
-				state = SM_NAV_HOME;
-				break;
-			 }
-
-			case SM_NAV_HOME:{
-				std::cout << "\n State machine: SM_NAV_HOME" << std::endl;
-				//De acuerdo a la posición inicial del robot, le envía una dos metros al frente
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 1.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_2;
-				break;
-			}
-
-			case SM_NAV_2:{
-				std::cout << "\n State machine: SM_NAV_2" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 2.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 2.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_3;
-				break;
-			}
-
-			case SM_NAV_3:{
-				std::cout << "\n State machine: SM_NAV_3" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 3.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 3.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_4;
-				break;
-			}
-
-			case SM_NAV_4:{
-				std::cout << "\n State machine: SM_NAV_4" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 2.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 4.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_5;
-				break;
-			}
-
-			case SM_NAV_5:{
-				std::cout << "\n State machine: SM_NAV_4" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 5.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_6;
-				break;
-			}
-
-			case SM_NAV_6:{
-				std::cout << "\n State machine: SM_NAV_6" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 1.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 5.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_NAV_7;
-				break;
-			}
-
-			case SM_NAV_7:{
-				std::cout << "\n State machine: SM_NAV_7" << std::endl;
-				//De acuerdo a la posición inicial del robot
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + 0.0;
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + 4.0;
-				//robot_next_pos.pose.orientation.w = robot_first_pos.pose.orientation.w + 1.57;
-
-				//std::cout << "Pos goal" << robot_next_pos.pose.position.x << robot_next_pos.pose.position.y << std::endl;
-				navigate_to_location(n,robot_next_pos.pose.position.x, robot_next_pos.pose.position.y, pub_rosnav_goal, 10.0);
-				//std::cout << "Navigating Initial Point at Zone \t" << pips_as_zones[0].data << "\n" << pips_poses.at(0) << "\n" << std::endl;
-				//navigate_to_location(pips_poses.at(0));
-				//pub_zone_goal.publish(pips_as_zones[0]);
-				ros::Duration(10,0).sleep();
-				curr_pip++;
-				curr_pii++;
-				state = SM_FINAL_STATE;
+				state = SM_NAV_PIPS;
 				break;
 			}
 
 			case SM_NAV_PIPS:{
 				std::cout << "\n State machine: SM_NAV_PIPS" << std::endl;
-				//Navega a las zonas recorriendo los arreglos pips_poses y piis_poses
-				//El contador es el índice que recorre el arreglo
-				//Si aún no se han recorrido los puntos de inspeccion sigue 
-				if(curr_pip <= n_pips){
-					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
-					//navigate_to_location(pips_poses.at(curr_pip));
-					pub_zone_goal.publish(pips_as_zones[curr_pip]);
-					ros::Duration(10,0).sleep();
-					state = SM_TURN_AROUND_PIPS;
+				if(curr_pip <= x_pips_m.size()){
+					std::cout << "Navigating PIP \t" << curr_pip << std::endl; //"\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
+					if(navigate_to_location(n,x_pips_m[curr_pip], y_pips_m[curr_pip],pub_rosnav_goal, 4.0,robot_first_pos))
+					{
+						pips_vis++;
+					}
+					state = SM_TURN_AROUND;
 				}
 				else{
-					std::cout << "All PIPS Visited - Finishing SM \t" << std::endl;
+					std::cout << "All PIPS Visited\t" << std::endl;
 					state = SM_FINAL_STATE;
 				}
 				break;
 			}
 
-			case SM_TURN_AROUND_PIPS:{
-				std::cout << "\n State machine: SM_TURN_AROUND_PIPS" << std::endl;
-	 			step_size = 0.715;
-	 			from_pip = true;
+			case SM_TURN_AROUND:{
+				std::cout << "\n State machine: SM_TURN_AROUND" << std::endl;
 	 			std::cout << "Turn arooound for PIP \t" << curr_pip << std::endl;
-				if(curr_pip == 1){// || curr_pip == 8){ // Para Magenta y Cyan descomentar la segunda condición // Y probar c:c
-					quadrant = 1;
-					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
-					direction = -1;
-					angle = step_size*direction;
-					
-					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
-						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
-						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(6, 0).sleep();
-						tag_flag = look_for_tag(n, client, srv);
-						if(tag_flag){
-							publish_info(pub_mps_pos, pub_mps_name);
-							state = SM_TAG_DETECTED;
-						}
-						else{
-							std::cout << "No Tag" << std::endl;
-						}
-					}
-					if(turn_step_pip > n_steps_pip){
-						curr_pip++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIIS;
-					}
-				}
-				else if(curr_pip == 4){// || curr_pip == 6){
-					quadrant = 2;
-					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
-					// MC: viendo hacia el frente, giro a la izq 2 steps de 45 grad
-					direction = 1;
-					angle = step_size*direction;
-					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
-						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
-						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(6, 0).sleep();
-						tag_flag = look_for_tag(n, client, srv);
-						if(tag_flag){
-							state = SM_TAG_DETECTED;
-						}
-						else{
-							std::cout << "No Tag" << std::endl;
-						}
-					}
-					if(turn_step_pip > n_steps_pip){
-						curr_pip++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIIS;
-					}
-				}
-				else if(curr_pip == 2){// || curr_pip == 7){
-					quadrant = 3;
-					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
-					// MC: viendo hacia el frente, giro a la izq 90 grad sin steps
-					// MC: luego otros 45 a la izq, con 2 steps
-					//FestinoNavigation::moveDistAngle(0.0, 2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
+				for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
+					if(fwd_n_turn(pub_cmd_vel, 0.0,step_size))
 					{
 						std::cout << "Movement Done" << std::endl;
 					}
-					direction = 1;
-					angle = step_size*direction;
-					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
-						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
-						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(6, 0).sleep();
-						tag_flag = look_for_tag(n, client, srv);
-						if(tag_flag){
-							state = SM_TAG_DETECTED;
-						}
-						else{
-							std::cout << "No Tag" << std::endl;
-						}
-					}
-					if(turn_step_pip > n_steps_pip){
-						curr_pip++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIIS;
-					}
-				}
-				else if(curr_pip == 3){// || curr_pip == 5){
-					quadrant = 4;
-					std::cout << "Looking for ARUCO Tag in quadrant  " << quadrant << std::endl;
-					// MC: viendo hacia el frente, giro a la der 90 grad sin steps
-					// MC: luego otros 45 a la der, con 2 steps
-					//FestinoNavigation::moveDistAngle(0.0, -2*turn_step_pip, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-					{
-						std::cout << "Movement Done" << std::endl;
-					}
-					direction = -1;
-					angle = step_size*direction;
-					for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
-						//FestinoNavigation::moveDistAngle(0.0, angle*turn_step_pip, 1000);
-						if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-						{
-							std::cout << "Movement Done" << std::endl;
-						}
-						std::cout << "Step \t" << turn_step_pip << "\t Angle \t" << angle*turn_step_pip << std::endl;
-						std::cout << "Looking for ARUCO   " << std::endl;
-						ros::Duration(6, 0).sleep();
-						tag_flag = look_for_tag(n, client, srv);
-						if(tag_flag){
-							state = SM_TAG_DETECTED;
-						}
-						else{
-							std::cout << "No Tag" << std::endl;
-						}
-					}
-					if(turn_step_pip > n_steps_pip){
-						curr_pip++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIIS;
-					}
-				}
-				break;
-			}
-
-			case SM_NAV_PIIS:{
-				std::cout << "\n State machine: SM_NAV_PIIS" << std::endl;
-				if(curr_pii <= n_piis){
-					std::cout << "Navigating PII \t" << curr_pii << "\n" << std::endl;// piis_poses.at(curr_pii) << "\n" << std::endl;
-					//navigate_to_location(pips_poses.at(curr_pii));
-					std::cout << "Coords del pii" << x_piis_m[curr_pii] <<","<< y_piis_m[curr_pii] << std::endl;
-					navigate_to_location(n,x_piis_m[curr_pii], y_piis_m[curr_pii],pub_rosnav_goal, 10.0);
-					state = SM_TURN_AROUND_PIIS;
-				}
-				else{
-					std::cout << "All PIIS Visited \t" << std::endl;
-					state = SM_NAV_PIPS;
-				}
-				break;
-			}
-
-			case SM_TURN_AROUND_PIIS:{
-				std::cout << "\n State machine: SM_TURN_AROUND_PIIS" << std::endl;
-				// MitComment: Da un giro de 360 grados (2pi) para escanear todo
-				// MC: Steps ==> 2*pi/8 = 0.7854
-				// MC: ¿porqué pusimos 0.715?  creo que vimos que el robot
-	 			// MC: no giraba los 45 grados y encontramos que lo hacía 
-	 			// MC: con ese num
-	 			step_size = 0.715;
-	 			from_pip = false;
-	 			std::cout << "Turn arooound for PII \t" << curr_pii << std::endl;
-				for(turn_step_pii = 0; turn_step_pii <= n_steps_pii; turn_step_pii++){
-					//FestinoNavigation::moveDistAngle(0.0, step_size, 1000);
-					if(fwd_n_turn(pub_cmd_vel, 0.0,2.5))
-					{
-						std::cout << "Movement Done" << std::endl;
-					}
-					std::cout << "Step \t" << turn_step_pii << "\t Angle \t" << step_size*turn_step_pii << std::endl;
-					std::cout << "Looking for ARUCO   " << std::endl;
-					ros::Duration(2, 0).sleep();
+					std::cout << "Step \t" << turn_step_pip << std::endl;
+					ros::Duration(3, 0).sleep();
 					tag_flag = look_for_tag(n, client, srv);
 					if(tag_flag){
+						publish_info(pub_mps_pos, pub_mps_name);
 						state = SM_TAG_DETECTED;
-						curr_pii++;
-						break;
 					}
 					else{
 						std::cout << "No Tag" << std::endl;
 					}
 				}
-				if(curr_pii == 1 || curr_pii == 4){
-					std::cout << "Nav to PII" << std::endl;
-					if(turn_step_pii > n_steps_pii){
-						curr_pii++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIIS;
-					}
-				}
-				else{
-					std::cout << "Nav to PIP" << std::endl;
-					if(turn_step_pii > n_steps_pii){
-						curr_pii++;
-						std::cout << "Steps finished" << std::endl;
-						state = SM_NAV_PIPS;
-					}
+				if(turn_step_pip > n_steps_pip){
+					curr_pip++;
+					std::cout << "Steps finished" << std::endl;
+					state = SM_NAV_PIPS;
 				}
 				break;
 			}
@@ -1219,21 +822,10 @@ int main(int argc, char** argv){
 			case SM_TAG_DETECTED:{
 	    		//Scan Tag and Send Information
 	    		std::cout << "\n State machine: SM_TAG_DETECTED" << std::endl;
-	    		std::cout << "¿imprimo, publico? ¿qué hago?" << std::endl;
-	            voice =  "Print information";
 	            print_vector(mps_name);
 				print_vector(mps_PointStamped);	
-				//Vuelve al pi de donde venía
-				if(from_pip){
-					std::cout << "Back to the route" << std::endl;
-					from_pip = false;
-					state = SM_TURN_AROUND_PIPS;
-				}
-				else if(from_pip == false){
-					std::cout << "Back to the route" << std::endl;
-					from_pip = false;
-					state = SM_TURN_AROUND_PIIS;
-				}
+				std::cout << "Back to the route" << std::endl;
+				state = SM_TURN_AROUND;
 	    		break;
 			}
 			
@@ -1241,9 +833,8 @@ int main(int argc, char** argv){
 	    		//Finish
 	    		std::cout << "\n State machine: SM_FINAL_STATE" << std::endl;	
 	            std::cout << "Exploration finished" << std::endl;
-	            std::cout << "\n PIPS visited \t" << curr_pip << std::endl;
-	            std::cout << "\n PIIS visited \t" << curr_pii << std::endl;
-	            std::cout << "\n Machine imformation" << std::endl;
+	            std::cout << "\n PIPS successfully visited \t" << pips_vis << "PIPS missed \t" << x_pips_m.size() - pips_vis << std::endl;
+	            //std::cout << "\n Machine information" << std::endl;
 	            print_vector(mps_name);
 				print_vector(mps_PointStamped);
 
