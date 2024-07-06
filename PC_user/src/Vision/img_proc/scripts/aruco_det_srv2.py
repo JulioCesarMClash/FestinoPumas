@@ -66,6 +66,8 @@ class FindTagNode:
     aruco_list = []
     dire = -1
     next_turn = False
+    no_tag = False 
+    already_tag = False
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
@@ -165,7 +167,14 @@ class FindTagNode:
                     slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
                     print("la pendiente es: ", slope)
 
-                   
+                    if not already_tag:
+                      if no_tag:
+                        vel.linear.y = 1
+                        pub_vel.publish(vel)
+                      elif next_turn and not no_tag:
+                        vel.linear.y = -1
+                        pub_vel.publish(vel)
+                     
                     Kp = -3.0
                     Kp_m = 3.0
 
@@ -175,6 +184,7 @@ class FindTagNode:
                     elif (slope < -0.01):
                         vel.angular.z = Kp_m*abs(slope)
                         
+                    already_tag = True
                     print("no")
 
                     #corners = markerCorners[i]
@@ -280,13 +290,15 @@ class FindTagNode:
 
         except AttributeError:
             if next_turn:
-               vel.angular.z = -2*0.7854
+               vel.angular.z = -0.7854
+               no_tag = True
             else:
                vel.angular.z = 0.7854
                next_turn = True
 
             pub_vel.publish(vel)
             print('No Tag')
+            no_tag = True
             rospy.sleep(4)
 
       print(name_list)
