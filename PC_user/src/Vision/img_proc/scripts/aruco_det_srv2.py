@@ -168,16 +168,18 @@ class FindTagNode:
                     print("la pendiente es: ", slope)
 
                     if not already_tag:
+ 		      vel.angular.z = 0
                       print("Despues de no verlo ya lo vi")
                       if no_tag:
-                        vel.linear.y = 1
-                        pub_vel.publish(vel)
-                        print("Me muevo para un lado")
-                      elif next_turn and not no_tag:
                         vel.linear.y = -1
                         pub_vel.publish(vel)
-                        print("Me muevo para un lado")
-                     
+                        print("Me muevo para un lado hmm")
+                      elif next_turn and not no_tag:
+                        vel.linear.y = 1
+                        pub_vel.publish(vel)
+                        print("Me muevo para el otro lado")
+                    
+		    rospy.sleep(3)
                     Kp = -3.0
                     Kp_m = 3.0
 
@@ -303,7 +305,6 @@ class FindTagNode:
 
             pub_vel.publish(vel)
             print('No Tag')
-            no_tag = True
             rospy.sleep(4)
 
       print(name_list)
