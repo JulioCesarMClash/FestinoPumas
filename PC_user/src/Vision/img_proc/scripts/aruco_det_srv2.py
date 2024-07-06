@@ -66,8 +66,11 @@ class FindTagNode:
     aruco_list = []
     dire = -1
     next_turn = False
-    no_tag = False 
+    no_find_2 = False 
+    no_find_1 = False
     already_tag = False
+    cont_giro = 0
+    go_back = True
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
@@ -166,20 +169,18 @@ class FindTagNode:
                     #Se obtiene la pendiente de la recta 
                     slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
                     print("la pendiente es: ", slope)
-
                     if not already_tag:
- 		      vel.angular.z = 0
-                      print("Despues de no verlo ya lo vi")
-                      if no_tag:
+                      vel.angular.z = 0
+                      if no_find_2:
                         vel.linear.y = -1
                         pub_vel.publish(vel)
                         print("Me muevo para un lado hmm")
-                      elif next_turn and not no_tag:
+                      elif no_find_1 and not no_find_2:
                         vel.linear.y = 1
                         pub_vel.publish(vel)
                         print("Me muevo para el otro lado")
-                    
-		    rospy.sleep(3)
+
+                    rospy.sleep(3)
                     Kp = -3.0
                     Kp_m = 3.0
 
@@ -295,13 +296,29 @@ class FindTagNode:
 
         except AttributeError:
             if next_turn:
-               vel.angular.z = -0.7854
-               print("Giro para el otro")
-               no_tag = True
+               #Se gira despues para este lado (sentido horario)
+
+               #Si aun no regresa a la posicion original que gire 3 veces para regresar a 
+               #la posicion original mas un giro extra
+               if not go_back:
+                  vel.angular.z = -3*0.7854
+                  print("Giro para el otro amplio")
+                  go_back = True
+               #Ya que dio el primer giro da el segundo
+               else:
+                  print("Giro para el otro chiquito")
+                  vel.angular.z = 0.7854
+               no_find_2 = True
             else:
+               #Primero se gira hacia este lado (sentido antihorario)
+               no_find_1 = True
                print("Giro para un lado")
                vel.angular.z = 0.7854
-               next_turn = True
+               #Aumenta en 1 el numero de giros
+               cont_giro = cont_giro + 1
+               #Cuando ya se hayan dado dos giros hacia este lado ya se empezara a girar al otro
+               if(cont_giro == 2):
+                  next_turn = True
 
             pub_vel.publish(vel)
             print('No Tag')
