@@ -181,7 +181,7 @@ class FindTagNode:
                     Kp = -3.0
                     Kp_m = 3.0
 
-
+                    vel.linear.y = 0
                     if(slope > 0.01):
                         vel.angular.z = Kp*abs(slope)
                     elif (slope < -0.01):
