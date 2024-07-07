@@ -116,6 +116,11 @@ class FindTagNode:
 
                     # End coordinate, here (250, 250) 
                     # represents the bottom right corner of image 
+
+                    #Esquina para detectar recta superior
+                    #end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
+                    
+                    #Esquina para detectar recta lateral (con esta orientacion estan los Arucos en las maquinas)
                     end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
 
                     y2 = corneru[(0,3,1)]
