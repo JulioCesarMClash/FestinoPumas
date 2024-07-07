@@ -140,7 +140,7 @@ class FindTagNode:
 
                     #Si al principio no lo encontro entonces giro
                     #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
-                    #Primero se tiene que hacer esto y después se tiene que sacar la pendiente
+                    #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
                     if not already_tag:
                       vel.angular.z = 0
                       if no_find_2:
