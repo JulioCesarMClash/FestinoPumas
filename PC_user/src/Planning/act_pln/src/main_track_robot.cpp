@@ -199,7 +199,8 @@ void transform_zone()
     tf::StampedTransform transform;
 
     //Descomentar cuando se use la zona marcada del lab
-    zone = "C_Z42";
+    //zone = "C_Z42";
+    zone = "M_Z61";
 
     //Descomentar cuando se quiera ir a la mesa en medio del lab
     //zone = "M_Z13";
@@ -312,7 +313,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	    laser_l=0;
 	    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
 	    {
-		if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 4)
+		if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 0.8)
 		{ 
 		    laser_l=laser_l+laserScan.ranges[i]; 
 		    cont_laser++;
@@ -525,7 +526,7 @@ int main(int argc, char** argv){
                         
 					    //FestinoNavigation::moveDistAngle(0.37, 0, 10000);
 					    //state = SM_WAIT_FOR_INSTRUCTION;	
-			            //flag_wall = true;
+			            flag_wall = true;
                         //state = SM_TAKE;	
 			            state = SM_FINAL_STATE;
                     }

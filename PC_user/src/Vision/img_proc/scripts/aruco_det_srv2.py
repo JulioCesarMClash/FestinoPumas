@@ -70,7 +70,7 @@ class FindTagNode:
     no_find_1 = False
     already_tag = False
     cont_giro = 0
-    go_back = True
+    go_back = False
     #Cuando se haga un request a este servicio se debe de poner is_find_tag_enabled=true
     #Cuando se cumpla eso ya se ejecutara lo que esta adentro del if
     if request.is_find_tag_enabled:
@@ -187,9 +187,12 @@ class FindTagNode:
                     vel.linear.y = 0
                     if(slope > 0.01):
                         vel.angular.z = Kp*abs(slope)
+			#Se publica al cmd_vel el giro angular que se requiera
+                    	pub_vel.publish(vel)
                     elif (slope < -0.01):
                         vel.angular.z = Kp_m*abs(slope)
-                        
+                        #Se publica al cmd_vel el giro angular que se requiera
+                    	pub_vel.publish(vel)
                     already_tag = True
                     print("no")
 
@@ -285,8 +288,7 @@ class FindTagNode:
                     yaw_z = math.degrees(yaw_z)"""
                     #print(roll_x, pitch_y, yaw_z)
 		    
-                    #Se publica al cmd_vel el giro angular que se requiera
-                    pub_vel.publish(vel)
+                    
                     #Delay para que le de tiempo al robot de girar
                     rospy.sleep(2)
 
@@ -300,14 +302,12 @@ class FindTagNode:
 
                #Si aun no regresa a la posicion original que gire 3 veces para regresar a 
                #la posicion original mas un giro extra
-               if not go_back:
-                  vel.angular.z = -3*0.7854
-                  print("Giro para el otro amplio")
-                  go_back = True
+               #if not go_back:
+               vel.angular.z = -0.7854
+               print("Giro para el otro")
+               #go_back = True
                #Ya que dio el primer giro da el segundo
-               else:
-                  print("Giro para el otro chiquito")
-                  vel.angular.z = 0.7854
+               #else:
                no_find_2 = True
             else:
                #Primero se gira hacia este lado (sentido antihorario)
