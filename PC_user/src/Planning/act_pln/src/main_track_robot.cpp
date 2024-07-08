@@ -427,8 +427,8 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,5);
-	    	    //state = SM_WAIT_FOR_INSTRUCTION;
-                state = SM_GO_TO;
+	    	    state = SM_WAIT_FOR_INSTRUCTION;
+                //state = SM_GO_TO;
                 //state = SM_FINAL_STATE;
                 //state = SM_ALIGN;
 	    		break;
@@ -444,13 +444,13 @@ int main(int argc, char** argv){
 
                 //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
-                // if(!request){
-                //     pubRequest.publish(request_string);
-                //     request = true;
-                //     std::cout << "Ya mandé el request" << std::endl;	
-                // }
+                /* if(!request){
+                     pubRequest.publish(request_string);
+                     request = true;
+                     std::cout << "Ya mandé el request" << std::endl;	
+                 }*/
 
-				//Waiting for instruction
+			//Waiting for instruction
 	
 	    		state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
@@ -462,7 +462,7 @@ int main(int argc, char** argv){
 				//FestinoHRI::say(voice,3);
                 
                 //Si estamos en la misma zona solo muevete ahí mismo 
-                /*if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
+                if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
                     vel.linear.y = 2;
                     pubVel.publish(vel);
 		            ros::Duration(1, 0).sleep();
@@ -471,8 +471,8 @@ int main(int argc, char** argv){
 		            pubVel.publish(vel);
 
                     state = SM_WAIT_FOR_INSTRUCTION;
-                }*/
-                //else{
+                }
+                else{
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
                     //Dependiendo de la orientacion de la maquina y de si se quiere ir a la entrada o salida se obtienen las coordenadas
@@ -482,12 +482,12 @@ int main(int argc, char** argv){
                     //Navegacion Marco
                     navigate_to_location(tf_target_zone);
                     //Para que vea hacia la máquina
-		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 10000);
+		    FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 10000);
                     state = SM_ALIGN;
-                //}
+                }
                 
-                //zone_buffer = tokens[2];
-                //sec_buffer  = tokens[4];
+                zone_buffer = tokens[2];
+                sec_buffer  = tokens[4];
             
                 //Navegacion ROS para hacer pruebas
                 //pub_rosnav_goal.publish(tf_target_zone);
@@ -512,23 +512,22 @@ int main(int argc, char** argv){
 
                     if(aruco_srv.response.success){
 
-                        // if(tokens.at(4) == "platform"){
-                        //     vel.linear.y = -2;
-			            //     std::cout << "Publico en vel" << std::endl;
-                        //     pubVel.publish(vel);
-			            //     ros::Duration(1, 0).sleep();
-			            //     pubVel.publish(vel);
-			            //     ros::Duration(1, 0).sleep();
-			            //     pubVel.publish(vel);
-                        // }
+                         if(tokens.at(4) == "platform"){
+                             vel.linear.y = -2;
+			                 std::cout << "Publico en vel" << std::endl;
+                             pubVel.publish(vel);
+			                 ros::Duration(1, 0).sleep();
+			                 pubVel.publish(vel);
+			                 ros::Duration(1, 0).sleep();
+			                 pubVel.publish(vel);
+                         }
 
                         std::cout << "Alineado!!!" << std::endl;
-                        
-					    //FestinoNavigation::moveDistAngle(0.37, 0, 10000);
-					    //state = SM_WAIT_FOR_INSTRUCTION;	
+                     
+			state = SM_WAIT_FOR_INSTRUCTION;	
 			            flag_wall = true;
                         //state = SM_TAKE;	
-			            state = SM_FINAL_STATE;
+			//state = SM_FINAL_STATE;
                     }
                     else{
                         //Se tiene que poner algo para que no repita todo 
@@ -558,11 +557,11 @@ int main(int argc, char** argv){
                     manipulator_var.data = 1;
                 }
 
-                pubManipulator.publish(manipulator_var);
+                //pubManipulator.publish(manipulator_var);
                 std::cout << "Estoy tomando" << std::endl;
 
                 //Delay para que pueda tomar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		//ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 		
 		        // FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
@@ -589,10 +588,10 @@ int main(int argc, char** argv){
                     //Dejar en la banda
                     manipulator_var.data = 0;
                 }
-                pubManipulator.publish(manipulator_var);
+               // pubManipulator.publish(manipulator_var);
 
                 //Delay para que pueda dejar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		//ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 
                 //Al nodo del manipulador se le manda un 2 para DROP
@@ -605,7 +604,7 @@ int main(int argc, char** argv){
 
 			case SM_ASK:
 	    		std::cout << "State machine: SM_ASK" << std::endl;	
-	            voice =  "I have finished test";
+	            voice =  "Asking the machine";
 	            std::cout << voice << std::endl;
 			
 				FestinoHRI::say(voice,3);
