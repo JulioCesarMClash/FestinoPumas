@@ -757,9 +757,9 @@ int main(int argc, char** argv){
 					ROS_ERROR("%s",ex.what());
 					ros::Duration(1.0).sleep();
 				}
-				robot_first_pos.pose.position.x = 0;transform.getOrigin().x();
-				robot_first_pos.pose.position.y = 0;transform.getOrigin().y();
-				robot_first_pos.pose.position.z = 0;transform.getOrigin().z();
+				robot_first_pos.pose.position.x = transform.getOrigin().x();
+				robot_first_pos.pose.position.y = transform.getOrigin().y();
+				robot_first_pos.pose.position.z = transform.getOrigin().z();
 				std::cout << "First Pose \n" << robot_first_pos.pose.position << std::endl;
 	    		state = SM_FIRSTMAPPING;
 	    		break;
