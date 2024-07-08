@@ -93,20 +93,30 @@ int angulo_int = 0;
 
 //Función para ya hacer pruebas con el Refbox
 void compute_coordinates(){
+    //Signo por el que se multiplican los senos y cosenos 
+    int dir_sign = 0;
     //Se convierte en angulo de string a entero
     angulo_int = std::stoi(tokens[3]);
-    //Se convierte el angulo de degrees a radianes
-    angulo_rad = angulo_int*(M_PI/180);
+    
+    float angulo_pose = 0.0f;
+    angulo_pose = angulo_int*(M_PI/180);
 
     if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo_rad);
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo_rad); 
-        angulo_int = angulo_int - 180;                       
+	//Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
+        angulo_int = angulo_int - 180;
+	//Si es entrada o plataforma se le suman los senos y cosenos   
+	dir_sign = 1;                    
     }
     if(tokens[4] == "output"){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - param_x*cos(angulo_rad);
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - param_y*sin(angulo_rad);
+	//Si es salida se le restan los senos y cosenos  
+	dir_sign = -1; 
     }
+
+    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + dir_sign*param_x*cos(angulo_pose);
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + dir_sign*param_y*sin(angulo_pose); 
+
+    //Se convierte el angulo de degrees a radianes
+    angulo_rad = angulo_int*(M_PI/180);
 }
 
 //Función hardcodeada para hacer pruebas rápidas
@@ -167,7 +177,7 @@ void transform_zone()
 
     try{
         std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(1000.0));
+        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(100.0));
         listener.lookupTransform("/map", tokens.at(2), ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
@@ -285,6 +295,7 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
 
 sensor_msgs::LaserScan laserScan;
 bool flag_wall = false;
+float move_to_machine = 0.0f;
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -318,7 +329,8 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	    if(laser_l/cont_laser > 0.20)
 	    {
 		flag_wall = false;
-		FestinoNavigation::moveDistAngle(laser_l/cont_laser - 0.16, 0, 10000);
+		move_to_machine = laser_l/cont_laser - 0.2;
+		FestinoNavigation::moveDistAngle(move_to_machine, 0, 10000);
 		//std::cout<<"door open"<<std::endl;
 	    }
     } 
@@ -440,20 +452,20 @@ int main(int argc, char** argv){
 	            std::cout << voice << std::endl;
 				FestinoHRI::say(voice,5);
 
-                debug_instructions(instructions[cont_instructions]);
-                cont_instructions++;
+                //debug_instructions(instructions[cont_instructions]);
+                //cont_instructions++;
 
                 //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
-                /* if(!request){
+                if(!request){
                      pubRequest.publish(request_string);
                      request = true;
                      std::cout << "Ya mandé el request" << std::endl;	
-                 }*/
+                 }
 
 			    //Waiting for instruction
 	
-	    		//state = SM_WAIT_FOR_INSTRUCTION;
+	    	state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
 	    	case SM_GO_TO:
@@ -475,6 +487,9 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
+
+		    FestinoNavigation::moveDistAngle(-move_to_machine, 0, 10000);
+
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
 
