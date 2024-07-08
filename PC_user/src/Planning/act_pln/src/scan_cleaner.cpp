@@ -18,7 +18,7 @@ bool fail = false;
 bool success = false;
 bool flag_door = true;
 
-float p_2_discard = 100;
+float p_2_discard = 250;
 
 sensor_msgs::LaserScan laserScan;
 

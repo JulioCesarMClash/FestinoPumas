@@ -110,7 +110,7 @@
 </node>
 <param name="robot_description" command="$(find xacro)/xacro '$(find robotino_description)/robotino_kinect_arm.xacro'" /-->
 
-<!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/-->
+<node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/>
 <!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="6 -5 0 0 0 0 1 map Log_origin 100"/-->
 <!--include file="$(find movement_functions)/launch/logisticsZones.launch"> </include-->
 
