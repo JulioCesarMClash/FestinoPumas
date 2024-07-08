@@ -121,11 +121,11 @@ class FindTagNode:
                     #end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
                     
                     #Esquina para detectar recta lateral (con esta orientacion estan los Arucos en las maquinas)
-                    end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
+                    end_point = (corneru[(0,1,0)],corneru[(0,1,1)])
 
-                    y2 = corneru[(0,3,1)]
+                    y2 = corneru[(0,1,1)]
                     y1 = corneru[(0,0,1)]
-                    x2 = corneru[(0,3,0)]
+                    x2 = corneru[(0,1,0)]
                     x1 = corneru[(0,0,0)]
                     
                     # Green color in BGR 
