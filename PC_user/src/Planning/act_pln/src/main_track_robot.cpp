@@ -424,6 +424,9 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
+
+                //FestinoNavigation::moveLateral(0.5, 10000);
+                
 				//FestinoHRI::say(voice,5);
 	    	    state = SM_WAIT_FOR_INSTRUCTION;
                 //state = SM_GO_TO;
