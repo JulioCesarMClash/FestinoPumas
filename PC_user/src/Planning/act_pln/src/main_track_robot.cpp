@@ -80,7 +80,7 @@ int simple_move_status_id = 0;
 
 bool request = false;
 
-float angulo = 315;
+int angulo = 315;
 float angulo_rad;
 
 //Parametro que multiplica al coseno 
@@ -88,30 +88,25 @@ float param_x = 0.9;
 //Parametro que multiplica al seno
 float param_y = 1;
 
+//Variable que guarda el angulo en formato entero (se convierte de string a entero)
+int angulo_int = 0;
+
 //Función para ya hacer pruebas con el Refbox
 void compute_coordinates(){
+    //Se convierte en angulo de string a entero
+    angulo_int = std::stoi(tokens[3]);
+    //Se convierte el angulo de degrees a radianes
+    angulo_rad = angulo_int*(M_PI/180);
+
     if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(std::stoi(tokens[3])*(M_PI/180));
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(std::stoi(tokens[3])*(M_PI/180)); 
-        angulo = angulo - 180;                       
+        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo_rad);
+        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo_rad); 
+        angulo_int = angulo_int - 180;                       
     }
     if(tokens[4] == "output"){
-        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - param_x*cos(std::stoi(tokens[3])*(M_PI/180));
-        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - param_y*sin(std::stoi(tokens[3])*(M_PI/180));
+        tf_target_zone.pose.position.x = tf_target_zone.pose.position.x - param_x*cos(angulo_rad);
+        tf_target_zone.pose.position.y = tf_target_zone.pose.position.y - param_y*sin(angulo_rad);
     }
-    
-    angulo_rad = angulo*M_PI/180;
-
-    tf::Quaternion myQuaternion;
-
-    myQuaternion.setRPY(0,0,angulo*M_PI/180);
-
-    myQuaternion=myQuaternion.normalize();
-
-    tf_target_zone.pose.orientation.x = myQuaternion[0];
-    tf_target_zone.pose.orientation.y = myQuaternion[1];
-    tf_target_zone.pose.orientation.z = myQuaternion[2];
-    tf_target_zone.pose.orientation.w = myQuaternion[3];
 }
 
 //Función hardcodeada para hacer pruebas rápidas
@@ -416,6 +411,9 @@ int main(int argc, char** argv){
     //String que guarda la seccion en la que estamos 
     std::string sec_buffer = "indef";
 
+    //Numero de pasos laterales para llegar a la plataforma
+    int steps_to_platform = 3;
+
     int cont_instructions = 0;
 
     int cont = 0;
@@ -450,7 +448,7 @@ int main(int argc, char** argv){
                      std::cout << "Ya mandé el request" << std::endl;	
                  }*/
 
-			//Waiting for instruction
+			    //Waiting for instruction
 	
 	    		//state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
@@ -464,24 +462,27 @@ int main(int argc, char** argv){
                 //Si estamos en la misma zona solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
                     vel.linear.y = 2;
-                    pubVel.publish(vel);
-		            ros::Duration(1, 0).sleep();
-	                pubVel.publish(vel);
-		            ros::Duration(1, 0).sleep();
-		            pubVel.publish(vel);
+
+                    //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
+                    for(int i=0; i<steps_to_platform; i++){
+                        pubVel.publish(vel);
+                        ros::Duration(1, 0).sleep();
+                    }
 
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
+
                     //Dependiendo de la orientacion de la maquina y de si se quiere ir a la entrada o salida se obtienen las coordenadas
                     //tomando como base las coordenadas x,y de la zona, que representan el centro.
                     compute_coordinates();
 
                     //Navegacion Marco
                     navigate_to_location(tf_target_zone);
-                    //Para que vea hacia la máquina
+
+                    //Movimiento angular para que vea hacia la máquina
 		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 10000);
                     state = SM_ALIGN;
                 }
@@ -515,11 +516,11 @@ int main(int argc, char** argv){
                          if(tokens.at(4) == "platform"){
                              vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
-                             pubVel.publish(vel);
-			                 ros::Duration(1, 0).sleep();
-			                 pubVel.publish(vel);
-			                 ros::Duration(1, 0).sleep();
-			                 pubVel.publish(vel);
+                             //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
+                             for(int i=0; i<steps_to_platform; i++){
+                                pubVel.publish(vel);
+			                    ros::Duration(1, 0).sleep();
+                             }
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
