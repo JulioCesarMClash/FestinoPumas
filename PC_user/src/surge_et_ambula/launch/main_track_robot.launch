@@ -15,5 +15,6 @@
 	<!--node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/-->
     <!--Detector de Arucos-->
     <node name="find_tag_service" pkg="img_proc" type="aruco_det_srv2.py"/>
+    <node name="main_track_robot" pkg="act_pln" type="main_track_robot"/>
 	
 </launch>

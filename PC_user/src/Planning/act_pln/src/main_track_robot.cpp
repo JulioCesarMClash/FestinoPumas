@@ -164,8 +164,11 @@ SMState state = SM_INIT;
 #define param_y 1
 //Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
 #define param_calib_dist 0.25
-//Parametro que modifica el numero de pasos laterales para llegar a la plataforma
+//Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
 #define steps_to_platform 3
+//Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
+#define dist_to_platform 0.4
+
 
 //-------------------------------------------------------------------------------//
 //-------------------------------------------------------------------------------//
@@ -330,7 +333,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	    {
             flag_wall = false;
             move_to_machine = laser_l/cont_laser - param_calib_dist;
-            FestinoNavigation::moveDistAngle(move_to_machine, 0, 10000);
+            FestinoNavigation::moveDistAngle(move_to_machine, 0, 1000);
 	    }
     } 
 }
@@ -432,8 +435,6 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
-
-                FestinoNavigation::moveLateral(0.5, 10000);
                 
 				//FestinoHRI::say(voice,5);
 	    	    state = SM_WAIT_FOR_INSTRUCTION;
@@ -472,19 +473,20 @@ int main(int argc, char** argv){
                 
                 //Si estamos en la misma zona solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
-                    vel.linear.y = 2;
-
+                    //vel.linear.y = 2;
                     //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                    for(int i=0; i<steps_to_platform; i++){
+                    /*for(int i=0; i<steps_to_platform; i++){
                         pubVel.publish(vel);
                         ros::Duration(1, 0).sleep();
-                    }
+                    }*/
+
+		    FestinoNavigation::moveLateral(dist_to_platform, 1000);
 
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
 
-		            FestinoNavigation::moveDistAngle(-move_to_machine, 0, 10000);
+		            FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
 
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
@@ -497,7 +499,7 @@ int main(int argc, char** argv){
                     navigate_to_location(tf_target_zone);
 
                     //Movimiento angular para que vea hacia la máquina
-		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 10000);
+		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 1000);
                     state = SM_ALIGN;
                 }
                 
@@ -528,13 +530,14 @@ int main(int argc, char** argv){
                     if(aruco_srv.response.success){
 
                          if(tokens.at(4) == "platform"){
-                             vel.linear.y = -2;
+                             //vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
                              //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                             for(int i=0; i<steps_to_platform; i++){
+                             /*for(int i=0; i<steps_to_platform; i++){
                                 pubVel.publish(vel);
 			                    ros::Duration(1, 0).sleep();
-                             }
+                             }*/
+				FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
