@@ -32,6 +32,7 @@ float goal_angle     = 0;
 bool  new_pose       = false;
 bool  new_path       = false;
 bool  collision_risk = false;
+bool  move_lat       = false;
 nav_msgs::Path goal_path;
 bool stop = false;
 std::string base_link_name = "base_footprint";
@@ -42,6 +43,7 @@ void callback_general_stop(const std_msgs::Empty::ConstPtr& msg)
     stop     = true;
     new_pose = false;
     new_path = false;
+    move_lat = false;
 }
 
 void callback_navigation_stop(const std_msgs::Empty::ConstPtr& msg)
@@ -50,6 +52,8 @@ void callback_navigation_stop(const std_msgs::Empty::ConstPtr& msg)
     stop     = true;
     new_pose = false;
     new_path = false;
+    move_lat = false;
+
 }
 
 void callback_simple_move_stop(const std_msgs::Empty::ConstPtr& msg)
@@ -67,6 +71,7 @@ void callback_goal_dist(const std_msgs::Float32::ConstPtr& msg)
     goal_angle    = 0;
     new_pose = true;
     new_path = false;
+    move_lat = false;
 }
 
 void callback_goal_dist_angle(const std_msgs::Float32MultiArray::ConstPtr& msg)
@@ -78,9 +83,19 @@ void callback_goal_dist_angle(const std_msgs::Float32MultiArray::ConstPtr& msg)
     new_path = false;
 }
 
+void callback_move_lateral(const std_msgs::Float32::ConstPtr& msg)
+{
+    goal_distance = msg->data;
+    goal_angle    = 0;
+    new_pose = true;
+    new_path = false;
+    move_lat = true;
+}
+
 void callback_goal_path(const nav_msgs::Path::ConstPtr& msg)
 {
     std::cout << "SimpleMove.->New path received with " << msg->poses.size() << " points with id=" << msg->header.seq << std::endl;
+    move_lat = false;
     if (msg->poses.size() <= 0)
     {
         new_pose = false;
@@ -156,9 +171,8 @@ void get_goal_position_wrt_odom(float goal_distance, float goal_angle, tf::Trans
     float robot_y = transform.getOrigin().y();
     tf::Quaternion q = transform.getRotation();
     float robot_t = atan2((float)q.z(), (float)q.w()) * 2;
-
-    goal_x = robot_x + goal_distance * cos(robot_t + goal_angle);
-    goal_y = robot_y + goal_distance * sin(robot_t + goal_angle);
+    goal_x = robot_x + goal_distance * cos(robot_t + goal_angle + (move_lat?M_PI/2:0));
+    goal_y = robot_y + goal_distance * sin(robot_t + goal_angle + (move_lat?M_PI/2:0));
     goal_t = robot_t + goal_angle;
     if(goal_t >   M_PI) goal_t -= 2*M_PI;
     if(goal_t <= -M_PI) goal_t += 2*M_PI;
@@ -227,7 +241,8 @@ int main(int argc, char** argv)
     
     ros::Subscriber sub_goalDistance     = n.subscribe("/simple_move/goal_dist"      , 1, callback_goal_dist);                     
     ros::Subscriber sub_goalDistAngle    = n.subscribe("/simple_move/goal_dist_angle", 1, callback_goal_dist_angle);          
-    ros::Subscriber sub_goalPath         = n.subscribe("/simple_move/goal_path"      , 1, callback_goal_path);                     
+    ros::Subscriber sub_goalPath         = n.subscribe("/simple_move/goal_path"      , 1, callback_goal_path);
+    ros::Subscriber sub_moveLateral      = n.subscribe("/simple_move/goal_dist_lateral" , 1, callback_move_lateral);                     
     ros::Subscriber sub_generalStop      = n.subscribe("/stop", 1, callback_general_stop);
     ros::Subscriber sub_navCtrlStop      = n.subscribe("/navigation/stop",  1, callback_navigation_stop);
     ros::Subscriber sub_navSimpleMvStop  = n.subscribe("/simple_move/stop", 1, callback_simple_move_stop);               

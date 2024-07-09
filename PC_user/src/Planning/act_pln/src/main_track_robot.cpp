@@ -34,93 +34,22 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+//-------------------------------------------------------------------------------//
+//-----------------------PARAMETROS Y FUNCIONES PARA DEBUG-----------------------//
+//-------------------------------------------------------------------------------//
 
-//Se puede cambiar, agregar o eliminar los estados
-enum SMState {
-    SM_INIT,
-	SM_WAIT_FOR_INSTRUCTION,
-	SM_GO_TO,
-    SM_ALIGN,
-    SM_TAKE,
-    SM_DROP,
-    SM_ASK,
-    SM_FINAL_STATE
-};
-
-bool fail = false;
-bool success = false;
-SMState state = SM_INIT;
-bool flag_zones = false;
-
-std_msgs::String target_zone;
-geometry_msgs::PoseStamped tf_target_zone;
-std::vector<geometry_msgs::PoseStamped> zones_path;
-
-//Para el cmd_vel
-geometry_msgs::Twist vel;
-
-//String that storage instruction tokens
-std::vector<std::string> tokens;
-
-std::string zone;
-
-std::vector<std::string> real_refbox_names;
-// std::string instructions[] = {"ACT-PLN 1 1 Festina goto CS M_Z47 0 entrance",
-//                               "ACT-PLN 1 2 Festina take CAP_GRAY",
-//                               "ACT-PLN 1 1 Festina goto CS M_Z47 0 platform",
-//                               "ACT-PLN 1 1 Festina drop CAP_GRAY"};
-
-std::string instructions[] = {"goto CS C_Z42 0 platform",
+/*std::string instructions[] = {"goto CS C_Z42 0 platform",
                               "goto CS C_Z42 0 entrance",
                               "goto CS C_Z42 0 output",
-                              "goto CS M_Z61 0 entrance"};
-std_msgs::String new_zone;
-actionlib_msgs::GoalStatus simple_move_goal_status;
-int simple_move_status_id = 0;
 
-bool request = false;
+                             "goto CS M_Z61 0 entrance"};
 
+int cont_instructions = 0;
 int angulo = 315;
-float angulo_rad;
-
-//Parametro que multiplica al coseno 
-float param_x = 0.9;
-//Parametro que multiplica al seno
-float param_y = 1;
-
-//Variable que guarda el angulo en formato entero (se convierte de string a entero)
-int angulo_int = 0;
-
-//Función para ya hacer pruebas con el Refbox
-void compute_coordinates(){
-    //Signo por el que se multiplican los senos y cosenos 
-    int dir_sign = 0;
-    //Se convierte en angulo de string a entero
-    angulo_int = std::stoi(tokens[3]);
-    
-    float angulo_pose = 0.0f;
-    angulo_pose = angulo_int*(M_PI/180);
-
-    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-	//Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
-        angulo_int = angulo_int - 180;
-	//Si es entrada o plataforma se le suman los senos y cosenos   
-	dir_sign = 1;                    
-    }
-    if(tokens[4] == "output"){
-	//Si es salida se le restan los senos y cosenos  
-	dir_sign = -1; 
-    }
-
-    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + dir_sign*param_x*cos(angulo_pose);
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + dir_sign*param_y*sin(angulo_pose); 
-
-    //Se convierte el angulo de degrees a radianes
-    angulo_rad = angulo_int*(M_PI/180);
-}
+std::string zone;
 
 //Función hardcodeada para hacer pruebas rápidas
-/*void compute_coordinates(){
+void compute_coordinates(){
     float quat;
 
     //Descomentar para pruebas con los parámetros reales
@@ -131,11 +60,7 @@ void compute_coordinates(){
     //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 1;
     //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y; 
 
-    //Si es ir a la entrada entonces se obtiene el complemento del ángulo en 180
-    //Si es ir a la salida entonces se queda igual el ángulo
-    //if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-        angulo = angulo - 180;                     
-    //}
+    angulo = angulo - 180;                     
 	angulo_rad = angulo*M_PI/180;
 
     std::cout << "el ángulo en grados es: " << angulo << std::endl;
@@ -154,51 +79,10 @@ void compute_coordinates(){
 
     std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
                     
-}*/
-
-//Funcion para ya hacer pruebas con el refbox
-void transform_zone()
-{
-	tf::TransformListener listener;
-    tf::StampedTransform transform;
-
-    //TF related stuff 
-    std::cout << tokens[2] << std::endl;
-    tf_target_zone.header.frame_id = "/map";
-    tf_target_zone.pose.position.x = 0.0;
-    tf_target_zone.pose.position.y = 0.0;
-    tf_target_zone.pose.position.z = 0.0;
-    tf_target_zone.pose.orientation.x = 0.0;
-    tf_target_zone.pose.orientation.y = 0.0;
-    tf_target_zone.pose.orientation.z = 0.0;
-    tf_target_zone.pose.orientation.w = 0.0;
-
-    std::cout << "entró al transform zones" << std::endl;
-
-    try{
-        std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(100.0));
-        listener.lookupTransform("/map", tokens.at(2), ros::Time(0), transform);
-    }
-    catch (tf::TransformException ex){
-        ROS_ERROR("%s",ex.what());
-        ros::Duration(1.0).sleep();
-    }
-
-    tf_target_zone.pose.position.x = transform.getOrigin().x();
-    tf_target_zone.pose.position.y = transform.getOrigin().y();
-	tf_target_zone.pose.position.z = transform.getOrigin().z();
-	tf_target_zone.pose.orientation.x = transform.getRotation().x();
-	tf_target_zone.pose.orientation.y = transform.getRotation().y();
-	tf_target_zone.pose.orientation.z = transform.getRotation().z();
-	tf_target_zone.pose.orientation.w = transform.getRotation().w();
-
-    std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
 }
 
 //Funcion hardcodeada para hacer pruebas rapidas
-
-/*void transform_zone()
+void transform_zone()
 {
 	tf::TransformListener listener;
     tf::StampedTransform transform;
@@ -251,25 +135,54 @@ void transform_zone()
     std::cout << "Las rotaciones son" << " ori w:" << tf_target_zone.pose.orientation.w << std::endl;
 }*/
 
-void navigate_to_location(geometry_msgs::PoseStamped location)
-{
-    std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
-    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
-        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
-         	std::cout << "Cannot move to " << std::endl;
-                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
-        }
-    }
-}
+//--------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+
+//Se puede cambiar, agregar o eliminar los estados
+enum SMState {
+    SM_INIT,
+	SM_WAIT_FOR_INSTRUCTION,
+	SM_GO_TO,
+    SM_ALIGN,
+    SM_TAKE,
+    SM_DROP,
+    SM_ASK,
+    SM_FINAL_STATE
+};
+
+bool fail = false;
+bool success = false;
+SMState state = SM_INIT;
+
+//-------------------------------------------------------------------------------//
+//-----------------------------------PARAMETROS----------------------------------//
+//-------------------------------------------------------------------------------//
+
+//Parametro que multiplica al coseno 
+#define param_x 0.9
+//Parametro que multiplica al seno
+#define param_y 1
+//Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
+#define param_calib_dist 0.25
+//Parametro que modifica el numero de pasos laterales para llegar a la plataforma
+#define steps_to_platform 3
+
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+
+
+//Bandera de request para instrucciones del planificador
+bool request = false;
+//String that storage instruction tokens
+std::vector<std::string> tokens;
 
 void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
     std::cout << "Entré al callback de instrucciones" << msg->data.c_str() <<std::endl;	
     //Tokenize instruction string
-    target_zone = *msg;
-    std::cout << "La instrucción es: " <<  target_zone <<std::endl;	
+    std::cout << "La instrucción es: " <<  *msg <<std::endl;	
     tokens.clear();
-    boost::algorithm::split(tokens, target_zone.data, boost::algorithm::is_any_of(" "));
+    boost::algorithm::split(tokens, (*msg).data, boost::algorithm::is_any_of(" "));
     request = false;
 
     if(tokens[0] == "goto"){
@@ -290,6 +203,93 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
     if(tokens[0] == "ask"){
         state = SM_ASK;
         return;
+    }
+}
+
+//Angulo en radianes
+float angulo_rad;
+//Variable que guarda el angulo en formato entero (se convierte de string a entero)
+int angulo_int = 0;
+//TF que va guardando la zona objetivo
+geometry_msgs::PoseStamped tf_target_zone;
+
+//Función para ya hacer pruebas con el Refbox
+void compute_coordinates(){
+    //Signo por el que se multiplican los senos y cosenos 
+    int dir_sign = 0;
+    //Se convierte en angulo de string a entero
+    angulo_int = std::stoi(tokens[3]);
+    
+    float angulo_pose = 0.0f;
+    angulo_pose = angulo_int*(M_PI/180);
+
+    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+	//Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
+        angulo_int = angulo_int - 180;
+	//Si es entrada o plataforma se le suman los senos y cosenos   
+	dir_sign = 1;                    
+    }
+    if(tokens[4] == "output"){
+	//Si es salida se le restan los senos y cosenos  
+	dir_sign = -1; 
+    }
+
+    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + dir_sign*param_x*cos(angulo_pose);
+    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + dir_sign*param_y*sin(angulo_pose); 
+
+    //Se convierte el angulo de degrees a radianes
+    angulo_rad = angulo_int*(M_PI/180);
+}
+
+//Funcion para ya hacer pruebas con el refbox
+void transform_zone()
+{
+	tf::TransformListener listener;
+    tf::StampedTransform transform;
+
+    //TF related stuff 
+    std::cout << tokens[2] << std::endl;
+    tf_target_zone.header.frame_id = "/map";
+    tf_target_zone.pose.position.x = 0.0;
+    tf_target_zone.pose.position.y = 0.0;
+    tf_target_zone.pose.position.z = 0.0;
+    tf_target_zone.pose.orientation.x = 0.0;
+    tf_target_zone.pose.orientation.y = 0.0;
+    tf_target_zone.pose.orientation.z = 0.0;
+    tf_target_zone.pose.orientation.w = 0.0;
+
+    std::cout << "entró al transform zones" << std::endl;
+
+    try{
+        std::cout << "entró al try" << std::endl;
+        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(100.0));
+        listener.lookupTransform("/map", tokens.at(2), ros::Time(0), transform);
+    }
+    catch (tf::TransformException ex){
+        ROS_ERROR("%s",ex.what());
+        ros::Duration(1.0).sleep();
+    }
+
+    tf_target_zone.pose.position.x = transform.getOrigin().x();
+    tf_target_zone.pose.position.y = transform.getOrigin().y();
+	tf_target_zone.pose.position.z = transform.getOrigin().z();
+	tf_target_zone.pose.orientation.x = transform.getRotation().x();
+	tf_target_zone.pose.orientation.y = transform.getRotation().y();
+	tf_target_zone.pose.orientation.z = transform.getRotation().z();
+	tf_target_zone.pose.orientation.w = transform.getRotation().w();
+
+    std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+}
+
+
+void navigate_to_location(geometry_msgs::PoseStamped location)
+{
+    std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
+    if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
+        if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x, 60000)){
+         	std::cout << "Cannot move to " << std::endl;
+                FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
+        }
     }
 }
 
@@ -319,19 +319,18 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	    laser_l=0;
 	    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
 	    {
-		if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 0.8)
-		{ 
-		    laser_l=laser_l+laserScan.ranges[i]; 
-		    cont_laser++;
-		}
+            if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 0.8)
+            { 
+                laser_l=laser_l+laserScan.ranges[i]; 
+                cont_laser++;
+            }
 	    }
-	    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
+
 	    if(laser_l/cont_laser > 0.20)
 	    {
-		flag_wall = false;
-		move_to_machine = laser_l/cont_laser - 0.2;
-		FestinoNavigation::moveDistAngle(move_to_machine, 0, 10000);
-		//std::cout<<"door open"<<std::endl;
+            flag_wall = false;
+            move_to_machine = laser_l/cont_laser - param_calib_dist;
+            FestinoNavigation::moveDistAngle(move_to_machine, 0, 10000);
 	    }
     } 
 }
@@ -423,12 +422,9 @@ int main(int argc, char** argv){
     //String que guarda la seccion en la que estamos 
     std::string sec_buffer = "indef";
 
-    //Numero de pasos laterales para llegar a la plataforma
-    int steps_to_platform = 3;
+    //Para el cmd_vel
+    geometry_msgs::Twist vel;
 
-    int cont_instructions = 0;
-
-    int cont = 0;
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -437,7 +433,7 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the main track challenge";
 	            std::cout << voice << std::endl;
 
-                //FestinoNavigation::moveLateral(0.5, 10000);
+                FestinoNavigation::moveLateral(0.5, 10000);
                 
 				//FestinoHRI::say(voice,5);
 	    	    state = SM_WAIT_FOR_INSTRUCTION;
@@ -450,7 +446,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_WAIT_FOR_INSTRUCTION" << std::endl;	
 	            voice = "Waiting for instruction";
 	            std::cout << voice << std::endl;
-				FestinoHRI::say(voice,5);
+				//FestinoHRI::say(voice,5);
 
                 //debug_instructions(instructions[cont_instructions]);
                 //cont_instructions++;
@@ -488,7 +484,7 @@ int main(int argc, char** argv){
                 }
                 else{
 
-		    FestinoNavigation::moveDistAngle(-move_to_machine, 0, 10000);
+		            FestinoNavigation::moveDistAngle(-move_to_machine, 0, 10000);
 
                     //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
@@ -546,7 +542,7 @@ int main(int argc, char** argv){
 			            state = SM_WAIT_FOR_INSTRUCTION;	
 			            flag_wall = true;
                         //state = SM_TAKE;	
-			//state = SM_FINAL_STATE;
+			            //state = SM_FINAL_STATE;
                     }
                     else{
                         //Se tiene que poner algo para que no repita todo 
