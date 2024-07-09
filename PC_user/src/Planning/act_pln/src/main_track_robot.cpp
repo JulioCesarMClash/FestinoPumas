@@ -378,7 +378,7 @@ int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
-    ros::init(argc, argv, "SM");
+    ros::init(argc, argv, "SM_exploration");
     ros::NodeHandle n;
 	
 	FestinoNavigation::setNodeHandle(&n);
@@ -572,11 +572,11 @@ int main(int argc, char** argv){
                     manipulator_var.data = 1;
                 }
 
-                //pubManipulator.publish(manipulator_var);
+                pubManipulator.publish(manipulator_var);
                 std::cout << "Estoy tomando" << std::endl;
 
                 //Delay para que pueda tomar la pieza
-	    		//ros::Duration(30, 0).sleep();
+	    		ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 		
 		        // FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
@@ -603,10 +603,10 @@ int main(int argc, char** argv){
                     //Dejar en la banda
                     manipulator_var.data = 0;
                 }
-               // pubManipulator.publish(manipulator_var);
+                pubManipulator.publish(manipulator_var);
 
                 //Delay para que pueda dejar la pieza
-	    		//ros::Duration(30, 0).sleep();
+	    		ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 
                 //Al nodo del manipulador se le manda un 2 para DROP

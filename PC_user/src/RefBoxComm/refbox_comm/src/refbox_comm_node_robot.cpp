@@ -16,6 +16,7 @@
 #include <tf/transform_listener.h>
 
 #include "std_msgs/String.h"
+#include "std_msgs/Bool.h"
 
 //Biblioteca para tokenizar
 #include <boost/algorithm/string.hpp>
@@ -52,6 +53,7 @@ using PrepareInstructionCS = llsf_msgs::PrepareInstructionCS;
 using PrepareInstructionBS = llsf_msgs::PrepareInstructionBS;
 
 using PrepareMachine = llsf_msgs::PrepareMachine;
+using GameState = llsf_msgs::GameState;
 
 //--------------------------------ROBOT POSE
         float pose_x = 3.0f;
@@ -66,6 +68,11 @@ using PrepareMachine = llsf_msgs::PrepareMachine;
         using NavigationRoutes = llsf_msgs::NavigationRoutes;
         using Zone = llsf_msgs::Zone;
 //--------------------------------NAVIGATION CHALLENGE
+
+//--------------------------------
+	ros::Publisher pub_time_over;
+	bool beca_start = false;
+//--------------------------------
 
     std::shared_ptr<ProtobufBroadcastPeer> m_public_peer;
     std::shared_ptr<ProtobufBroadcastPeer> m_private_peer;
@@ -340,7 +347,13 @@ class Handler {
             {
                 //ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 //ROS_INFO_STREAM(""<< game_state->ShortDebugString());
-                
+                if(!beca_start && game_state->phase() == llsf_msgs::GameState::PRODUCTION && game_state->game_time().sec() > 180){
+			beca_start = true;
+			std_msgs::Bool time_over;
+			time_over.data = true;
+			pub_time_over.publish(time_over);
+		}
+
                 if(!team_color_set){
                     auto cyan = game_state->team_cyan();
                     if (cyan == m_team_name){
@@ -485,12 +498,16 @@ int main(int argc, char** argv)
     //NAVIGATION CHALLENGE
     pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
 
+    pub_time_over = n.advertise<std_msgs::Bool>("/time_over", 1000);
+
     p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
 
     ros::Subscriber subMachineInstructions = n.subscribe("/machine_instruction_msg", 10, callback_MachineInstructions);
+	
 
     ros::Rate r(10);
     while (ros::ok()) {
+                       
 
         //Obtaining robot location
 	    geometry_msgs::PoseStamped tf_robot_pose;

@@ -27,7 +27,7 @@
 #include "sensor_msgs/Range.h"
 #include "sensor_msgs/LaserScan.h"
 
-#include <festino_arm_moveit_demos/srv_arm.h>
+//#include <festino_arm_moveit_demos/srv_arm.h>
 #include <img_proc/MPS_Detector.h>
 
 
@@ -79,6 +79,9 @@ geometry_msgs::PoseStamped det_mps;
 geometry_msgs::PoseStamped robot_curr_pos;
 geometry_msgs::PoseStamped robot_next_pos;
 geometry_msgs::PoseStamped robot_first_pos;
+geometry_msgs::PoseStamped robot_last_pos;
+
+std_msgs::Bool time_over;
 
 std_msgs::String new_zone;
 std_msgs::String mps_name_anterior;
@@ -89,7 +92,6 @@ std::vector<std_msgs::String> mps_names;
 bool flag_names = false;
 std_msgs::String mps_id;
 geometry_msgs::PoseStamped robot_base_pos;
-
 
 bool nav_flag = false;
 bool nav_success = false;
@@ -379,6 +381,12 @@ void callback_mps_name(const std_msgs::String::ConstPtr& msg){
 	}
 }
 
+
+void callback_time_over(const std_msgs::Bool::ConstPtr& msg)
+{
+    time_over = *msg;
+}
+
 /*void callback_mps_name(const std_msgs::String::ConstPtr& msg){
     mps_name2send = *msg;
 }*/
@@ -666,6 +674,7 @@ int main(int argc, char** argv){
     //Subscribers and Publishers
     ros::Subscriber sub_move_goal_status   	= n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
     ros::Subscriber subLaserScan 			= n.subscribe("/scan", 1, callbackLaserScan);
+    ros::Subscriber sub_time_over 			= n.subscribe("/time_over", 1, callback_time_over);
 
 	ros::Publisher pub_mps_name 	= n.advertise<std_msgs::String>("/mps_name", 1000, true);
 	ros::Publisher pub_mps_pos 		= n.advertise<geometry_msgs::PoseStamped>("/mps_pos", 1000);
@@ -743,8 +752,18 @@ int main(int argc, char** argv){
 	robot_first_pos.pose.orientation.z = 0.0;
 	robot_first_pos.pose.orientation.w = 0.0;
 
+	robot_last_pos.pose.position.x = 0.0;
+	robot_last_pos.pose.position.y = 0.0;
+	robot_last_pos.pose.position.z = 0.0;
+	robot_last_pos.pose.orientation.x = 0.0;
+	robot_last_pos.pose.orientation.y = 0.0;
+	robot_last_pos.pose.orientation.z = 0.0;
+	robot_last_pos.pose.orientation.w = 0.0;
 
-	while(ros::ok() && !fail && !success){
+
+
+
+	while(ros::ok() && !fail && !success && !time_over.data){
 	    switch(state){
 			case SM_INIT:{
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;	
@@ -833,11 +852,22 @@ int main(int argc, char** argv){
 	    		//Finish
 	    		std::cout << "\n State machine: SM_FINAL_STATE" << std::endl;	
 	            std::cout << "Exploration finished" << std::endl;
-	            std::cout << "\n PIPS successfully visited \t" << pips_vis << "PIPS missed \t" << x_pips_m.size() - pips_vis << std::endl;
+	            //std::cout << "\n PIPS successfully visited \t" << pips_vis << "PIPS missed \t" << x_pips_m.size() - pips_vis << std::endl;
 	            //std::cout << "\n Machine information" << std::endl;
 	            print_vector(mps_name);
 				print_vector(mps_PointStamped);
-
+				try{
+					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
+					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
+				}
+				catch(tf::TransformException ex){
+					ROS_ERROR("%s",ex.what());
+					ros::Duration(1.0).sleep();
+				}
+				robot_last_pos.pose.position.x = transform.getOrigin().x();
+				robot_last_pos.pose.position.y = transform.getOrigin().y();
+				robot_last_pos.pose.position.z = transform.getOrigin().z();
+				std::cout << "Last Pose \n" << robot_last_pos.pose.position << std::endl;
 	    		success = true;
 	    		fail = true;
 	    		break;
