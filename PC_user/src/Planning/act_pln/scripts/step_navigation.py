@@ -12,19 +12,36 @@ import math
 import numpy as np
 from geometry_msgs.msg import *
 from std_msgs.msg import *
+import subprocess
 
 global time_over
+global time_start
 
-def callback_time_over(data):
-	global time_over
-	time_over = data
-	print(time_over)
+
+def ejec_script():
+        script_shell='/home/festino/FestinoPumas/PC_user/src/surge_et_ambula/include/map_transfer.sh'
+        try:
+                print("Sending maps files")
+                res=subprocess.call([script_shell],shell=True)
+        except:
+                print("Error sending the maps")
+
+
+def callback_time_over(msg):
+	if(msg.data == 'start'):
+		time_start = True
+		print("TS",time_start)
+	if(msg.data == "over"):
+		time_over = True
+		print("TO",time_over)
 
 def main():
-	global time_over
+	time_over=False
+	time_start=False
+
 	path = '/home/festino/FestinoPumas/PC_user/src/'
 
-	sub_time_over	= rospy.Subscriber("/time_over",Bool,callback_time_over)
+	sub_time_over	= rospy.Subscriber("/time_over",String,callback_time_over)
 
 	tfBuffer = tf2_ros.Buffer()
 
@@ -32,7 +49,9 @@ def main():
 	uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
 	roslaunch.configure_logging(uuid)
 
-	ros_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/explore_n_map.launch"])
+	#ros_refbox_comm 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "surge_et_ambula/launch/robot_comm.launch"])
+
+	ros_nav_launch 		=  roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/explore_n_map.launch"])
 	doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/late_navigation.launch"])
 	log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/Pos_control/movement_functions/launch/logisticsZones.launch"])
 	main_track_robot_launch = roslaunch.parent.ROSLaunchParent(uuid, [path + "surge_et_ambula/launch/main_track_robot.launch"])
@@ -47,7 +66,14 @@ def main():
 	robot_init_pose.header.frame_id = "map"
 	
 	rospy.sleep(3)
-	while(not time_over.data):
+
+	#ros_refbox_comm.start()
+	while(not time_start):
+		print("W S",time_start)
+		rospy.sleep(2)
+		print("Waiting")
+
+	while(not time_over):
 		rospy.sleep(3)
 		print("Starting  Exploration")
 		ros_nav_launch.start()
@@ -99,12 +125,15 @@ def main():
 		listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
 		(first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
 		print("Robot a map - LAST POS", first_trans, "\t", first_rot, "at %i", now.secs)
-	if(time_over.data):
+	if(time_over):
 		print("Time over, start Rebecas launch")
 		ros_nav_launch.shutdown()
+		rospy.sleep(2)
+		ejec_script()
 		doc_nav_launch.start()
-		rospy.sleep(5)
+		rospy.sleep(2)
 		main_track_robot_launch.start()
+
 
 	try:
 	    rospy.spin()
