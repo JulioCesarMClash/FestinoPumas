@@ -3,6 +3,9 @@
   <!--Log_origin en el lab 6 -5 0 0 0 0 1 -->
   <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="6 -5 0 0 0 0 1 map Log_origin 100" />
 
+  <!--Log_origin para explore_n_map-->
+  <!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="0 0 0 0 0 1.57 1 map Log_origin 100" /-->
+
   <!--Simulación RosNav-->
   <!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="-2 -3 0 0 0 -0.41 1 map Log_origin 100" /-->
   <!--No estoy segura de dónde es :c-->

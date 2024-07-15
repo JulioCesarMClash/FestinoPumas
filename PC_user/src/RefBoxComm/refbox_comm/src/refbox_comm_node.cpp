@@ -1733,7 +1733,7 @@ int main(int argc, char** argv)
 
     ros::Rate r(10);
     while (ros::ok()) {
-/*  
+  
 //NAVIGATION CHALLENGE
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;
@@ -1757,7 +1757,7 @@ int main(int argc, char** argv)
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
 
     pose_ori = 0.0f;
-*/
+
         ros::spinOnce();
     }
     return 0;

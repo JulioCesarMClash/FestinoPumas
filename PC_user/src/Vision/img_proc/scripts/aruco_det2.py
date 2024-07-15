@@ -3,10 +3,10 @@ from __future__ import print_function
 
 import time
 
-#Para desempacar la matriz de la cámara y los coeficientes de distor
+#Para desempacar la matriz de la camara y los coeficientes de distor
 import pickle
 
-from scipy.spatial.transform import Rotation
+#from scipy.spatial.transform import Rotation
 import numpy as np
 
 import roslib
@@ -222,12 +222,12 @@ def callback_depth_points(data):
   mps_name = "Not Identified"
   fracaso = "fracaso"
 
-  with open('/home/robocup20/FestinoPumas/PC_user/src/Vision/img_proc/scripts/cameraMatrix.pkl', 'rb') as f:
+  """with open('/home/robocup20/FestinoPumas/PC_user/src/Vision/img_proc/scripts/cameraMatrix.pkl', 'rb') as f:
         mtx = pickle.load(f)
 
     
   with open('/home/robocup20/FestinoPumas/PC_user/src/Vision/img_proc/scripts/dist.pkl', 'rb') as f:
-        dst = pickle.load(f)
+        dst = pickle.load(f)"""
 
   try:
     if(markerIds.shape[0] >= 1):
@@ -263,9 +263,9 @@ def callback_depth_points(data):
         if(slope < 0.03  and slope > -0.03):
           print("alineado!!")
         else:
-          print("ño")
+          print("no")
 
-        slope_pub.publish(slope)
+        #slope_pub.publish(slope)
 
         #corners = markerCorners[i]
 
@@ -312,7 +312,7 @@ def callback_depth_points(data):
         # #print("[INFO] ArUco marker ID: {}".format(ids))
 
         
-        # d=np.round((math.dist(topLeft,bottomRight)+math.dist(topRight,bottomLeft))/2,3)
+        """ # d=np.round((math.dist(topLeft,bottomRight)+math.dist(topRight,bottomLeft))/2,3)
         # # Get the rotation and translation vectors
         aruco_marker_side_length = 0.123 
         #12.3 cm o 0.123 m
@@ -339,7 +339,7 @@ def callback_depth_points(data):
           r = Rotation.from_dcm(rotation_matrix[0:3, 0:3])
         except Exception as e: 
             print(e)
-            print('No se pudo por alguna razón :(')
+            print('No se pudo por alguna razon :(')
 
         cv2.drawFrameAxes(aruco_img, mtx, dst, rvecs, tvecs, 0.123 * 1.5, 2)
         #cv2.solvePnP(obj_points, corners, mtx, dst, rvecs, tvecs)
@@ -356,7 +356,7 @@ def callback_depth_points(data):
                 
         roll_x = math.degrees(roll_x)
         pitch_y = math.degrees(pitch_y)
-        yaw_z = math.degrees(yaw_z)
+        yaw_z = math.degrees(yaw_z)"""
         #print(roll_x, pitch_y, yaw_z)
 
         time.sleep(0.1)
