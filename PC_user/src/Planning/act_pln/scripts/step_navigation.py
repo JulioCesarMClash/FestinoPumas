@@ -14,8 +14,8 @@ from geometry_msgs.msg import *
 from std_msgs.msg import *
 import subprocess
 
-global time_over
-global time_start
+time_over = False
+time_start = False
 
 
 def ejec_script():
@@ -28,6 +28,10 @@ def ejec_script():
 
 
 def callback_time_over(msg):
+
+	global time_over
+	global time_start
+
 	if(msg.data == 'start'):
 		time_start = True
 		print("TS",time_start)
@@ -36,8 +40,8 @@ def callback_time_over(msg):
 		print("TO",time_over)
 
 def main():
-	time_over=False
-	time_start=False
+	global time_over
+	global time_start
 
 	path = '/home/festino/FestinoPumas/PC_user/src/'
 
@@ -72,6 +76,9 @@ def main():
 		print("W S",time_start)
 		rospy.sleep(2)
 		print("Waiting")
+
+
+	
 
 	while(not time_over):
 		rospy.sleep(3)
@@ -125,6 +132,7 @@ def main():
 		listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
 		(first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
 		print("Robot a map - LAST POS", first_trans, "\t", first_rot, "at %i", now.secs)
+		
 	if(time_over):
 		print("Time over, start Rebecas launch")
 		ros_nav_launch.shutdown()
