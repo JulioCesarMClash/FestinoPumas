@@ -26,7 +26,7 @@
 #include "img_proc/Find_tag_Srv.h"
 #include "sensor_msgs/Range.h"
 
-#include <festino_arm_moveit_demos/srv_arm.h>
+//#include <festino_arm_moveit_demos/srv_arm.h>
 #include <img_proc/MPS_Detector.h>
 
 
@@ -658,8 +658,7 @@ int main(int argc, char** argv){
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
 
-    ros::ServiceClient client2 = n.serviceClient<festino_arm_moveit_demos::srv_arm>("/srv_arm");
-    festino_arm_moveit_demos::srv_arm srv2;
+    //ros::ServiceClient client2 = n.serviceClient<festino_arm_moveit_demos::srv_arm>("/srv_arm");
 
     ros::Rate loop(10);
 
