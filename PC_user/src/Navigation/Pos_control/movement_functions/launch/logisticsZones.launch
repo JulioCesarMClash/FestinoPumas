@@ -2,7 +2,7 @@
   
   <!--Log_origin en el lab 6 -5 0 0 0 0 1 -->
 
-  <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="-2.441 6.767 0.068 0 0 -0.1 1 map Log_origin 100" />
+  <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="-0.646 0.31 0 0 0 -0.14 1 map Log_origin 100" />
 
   <!--Simulación RosNav-->
   <!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="-2 -3 0 0 0 -0.41 1 map Log_origin 100" /-->
