@@ -3,7 +3,7 @@
 	<!--LAUNCHES-->
 
     <!--navegación-->
-	<include file="$(find config_files)/launch/navigation.launch"> </include>
+	<!--include file="$(find config_files)/launch/navigation.launch"> </include-->
     <!--Zonas logistics-->
 	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
     <!--Kinect-->
