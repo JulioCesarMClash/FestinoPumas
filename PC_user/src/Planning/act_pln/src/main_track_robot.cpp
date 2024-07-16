@@ -167,7 +167,7 @@ SMState state = SM_INIT;
 //-------------------------------------------------------------------------------//
 
 //Parametro que multiplica al coseno 
-#define param_x 0.9
+#define param_x 1
 //Parametro que multiplica al seno
 #define param_y 1
 //Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
@@ -229,7 +229,7 @@ void compute_coordinates(){
     //Signo por el que se multiplican los senos y cosenos 
     int dir_sign = 0;
     //Se convierte en angulo de string a entero
-    angulo_int = std::stoi(tokens[3]) - 90;
+    angulo_int = std::stoi(tokens[3]) - 15;
     
     float angulo_pose = 0.0f;
     angulo_pose = angulo_int*(M_PI/180);
@@ -482,14 +482,14 @@ int main(int argc, char** argv){
                 
                 //Si estamos en la misma zona solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
-                    //vel.linear.y = 2;
+                    vel.linear.y = 2;
                     //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                    /*for(int i=0; i<steps_to_platform; i++){
+                    for(int i=0; i<steps_to_platform; i++){
                         pubVel.publish(vel);
                         ros::Duration(1, 0).sleep();
-                    }*/
+                    }
 
-		    FestinoNavigation::moveLateral(dist_to_platform, 1000);
+		    //FestinoNavigation::moveLateral(dist_to_platform, 1000);
 
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
@@ -539,14 +539,14 @@ int main(int argc, char** argv){
                     if(aruco_srv.response.success){
 
                          if(tokens.at(4) == "platform"){
-                             //vel.linear.y = -2;
+                             vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
                              //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                             /*for(int i=0; i<steps_to_platform; i++){
+                             for(int i=0; i<steps_to_platform; i++){
                                 pubVel.publish(vel);
 			                    ros::Duration(1, 0).sleep();
-                             }*/
-				FestinoNavigation::moveLateral(-dist_to_platform, 1000);
+                             }
+				//FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
@@ -588,7 +588,7 @@ int main(int argc, char** argv){
                 std::cout << "Estoy tomando" << std::endl;
 
                 //Delay para que pueda tomar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		ros::Duration(3, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 		
 		        // FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
@@ -618,7 +618,7 @@ int main(int argc, char** argv){
                 pubManipulator.publish(manipulator_var);
 
                 //Delay para que pueda dejar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		ros::Duration(3, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 
                 //Al nodo del manipulador se le manda un 2 para DROP
