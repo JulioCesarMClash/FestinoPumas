@@ -172,7 +172,7 @@ void nav_zone_to_cords(ros::NodeHandle n,std_msgs::String zone, ros::Publisher p
 	std::cout << goal_tosend.pose << std::endl;
 }
 
-bool navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout, geometry_msgs::PoseStamped robot_first_pos)
+/*bool navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout, geometry_msgs::PoseStamped robot_first_pos)
 {
     std::cout << "Coords recieved, publishing coords to navigate \n" << std::endl;
     tf::TransformListener listener;
@@ -239,7 +239,7 @@ bool navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Pu
 	}
 	return nav_success;
 
-}
+}*/
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {	
@@ -443,7 +443,7 @@ void transform_mps()
 	}
 }
 
-/*void navigate_to_location(geometry_msgs::PoseStamped location)
+void navigate_to_location(geometry_msgs::PoseStamped location)
 {
     std::cout << "Navigate to location x:"<< location.pose.position.x << " y:" << location.pose.position.y << std::endl;
     if(!FestinoNavigation::getClose(location.pose.position.x, location.pose.position.y, location.pose.orientation.x,60000)){
@@ -454,7 +454,7 @@ void transform_mps()
                 //FestinoHRI::say("Just let me go. Cries in robot iiiiii",3);
         }
     }
-}*/
+}
 
 //Estas coordenadas son M_Z32, ahi sabemos que no habra maquina
 std::vector<float> arreglo_x = {-2.5, 0.0, 0.0, 0.0, 0.0};
@@ -658,11 +658,6 @@ int main(int argc, char** argv){
 	int turn_step_pii = 0;
 	int n_steps_pip = 1;
 	float step_size = 0.715;
-
-	pips_as_zones[0].data = "/M_Z11";
-	pips_as_zones[1].data = "/M_Z22";
-	pips_as_zones[2].data = "/M_Z33";
-	pips_as_zones[3].data = "/M_Z44";
 	
 	std::cout << "INITIALIZING EXPLORATION NODE... " << std::endl;
     ros::init(argc, argv, "SM");
@@ -760,9 +755,6 @@ int main(int argc, char** argv){
 	robot_last_pos.pose.orientation.z = 0.0;
 	robot_last_pos.pose.orientation.w = 0.0;
 
-
-
-
 	while(ros::ok() && !fail && !success && !time_over.data){
 	    switch(state){
 			case SM_INIT:{
@@ -780,7 +772,7 @@ int main(int argc, char** argv){
 				robot_first_pos.pose.position.y = transform.getOrigin().y();
 				robot_first_pos.pose.position.z = transform.getOrigin().z();
 				std::cout << "First Pose \n" << robot_first_pos.pose.position << std::endl;
-	    		state = SM_FIRSTMAPPING;
+	    		state = SM_NAV_PIPS;
 	    		break;
 			}
 
@@ -796,12 +788,15 @@ int main(int argc, char** argv){
 
 			case SM_NAV_PIPS:{
 				std::cout << "\n State machine: SM_NAV_PIPS" << std::endl;
+				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + x_pips_m[curr_pip];
+				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + y_pips_m[curr_pip];
 				if(curr_pip <= x_pips_m.size()){
 					std::cout << "Navigating PIP \t" << curr_pip << std::endl; //"\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
-					if(navigate_to_location(n,x_pips_m[curr_pip], y_pips_m[curr_pip],pub_rosnav_goal, 4.0,robot_first_pos))
+					/*if(navigate_to_location(n,x_pips_m[curr_pip], y_pips_m[curr_pip],pub_rosnav_goal, 4.0,robot_first_pos))
 					{
 						pips_vis++;
-					}
+					}*/
+					navigate_to_location(robot_next_pos);
 					state = SM_TURN_AROUND;
 				}
 				else{
