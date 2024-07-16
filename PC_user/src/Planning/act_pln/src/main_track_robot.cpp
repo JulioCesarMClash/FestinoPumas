@@ -229,7 +229,7 @@ void compute_coordinates(){
     //Signo por el que se multiplican los senos y cosenos 
     int dir_sign = 0;
     //Se convierte en angulo de string a entero
-    angulo_int = std::stoi(tokens[3]) - 15;
+    angulo_int = std::stoi(tokens[3]);
     
     float angulo_pose = 0.0f;
     angulo_pose = angulo_int*(M_PI/180);
