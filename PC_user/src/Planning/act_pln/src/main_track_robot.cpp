@@ -581,7 +581,7 @@ int main(int argc, char** argv){
                 }
                 else{
                     //Tomar de la banda
-                    manipulator_var.data = 1;
+                    manipulator_var.data = 2;
                 }
 
                 pubManipulator.publish(manipulator_var);
@@ -609,7 +609,7 @@ int main(int argc, char** argv){
 	    		
                 if(tokens[0] == "dropp"){
                     //Dejar en la plataforma
-                    manipulator_var.data = 2;
+                    manipulator_var.data = 3;
                 }
                 else{
                     //Dejar en la banda
