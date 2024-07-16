@@ -5,6 +5,8 @@
 
 #define TCPPORT 9002
 #define SERVER_IP "192.168.1.152"
+//#define SERVER_IP "192.168.1.106"
+//#define SERVER_IP "192.168.1.163"
 
 using namespace std;
 

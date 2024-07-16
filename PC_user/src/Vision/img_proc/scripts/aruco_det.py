@@ -239,6 +239,7 @@ def callback_depth_points(data):
             pos_x = float(arr[cent][0])
             pos_y = float(arr[cent][1])
             pos_z = float(arr[cent][2])
+	    print("La pose en x es: ", pos_y)
             mps_name_arr, mps_name = aruco_mps(markerIds[i])
             print(mps_name, "\n")
             mps_name_pub.publish(mps_name)
@@ -273,6 +274,7 @@ def callback_depth_points(data):
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                 aruco_pos_pub.publish(aruco_pose)
+		print("Holi")
                 """try:
                   print("nop")
                   tf_name = "/"+mps_name

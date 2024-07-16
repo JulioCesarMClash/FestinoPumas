@@ -11,7 +11,7 @@ Panels:
         - /PointCloud21
         - /PointCloud1
       Splitter Ratio: 0.5
-    Tree Height: 659
+    Tree Height: 356
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -27,6 +27,7 @@ Panels:
     Name: Views
     Splitter Ratio: 0.5
   - Class: rviz/Time
+    Experimental: false
     Name: Time
     SyncMode: 0
     SyncSource: LaserScan
@@ -176,6 +177,232 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        C_Z11:
+          Value: true
+        C_Z12:
+          Value: true
+        C_Z13:
+          Value: true
+        C_Z14:
+          Value: true
+        C_Z15:
+          Value: true
+        C_Z16:
+          Value: true
+        C_Z17:
+          Value: true
+        C_Z18:
+          Value: true
+        C_Z21:
+          Value: true
+        C_Z22:
+          Value: true
+        C_Z23:
+          Value: true
+        C_Z24:
+          Value: true
+        C_Z25:
+          Value: true
+        C_Z26:
+          Value: true
+        C_Z27:
+          Value: true
+        C_Z28:
+          Value: true
+        C_Z31:
+          Value: true
+        C_Z32:
+          Value: true
+        C_Z33:
+          Value: true
+        C_Z34:
+          Value: true
+        C_Z35:
+          Value: true
+        C_Z36:
+          Value: true
+        C_Z37:
+          Value: true
+        C_Z38:
+          Value: true
+        C_Z41:
+          Value: true
+        C_Z42:
+          Value: true
+        C_Z43:
+          Value: true
+        C_Z44:
+          Value: true
+        C_Z45:
+          Value: true
+        C_Z46:
+          Value: true
+        C_Z47:
+          Value: true
+        C_Z48:
+          Value: true
+        C_Z51:
+          Value: true
+        C_Z52:
+          Value: true
+        C_Z53:
+          Value: true
+        C_Z54:
+          Value: true
+        C_Z55:
+          Value: true
+        C_Z56:
+          Value: true
+        C_Z57:
+          Value: true
+        C_Z58:
+          Value: true
+        C_Z61:
+          Value: true
+        C_Z62:
+          Value: true
+        C_Z63:
+          Value: true
+        C_Z64:
+          Value: true
+        C_Z65:
+          Value: true
+        C_Z66:
+          Value: true
+        C_Z67:
+          Value: true
+        C_Z68:
+          Value: true
+        C_Z71:
+          Value: true
+        C_Z72:
+          Value: true
+        C_Z73:
+          Value: true
+        C_Z74:
+          Value: true
+        C_Z75:
+          Value: true
+        C_Z76:
+          Value: true
+        C_Z77:
+          Value: true
+        C_Z78:
+          Value: true
+        Log_origin:
+          Value: true
+        M_Z11:
+          Value: true
+        M_Z12:
+          Value: true
+        M_Z13:
+          Value: true
+        M_Z14:
+          Value: true
+        M_Z15:
+          Value: true
+        M_Z16:
+          Value: true
+        M_Z17:
+          Value: true
+        M_Z18:
+          Value: true
+        M_Z21:
+          Value: true
+        M_Z22:
+          Value: true
+        M_Z23:
+          Value: true
+        M_Z24:
+          Value: true
+        M_Z25:
+          Value: true
+        M_Z26:
+          Value: true
+        M_Z27:
+          Value: true
+        M_Z28:
+          Value: true
+        M_Z31:
+          Value: true
+        M_Z32:
+          Value: true
+        M_Z33:
+          Value: true
+        M_Z34:
+          Value: true
+        M_Z35:
+          Value: true
+        M_Z36:
+          Value: true
+        M_Z37:
+          Value: true
+        M_Z38:
+          Value: true
+        M_Z41:
+          Value: true
+        M_Z42:
+          Value: true
+        M_Z43:
+          Value: true
+        M_Z44:
+          Value: true
+        M_Z45:
+          Value: true
+        M_Z46:
+          Value: true
+        M_Z47:
+          Value: true
+        M_Z48:
+          Value: true
+        M_Z51:
+          Value: true
+        M_Z52:
+          Value: true
+        M_Z53:
+          Value: true
+        M_Z54:
+          Value: true
+        M_Z55:
+          Value: true
+        M_Z56:
+          Value: true
+        M_Z57:
+          Value: true
+        M_Z58:
+          Value: true
+        M_Z61:
+          Value: true
+        M_Z62:
+          Value: true
+        M_Z63:
+          Value: true
+        M_Z64:
+          Value: true
+        M_Z65:
+          Value: true
+        M_Z66:
+          Value: true
+        M_Z67:
+          Value: true
+        M_Z68:
+          Value: true
+        M_Z71:
+          Value: true
+        M_Z72:
+          Value: true
+        M_Z73:
+          Value: true
+        M_Z74:
+          Value: true
+        M_Z75:
+          Value: true
+        M_Z76:
+          Value: true
+        M_Z77:
+          Value: true
+        M_Z78:
+          Value: true
         arm_kinect_platform_link:
           Value: true
         base_link:
@@ -194,13 +421,6 @@ Visualization Manager:
           Value: false
         upper_platform_link:
           Value: true
-        wheel0_link:
-          Value: false
-        wheel1_link:
-          Value: false
-        wheel2_link:
-          Value: false
-      Marker Alpha: 1
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -208,6 +428,231 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
+          Log_origin:
+            C_Z11:
+              {}
+            C_Z12:
+              {}
+            C_Z13:
+              {}
+            C_Z14:
+              {}
+            C_Z15:
+              {}
+            C_Z16:
+              {}
+            C_Z17:
+              {}
+            C_Z18:
+              {}
+            C_Z21:
+              {}
+            C_Z22:
+              {}
+            C_Z23:
+              {}
+            C_Z24:
+              {}
+            C_Z25:
+              {}
+            C_Z26:
+              {}
+            C_Z27:
+              {}
+            C_Z28:
+              {}
+            C_Z31:
+              {}
+            C_Z32:
+              {}
+            C_Z33:
+              {}
+            C_Z34:
+              {}
+            C_Z35:
+              {}
+            C_Z36:
+              {}
+            C_Z37:
+              {}
+            C_Z38:
+              {}
+            C_Z41:
+              {}
+            C_Z42:
+              {}
+            C_Z43:
+              {}
+            C_Z44:
+              {}
+            C_Z45:
+              {}
+            C_Z46:
+              {}
+            C_Z47:
+              {}
+            C_Z48:
+              {}
+            C_Z51:
+              {}
+            C_Z52:
+              {}
+            C_Z53:
+              {}
+            C_Z54:
+              {}
+            C_Z55:
+              {}
+            C_Z56:
+              {}
+            C_Z57:
+              {}
+            C_Z58:
+              {}
+            C_Z61:
+              {}
+            C_Z62:
+              {}
+            C_Z63:
+              {}
+            C_Z64:
+              {}
+            C_Z65:
+              {}
+            C_Z66:
+              {}
+            C_Z67:
+              {}
+            C_Z68:
+              {}
+            C_Z71:
+              {}
+            C_Z72:
+              {}
+            C_Z73:
+              {}
+            C_Z74:
+              {}
+            C_Z75:
+              {}
+            C_Z76:
+              {}
+            C_Z77:
+              {}
+            C_Z78:
+              {}
+            M_Z11:
+              {}
+            M_Z12:
+              {}
+            M_Z13:
+              {}
+            M_Z14:
+              {}
+            M_Z15:
+              {}
+            M_Z16:
+              {}
+            M_Z17:
+              {}
+            M_Z18:
+              {}
+            M_Z21:
+              {}
+            M_Z22:
+              {}
+            M_Z23:
+              {}
+            M_Z24:
+              {}
+            M_Z25:
+              {}
+            M_Z26:
+              {}
+            M_Z27:
+              {}
+            M_Z28:
+              {}
+            M_Z31:
+              {}
+            M_Z32:
+              {}
+            M_Z33:
+              {}
+            M_Z34:
+              {}
+            M_Z35:
+              {}
+            M_Z36:
+              {}
+            M_Z37:
+              {}
+            M_Z38:
+              {}
+            M_Z41:
+              {}
+            M_Z42:
+              {}
+            M_Z43:
+              {}
+            M_Z44:
+              {}
+            M_Z45:
+              {}
+            M_Z46:
+              {}
+            M_Z47:
+              {}
+            M_Z48:
+              {}
+            M_Z51:
+              {}
+            M_Z52:
+              {}
+            M_Z53:
+              {}
+            M_Z54:
+              {}
+            M_Z55:
+              {}
+            M_Z56:
+              {}
+            M_Z57:
+              {}
+            M_Z58:
+              {}
+            M_Z61:
+              {}
+            M_Z62:
+              {}
+            M_Z63:
+              {}
+            M_Z64:
+              {}
+            M_Z65:
+              {}
+            M_Z66:
+              {}
+            M_Z67:
+              {}
+            M_Z68:
+              {}
+            M_Z71:
+              {}
+            M_Z72:
+              {}
+            M_Z73:
+              {}
+            M_Z74:
+              {}
+            M_Z75:
+              {}
+            M_Z76:
+              {}
+            M_Z77:
+              {}
+            M_Z78:
+              {}
           odom:
             base_link:
               kinect_link:
@@ -220,12 +665,6 @@ Visualization Manager:
                 arm_kinect_platform_link:
                   kinect_base_link:
                     {}
-              wheel0_link:
-                {}
-              wheel1_link:
-                {}
-              wheel2_link:
-                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -245,7 +684,6 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
-      Queue Size: 10
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
@@ -335,7 +773,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0.6449994444847107
+      Angle: -0.28000059723854065
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -345,18 +783,19 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 1075.5841064453125
+      Scale: 26.715585708618164
       Target Frame: <Fixed Frame>
-      X: 2.651550531387329
-      Y: -4.438194274902344
+      Value: TopDownOrtho (rviz)
+      X: 2.1180875301361084
+      Y: 3.0531928539276123
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: true
-  Height: 1009
+  Height: 428
   Hide Left Dock: true
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000018a00000335fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000007100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000004a00000335000000f700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000034afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000470000034a000000cb00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000072c00000047fc0100000002fb0000000800540069006d006501000000000000072c0000048600fffffffb0000000800540069006d006501000000000000045000000000000000000000072c0000033500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000018a00000335fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000000fb0000013d00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000004a00000335000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000034afc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007300000000470000034a000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000002eb00000047fc0100000002fb0000000800540069006d00650100000000000002eb000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000002eb0000011b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -365,6 +804,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1836
-  X: 84
-  Y: 34
+  Width: 747
+  X: 65
+  Y: 24

@@ -91,7 +91,7 @@ bool mps_flag;
 std::vector<std_msgs::String> mps_names;
 bool flag_names = false;
 std_msgs::String mps_id;
-geometry_msgs::PoseStamped robot_base_pos;
+geometry_msgs::PoseStamped Log_origin;
 
 bool nav_flag = false;
 bool nav_success = false;
@@ -110,7 +110,8 @@ geometry_msgs::PoseStamped tf_zone;
 
 // PIPs
 std::vector<geometry_msgs::PoseStamped> pips_poses;
-geometry_msgs::PoseStamped tf_pips;
+geometry_msgs::PoseStamped tf_pips_m;
+geometry_msgs::PoseStamped tf_pips_c;
 std_msgs::String pips_as_zones[4];
 
 // PIIs
@@ -304,13 +305,15 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 
 //X respecto al mapa de logistics
 //std::vector<float> x_pips_m {-4.5, -6.5, -0.5, -6.5, -0.5};
+std::vector<float> x_pips_m {-6.5, -0.5, -6.5, -0.5};
 //Y respecto al mapa
 //std::vector<float> y_pips_m {0.5, 1.5, 7.5, 7.5, 1.5}; 
+std::vector<float> y_pips_m {1.5, 7.5, 7.5, 1.5}; 
 
 //X respecto a la posición inicial del robot M_Z51                       ->Cyan
-std::vector<float> x_pips_m {1.0,1.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,2.0};
+//std::vector<float> x_pips_m {1.0,1.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,2.0};
 //Y respecto al mapa                                                             ->Cyan
-std::vector<float> y_pips_m {-1.0,-2.0,-3.0,-3.0,-3.0,-3.0,-2.0,-1.0,0.0,1.0,1.0,-7.0,-7.0,-7.0,-7.0,-7.0,-8.0,-9.0,-9.0,9.0,9.0}; 
+//std::vector<float> y_pips_m {-1.0,-2.0,-3.0,-3.0,-3.0,-3.0,-2.0,-1.0,0.0,1.0,1.0,-7.0,-7.0,-7.0,-7.0,-7.0,-8.0,-9.0,-9.0,9.0,9.0}; 
 
 //PIIs: (-5,3), (-2,6), (-3.5,7.5), (-5,6), (-2,3)
 
@@ -327,9 +330,9 @@ std::vector<float> y_piis_m {0, 3, 6, 7.5, 6, 3, 4.5};
 //PIPs: (0.5,7.5), (6.5,1.5), (6.5,7.5), (0.5,1.5)
 
 //X respecto al mapa de logistics
-//std::vector<float> x_pips_c {4.5, 0.5, 6.5, 6.5, 0.5};
+std::vector<float> x_pips_c {0.0,5.0, 6.5, 6.5, 0.5};
 //Y respecto al mapa
-//std::vector<float> y_pips_c {0.5, 7.5, 1.5, 7.5, 1.5}; 
+std::vector<float> y_pips_c {0.0,5.0, 1.5, 7.5, 1.5}; 
 
 //X respecto a la posición inicial del robot M_Z51
 //std::vector<float> x_pips_c {1.0,  2.0, 3.0, 4.0, 5.0, 5.0, 5.0, 4.0,3.0,2.0};
@@ -427,16 +430,16 @@ void transform_mps()
 			det_mps.pose.orientation.w = 0.0;
 
 			try{
-				listener.waitForTransform(mps_names[i].data, "/camera_link", ros::Time(0), ros::Duration(1000.0));
-				listener.lookupTransform(mps_names[i].data, "/camera_link", ros::Time(0), transform);
+				listener.waitForTransform("/camera_link", mps_names[i].data,  ros::Time(0), ros::Duration(1000.0));
+				listener.lookupTransform("/camera_link", mps_names[i].data, ros::Time(0), transform);
 			}
 			catch(tf::TransformException ex){
 				ROS_ERROR("%s",ex.what());
 				ros::Duration(1.0).sleep();
 			}
-			det_mps.pose.position.x = -transform.getOrigin().x();
-			det_mps.pose.position.y = -transform.getOrigin().y();
-			det_mps.pose.position.z = -transform.getOrigin().z();
+			det_mps.pose.position.x = transform.getOrigin().x();
+			det_mps.pose.position.y = transform.getOrigin().y();
+			det_mps.pose.position.z = transform.getOrigin().z();
 			
 			std::cout << det_mps.pose.position << std::endl;
 		}
@@ -682,17 +685,30 @@ int main(int argc, char** argv){
 
     ros::Rate loop(10);
 
-    // PIPs array
+    // PIPs Magenta array
 	for(int i=0; i<x_pips_m.size(); i++){
-    	tf_pips.header.frame_id = "/map";
-	    tf_pips.pose.position.x = x_pips_m.at(i);
-	    tf_pips.pose.position.y = y_pips_m.at(i);
-		tf_pips.pose.position.z = 0;
-		tf_pips.pose.orientation.x = 0;
-		tf_pips.pose.orientation.y = 0;
-		tf_pips.pose.orientation.z = 0;
-		tf_pips.pose.orientation.w = 0;
-		pips_poses.push_back(tf_pips);
+    	tf_pips_m.header.frame_id = "/map";
+	    tf_pips_m.pose.position.x = x_pips_m.at(i);
+	    tf_pips_m.pose.position.y = y_pips_m.at(i);
+		tf_pips_m.pose.position.z = 0;
+		tf_pips_m.pose.orientation.x = 0;
+		tf_pips_m.pose.orientation.y = 0;
+		tf_pips_m.pose.orientation.z = 0;
+		tf_pips_m.pose.orientation.w = 0;
+		pips_poses.push_back(tf_pips_m);
+	}
+
+	// PIPs Cyan array
+	for(int i=0; i<x_pips_c.size(); i++){
+    	tf_pips_c.header.frame_id = "/map";
+	    tf_pips_c.pose.position.x = x_pips_c.at(i);
+	    tf_pips_c.pose.position.y = y_pips_c.at(i);
+		tf_pips_c.pose.position.z = 0;
+		tf_pips_c.pose.orientation.x = 0;
+		tf_pips_c.pose.orientation.y = 0;
+		tf_pips_c.pose.orientation.z = 0;
+		tf_pips_c.pose.orientation.w = 0;
+		pips_poses.push_back(tf_pips_c);
 	}
 
 	tf::TransformListener listener;
@@ -715,13 +731,13 @@ int main(int argc, char** argv){
 	location_map.pose.orientation.z = 0.0;
 	location_map.pose.orientation.w = 0.0;
 
-	robot_base_pos.pose.position.x = 0.0;
-	robot_base_pos.pose.position.y = 0.0;
-	robot_base_pos.pose.position.z = 0.0;
-	robot_base_pos.pose.orientation.x = 0.0;
-	robot_base_pos.pose.orientation.y = 0.0;
-	robot_base_pos.pose.orientation.z = 0.0;
-	robot_base_pos.pose.orientation.w = 0.0;
+	Log_origin.pose.position.x = 0.0;
+	Log_origin.pose.position.y = 0.0;
+	Log_origin.pose.position.z = 0.0;
+	Log_origin.pose.orientation.x = 0.0;
+	Log_origin.pose.orientation.y = 0.0;
+	Log_origin.pose.orientation.z = 0.0;
+	Log_origin.pose.orientation.w = 0.0;
 
 	robot_curr_pos.pose.position.x = 0.0;
 	robot_curr_pos.pose.position.y = 0.0;
@@ -759,44 +775,30 @@ int main(int argc, char** argv){
 	    switch(state){
 			case SM_INIT:{
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;	
-	            std::cout << "I am ready - Exploration route has  " << x_pips_m.size() << " points" << std::endl;
+	            std::cout << "I am ready - Exploration route has  " << x_pips_c.size() << " points" << std::endl;
 				try{
-					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
+					listener.waitForTransform("/map", "/Log_origin", ros::Time(0), ros::Duration(1.0));
+					listener.lookupTransform("/map", "/Log_origin", ros::Time(0), transform);
 				}
 				catch(tf::TransformException ex){
 					ROS_ERROR("%s",ex.what());
 					ros::Duration(1.0).sleep();
 				}
-				robot_first_pos.pose.position.x = transform.getOrigin().x();
-				robot_first_pos.pose.position.y = transform.getOrigin().y();
-				robot_first_pos.pose.position.z = transform.getOrigin().z();
-				std::cout << "First Pose \n" << robot_first_pos.pose.position << std::endl;
+				Log_origin.pose.position.x = transform.getOrigin().x();
+				Log_origin.pose.position.y = transform.getOrigin().y();
+				Log_origin.pose.position.z = transform.getOrigin().z();
+				//std::cout << "Logistics Origin" << Log_origin.pose.position << std::endl;
 	    		state = SM_NAV_PIPS;
 	    		break;
 			}
 
-			case SM_FIRSTMAPPING:{
-				std::cout << "\n State machine: SM_FIRSTMAPPING" << std::endl;
-				if(fwd_n_turn(pub_cmd_vel, 2.0,6.0))
-				{
-					std::cout << "Movement Done" << std::endl;
-				}
-				state = SM_NAV_PIPS;
-				break;
-			}
-
 			case SM_NAV_PIPS:{
 				std::cout << "\n State machine: SM_NAV_PIPS" << std::endl;
-				robot_next_pos.pose.position.x = robot_first_pos.pose.position.x + x_pips_m[curr_pip];
-				robot_next_pos.pose.position.y = robot_first_pos.pose.position.y + y_pips_m[curr_pip];
-				if(curr_pip <= x_pips_m.size()){
-					std::cout << "Navigating PIP \t" << curr_pip << std::endl; //"\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
-					/*if(navigate_to_location(n,x_pips_m[curr_pip], y_pips_m[curr_pip],pub_rosnav_goal, 4.0,robot_first_pos))
-					{
-						pips_vis++;
-					}*/
-					navigate_to_location(robot_next_pos);
+				robot_next_pos.pose.position.x = Log_origin.pose.position.x + x_pips_c[curr_pip];
+				robot_next_pos.pose.position.y = Log_origin.pose.position.y + y_pips_c[curr_pip];
+				if(curr_pip <= x_pips_c.size()){
+					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
+					navigate_to_location(pips_poses.at(curr_pip));
 					state = SM_TURN_AROUND;
 				}
 				else{
@@ -808,7 +810,7 @@ int main(int argc, char** argv){
 
 			case SM_TURN_AROUND:{
 				std::cout << "\n State machine: SM_TURN_AROUND" << std::endl;
-	 			std::cout << "Turn arooound for PIP \t" << curr_pip << std::endl;
+	 			std::cout << "Turning for PIP \t" << curr_pip << std::endl;
 				for(turn_step_pip = 0; turn_step_pip <= n_steps_pip; turn_step_pip++){
 					if(fwd_n_turn(pub_cmd_vel, 0.0,step_size))
 					{
