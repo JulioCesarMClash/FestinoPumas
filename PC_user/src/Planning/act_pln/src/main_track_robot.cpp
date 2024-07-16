@@ -34,6 +34,14 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+std::string instructions[] = {"goto CS C_Z44 270 platform",
+                              "goto CS C_Z42 0 entrance",
+                              "goto CS C_Z42 0 output",
+
+                             "goto CS M_Z61 0 entrance"};
+
+int cont_instructions = 0;
+
 //-------------------------------------------------------------------------------//
 //-----------------------PARAMETROS Y FUNCIONES PARA DEBUG-----------------------//
 //-------------------------------------------------------------------------------//
@@ -167,7 +175,7 @@ SMState state = SM_INIT;
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
 #define steps_to_platform 3
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
-#define dist_to_platform 0.4
+#define dist_to_platform 0.2
 
 
 //-------------------------------------------------------------------------------//
@@ -221,7 +229,7 @@ void compute_coordinates(){
     //Signo por el que se multiplican los senos y cosenos 
     int dir_sign = 0;
     //Se convierte en angulo de string a entero
-    angulo_int = std::stoi(tokens[3]);
+    angulo_int = std::stoi(tokens[3]) - 90;
     
     float angulo_pose = 0.0f;
     angulo_pose = angulo_int*(M_PI/180);
@@ -331,6 +339,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 
 	    if(laser_l/cont_laser > 0.20)
 	    {
+	std::cout<< "Entro al if del callback del hokuyo"<<std::endl;
             flag_wall = false;
             move_to_machine = laser_l/cont_laser - param_calib_dist;
             FestinoNavigation::moveDistAngle(move_to_machine, 0, 1000);
@@ -499,7 +508,7 @@ int main(int argc, char** argv){
                     navigate_to_location(tf_target_zone);
 
                     //Movimiento angular para que vea hacia la máquina
-		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.2, 1000);
+		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.1, 1000);
                     state = SM_ALIGN;
                 }
                 
