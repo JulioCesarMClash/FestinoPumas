@@ -566,12 +566,23 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                              }
 				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
-                         //Si estamos en la CS y vamos a la entrada o si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
-                         else if((tokens[1] == "CS" && tokens[4] == "entrance") || (tokens[1] == "BS" && tokens[4] == "output")){
+                         //Si estamos en la CS y vamos a la entrada son 3 a la izquierda
+                         else if(tokens[1] == "CS" && tokens[4] == "entrance"){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
-                            std::cout << "Publico en vel para quedar a la izquierda de la banda" << std::endl;
+                            std::cout << "Publico tres en vel para quedar a la izquierda de la banda de CS" << std::endl;
+                            for(int i=0; i<3; i++){
+                                pubVel.publish(vel);
+			                    ros::Duration(1, 0).sleep();
+                             }
+                         }
+                         //si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
+                         else if(tokens[1] == "BS" && tokens[4] == "output"){
+                            //Mueve uno a la izquierda de la banda
+                            //Positivo a la izquierda
+                            vel.linear.y = 2;
+                            std::cout << "Publico uno vel para quedar a la izquierda de la banda de BS" << std::endl;
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
                          }
@@ -616,7 +627,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     manipulator_var.data = 1;
                 }
                 else{
- 		            if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
+ 		            if(station_buffer == "BS" || station_buffer == "RS" || (station_buffer == "CS" && sec_buffer == "entrance")){
                         std::cout << "Estoy enviando un 4" << std::endl;
                         //Tomar de la banda izq
                         manipulator_var.data = 4;
