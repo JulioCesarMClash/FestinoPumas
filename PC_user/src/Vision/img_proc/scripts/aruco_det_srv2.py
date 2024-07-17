@@ -222,6 +222,9 @@ class FindTagNode:
                         #Cuando ya se hayan dado dos giros hacia este lado ya se empezara a girar al otro
                         if(cont_giro == 2):
                             next_turn = True
+                      pub_vel.publish(vel)
+                      print('No Tag')
+                      rospy.sleep(4)
 
         #Esta excepcion es cuando no encuentra ningun Aruco
         except AttributeError:
