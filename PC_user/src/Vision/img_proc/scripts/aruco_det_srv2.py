@@ -125,6 +125,7 @@ class FindTagNode:
                       
                       print("tamano de imagen es: ", aruco_img.shape)
                       cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+                      print("el centro es: ",cent)
 
                       if cent > 479:
                         cent = 479
