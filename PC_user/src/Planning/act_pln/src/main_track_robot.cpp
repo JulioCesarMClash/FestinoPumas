@@ -178,8 +178,11 @@ SMState state = SM_INIT;
 #define param_calib_dist 0.25
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
 #define steps_to_platform 4
+//Parametro que modifica el numero de pasos laterales para llegar de la plataforma a la banda (Si se usa cmd_vel)
+#define steps_to_band 5
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
+
 
 
 //-------------------------------------------------------------------------------//
@@ -487,17 +490,23 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,3);
                 
-                //Si estamos en la misma zona solo muevete ahí mismo 
+                //Si estamos en la misma zona y queremos pasar de plataforma a entrada entonces solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
                     vel.linear.y = 2;
                     //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                    for(int i=0; i<steps_to_platform; i++){
+                    for(int i=0; i<steps_to_band; i++){
                         pubVel.publish(vel);
                         ros::Duration(1, 0).sleep();
                     }
 
-		    //FestinoNavigation::moveLateral(dist_to_platform, 1000);
+		            //FestinoNavigation::moveLateral(dist_to_platform, 1000);
 
+                    state = SM_WAIT_FOR_INSTRUCTION;
+                }
+                else if (tokens[1] == "ES"){
+                    FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
+                    transform_zone();
+                    navigate_to_location(tf_target_zone);
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
@@ -521,7 +530,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                 
                 zone_buffer = tokens[2];
                 sec_buffer  = tokens[4];
-		station_buffer = tokens[1];
+		        station_buffer = tokens[1];
             
                 //Navegacion ROS para hacer pruebas
                 //pub_rosnav_goal.publish(tf_target_zone);
@@ -547,6 +556,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     if(aruco_srv.response.success){
 
                          if(tokens.at(4) == "platform"){
+                             //Negativo a la derecha
                              vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
                              //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
@@ -554,7 +564,24 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                                 pubVel.publish(vel);
 			                    ros::Duration(1, 0).sleep();
                              }
-				//FestinoNavigation::moveLateral(-dist_to_platform, 1000);
+				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
+                         }
+                         //Si estamos en la CS y vamos a la entrada o si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
+                         else if((tokens[1] == "CS" && tokens[4] == "entrance") || (tokens[1] == "BS" && tokens[4] == "output")){
+                            //Mueve uno a la izquierda de la banda
+                            //Positivo a la izquierda
+                            vel.linear.y = 2;
+                            std::cout << "Publico en vel para quedar a la izquierda de la banda" << std::endl;
+                            pubVel.publish(vel);
+			                ros::Duration(1, 0).sleep();
+                         }
+                         else if(tokens[1] == "CS" && tokens[4] == "output"){
+                            //Mueve uno a la derecha de la banda
+                            //Negativo a la derecha
+                            vel.linear.y = -2;
+                            std::cout << "Publico en vel para quedar a la derecha de la banda" << std::endl;
+                            pubVel.publish(vel);
+			                ros::Duration(1, 0).sleep();
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
@@ -585,20 +612,20 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 
                 if(tokens[0] == "takep"){
                     //Tomar de la plataforma
-		std::cout << "Estoy enviando un 1" << std::endl;
+		            std::cout << "Estoy enviando un 1" << std::endl;
                     manipulator_var.data = 1;
                 }
                 else{
- 		  if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
-			std::cout << "Estoy enviando un 4" << std::endl;
-			//Tomar de la banda izq
-			manipulator_var.data = 4;
-		    }
-		    else{
-std::cout << "Estoy enviando un 2" << std::endl;
-			//Tomar de la banda derecha
-			manipulator_var.data = 2;
-		    }
+ 		            if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
+                        std::cout << "Estoy enviando un 4" << std::endl;
+                        //Tomar de la banda izq
+                        manipulator_var.data = 4;
+                    }
+		            else{
+                        std::cout << "Estoy enviando un 2" << std::endl;
+                        //Tomar de la banda derecha
+                        manipulator_var.data = 2;
+		            }
                 }
 
                 pubManipulator.publish(manipulator_var);
@@ -626,20 +653,25 @@ std::cout << "Estoy enviando un 2" << std::endl;
 	    		
                 if(tokens[0] == "dropp"){
                     //Dejar en la plataforma
-std::cout << "Estoy enviando un 3" << std::endl;
+                    std::cout << "Estoy enviando un 3" << std::endl;
                     manipulator_var.data = 3;
                 }
                 else{
-		    if(station_buffer == "CS" || station_buffer == "DS"){
-		std::cout << "Estoy enviando un 5" << std::endl;
-			//Dejar en la banda izq
-			manipulator_var.data = 5;
-		    }
-		    else{
-std::cout << "Estoy enviando un 0" << std::endl;
-			//Dejar en la banda derecha
-			manipulator_var.data = 0;
-		    }
+		            if(station_buffer == "CS" || station_buffer == "DS"){
+		                std::cout << "Estoy enviando un 5" << std::endl;
+			            //Dejar en la banda izq
+			            manipulator_var.data = 5;
+		            }
+		            else if (station_buffer == "ES"){
+                        std::cout << "Estoy enviando un 30" << std::endl;
+			            //Dejar en el piso
+			            manipulator_var.data = 30;
+                    }
+                    else{
+                        std::cout << "Estoy enviando un 0" << std::endl;
+			            //Dejar en la banda derecha
+			            manipulator_var.data = 0;
+		            }
                 }
                 pubManipulator.publish(manipulator_var);
 
