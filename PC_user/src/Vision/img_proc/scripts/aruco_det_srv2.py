@@ -127,8 +127,8 @@ class FindTagNode:
                       cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
                       print("el centro es: ",cent)
 
-                      if cent > 479:
-                        cent = 479
+                      if cent[0] > 479:
+                        cent[0] = 479
 
                     pos_x = float(arr[cent][0])
                     pos_y = float(arr[cent][1])
