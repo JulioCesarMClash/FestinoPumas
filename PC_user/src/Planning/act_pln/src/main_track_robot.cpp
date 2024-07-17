@@ -178,8 +178,11 @@ SMState state = SM_INIT;
 #define param_calib_dist 0.25
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
 #define steps_to_platform 4
+//Parametro que modifica el numero de pasos laterales para llegar de la plataforma a la banda (Si se usa cmd_vel)
+#define steps_to_band 5
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
+
 
 
 //-------------------------------------------------------------------------------//
@@ -487,20 +490,21 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 	            std::cout << voice << std::endl;
 				//FestinoHRI::say(voice,3);
                 
-                //Si estamos en la misma zona solo muevete ahí mismo 
+                //Si estamos en la misma zona y queremos pasar de plataforma a entrada entonces solo muevete ahí mismo 
                 if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
                     vel.linear.y = 2;
                     //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
-                    for(int i=0; i<steps_to_platform; i++){
+                    for(int i=0; i<steps_to_band; i++){
                         pubVel.publish(vel);
                         ros::Duration(1, 0).sleep();
                     }
 
-		    //FestinoNavigation::moveLateral(dist_to_platform, 1000);
+		            //FestinoNavigation::moveLateral(dist_to_platform, 1000);
 
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else if (tokens[1] == "ES"){
+                    FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
                     transform_zone();
                     navigate_to_location(tf_target_zone);
                     state = SM_WAIT_FOR_INSTRUCTION;
@@ -552,6 +556,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     if(aruco_srv.response.success){
 
                          if(tokens.at(4) == "platform"){
+                             //Negativo a la derecha
                              vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
                              //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
@@ -559,7 +564,24 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                                 pubVel.publish(vel);
 			                    ros::Duration(1, 0).sleep();
                              }
-				//FestinoNavigation::moveLateral(-dist_to_platform, 1000);
+				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
+                         }
+                         //Si estamos en la CS y vamos a la entrada o si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
+                         else if((tokens[1] == "CS" && tokens[4] == "entrance") || (tokens[1] == "BS" && tokens[4] == "output")){
+                            //Mueve uno a la izquierda de la banda
+                            //Positivo a la izquierda
+                            vel.linear.y = 2;
+                            std::cout << "Publico en vel para quedar a la izquierda de la banda" << std::endl;
+                            pubVel.publish(vel);
+			                ros::Duration(1, 0).sleep();
+                         }
+                         else if(tokens[1] == "CS" && tokens[4] == "output"){
+                            //Mueve uno a la derecha de la banda
+                            //Negativo a la derecha
+                            vel.linear.y = -2;
+                            std::cout << "Publico en vel para quedar a la derecha de la banda" << std::endl;
+                            pubVel.publish(vel);
+			                ros::Duration(1, 0).sleep();
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
