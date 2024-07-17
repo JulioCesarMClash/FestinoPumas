@@ -170,20 +170,6 @@ class FindTagNode:
                       # Draw a diagonal green line with thickness of 9 px 
                       image = cv2.line(aruco_img, start_point, end_point, color, thickness) 
 
-                      #Si al principio no lo encontro entonces giro
-                      #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
-                      #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
-                      if not already_tag:
-                        vel.angular.z = 0
-                        if no_find_2:
-                          vel.linear.y = -1
-                          pub_vel.publish(vel)
-                          print("Me muevo para un lado hmm")
-                        elif no_find_1 and not no_find_2:
-                          vel.linear.y = 1
-                          pub_vel.publish(vel)
-                          print("Me muevo para el otro lado")
-
                       #Se obtiene la pendiente de la recta
                       slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
 
@@ -204,6 +190,21 @@ class FindTagNode:
                           #Se publica al cmd_vel el giro angular que se requiera
                           #Meti el publish en los if porque al estar afuera hace un giro extra 
                           pub_vel.publish(vel)
+
+                      #Si al principio no lo encontro entonces giro
+                      #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
+                      #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
+                      if not already_tag:
+                        vel.angular.z = 0
+                        if no_find_2:
+                          vel.linear.y = -1
+                          pub_vel.publish(vel)
+                          print("Me muevo para un lado hmm")
+                        elif no_find_1 and not no_find_2:
+                          vel.linear.y = 1
+                          pub_vel.publish(vel)
+                          print("Me muevo para el otro lado")
+                          
                       already_tag = True
                       rospy.sleep(2)
                     else:
