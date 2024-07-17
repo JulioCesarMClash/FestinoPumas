@@ -586,14 +586,14 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
                          }
-                         else if(tokens[1] == "CS" && tokens[4] == "output"){
+                         /*else if(tokens[1] == "CS" && tokens[4] == "output"){
                             //Mueve uno a la derecha de la banda
                             //Negativo a la derecha
                             vel.linear.y = -2;
                             std::cout << "Publico en vel para quedar a la derecha de la banda" << std::endl;
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
-                         }
+                         }*/
 
                         std::cout << "Alineado!!!" << std::endl;
                                                      				
@@ -627,7 +627,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     manipulator_var.data = 1;
                 }
                 else{
- 		            if(station_buffer == "BS" || station_buffer == "RS" || (station_buffer == "CS" && sec_buffer == "entrance")){
+ 		            if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
                         std::cout << "Estoy enviando un 4" << std::endl;
                         //Tomar de la banda izq
                         manipulator_var.data = 4;
