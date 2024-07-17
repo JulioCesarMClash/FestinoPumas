@@ -175,22 +175,25 @@ class FindTagNode:
 
                       print("veo un aruco dentro del rango y la pendiente es: ", slope)
 
-                      rospy.sleep(3)
+                      
                       Kp = -3.0
                       Kp_m = 3.0
 
                       vel.linear.y = 0
                       if(slope > 0.01):
+                          print("giro giro")
                           vel.angular.z = Kp*abs(slope)
                           #Se publica al cmd_vel el giro angular que se requiera
                           #Meti el publish en los if porque al estar afuera hace un giro extra 
                           pub_vel.publish(vel)
                       elif (slope < -0.01):
+                          print("giro giro")
                           vel.angular.z = Kp_m*abs(slope)
                           #Se publica al cmd_vel el giro angular que se requiera
                           #Meti el publish en los if porque al estar afuera hace un giro extra 
                           pub_vel.publish(vel)
 
+                      rospy.sleep(3)
                       #Si al principio no lo encontro entonces giro
                       #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
                       #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
