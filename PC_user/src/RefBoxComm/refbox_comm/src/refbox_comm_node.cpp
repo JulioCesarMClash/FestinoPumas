@@ -938,6 +938,13 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                                         //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
 
 string my_msg = "";
+    for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
+    // ROS_INFO_STREAM("UNA ZONA " << i);
+        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+    }
+    /*2 robots, each plan on each robot*/
+    /*
 if(ROBOT_NO == 1){
     for(int i = 0; i < navigation_routes->routes().Get(0).route_size() / 2; i++){
     // ROS_INFO_STREAM("UNA ZONA " << i);
@@ -951,7 +958,7 @@ if(ROBOT_NO == 1){
         my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
     }
 }
-
+*/
 
        std_msgs::String el_msg;
    
