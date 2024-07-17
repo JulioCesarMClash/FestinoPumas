@@ -110,6 +110,15 @@ class FindTagNode:
             if(markerIds.shape[0] >= 1):
       
                 for i in range (markerIds.shape[0]):
+                    pos_x = float(arr[cent][0])
+                    pos_y = float(arr[cent][1])
+                    pos_z = float(arr[cent][2])
+
+                    if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
+                      #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                      aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
+                      print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
+            
                     corneru = corners[0]
                 
                     start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
@@ -176,6 +185,7 @@ class FindTagNode:
                     rospy.sleep(2)
         #Esta excepcion es cuando no encuentra ningun Aruco
         except AttributeError:
+            already_tag = False 
             if next_turn:
                #Se gira despues para este lado (sentido horario)
                #Si aun no regresa a la posicion original que gire 3 veces para regresar a 
