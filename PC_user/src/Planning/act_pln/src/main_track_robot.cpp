@@ -179,7 +179,7 @@ SMState state = SM_INIT;
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
 #define steps_to_platform 4
 //Parametro que modifica el numero de pasos laterales para llegar de la plataforma a la banda (Si se usa cmd_vel)
-#define steps_to_band 5
+#define steps_to_band 6
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
 
@@ -566,23 +566,21 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                              }
 				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
-                         //Si estamos en la CS y vamos a la entrada son 3 a la izquierda
-                         else if(tokens[1] == "CS" && tokens[4] == "entrance"){
+                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
+                         else if(tokens[1] == "CS"){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
-                            std::cout << "Publico tres en vel para quedar a la izquierda de la banda de CS" << std::endl;
-                            for(int i=0; i<3; i++){
-                                pubVel.publish(vel);
-			                    ros::Duration(1, 0).sleep();
-                             }
+                            std::cout << "Publico uno en vel para quedar a la izquierda de la banda de CS" << std::endl;
+                            pubVel.publish(vel);
+                            ros::Duration(1, 0).sleep();
                          }
                          //si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
                          else if(tokens[1] == "BS" && tokens[4] == "output"){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
-                            std::cout << "Publico uno vel para quedar a la izquierda de la banda de BS" << std::endl;
+                            std::cout << "Publico uno en vel para quedar a la izquierda de la banda de BS" << std::endl;
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
                          }
