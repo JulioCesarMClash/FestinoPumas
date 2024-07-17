@@ -123,13 +123,13 @@ class FindTagNode:
                       max_y = np.max([last_corner[1],first_corner[1]])
                       min_y = np.min([last_corner[1],first_corner[1]])
                       
-                      print("tamano de imagen es: ", aruco_img.shape)
+                      print("veo un aruco y el tamano de imagen es: ", aruco_img.shape)
                       cent_i = int(max_x - (max_x-min_x)/2)
                       if cent_i > 479:
                         cent_i = 479
                       cent_j = int(max_y - (max_y-min_y)/2)
                       cent = (cent_i,cent_j)
-                      print("el centro es: ",cent)
+                      #print("el centro es: ",cent)
 
                      
 
@@ -173,7 +173,7 @@ class FindTagNode:
                       #Se obtiene la pendiente de la recta
                       slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
 
-                      print("la pendiente es: ", slope)
+                      print("veo un aruco dentro del rango y la pendiente es: ", slope)
 
                       rospy.sleep(3)
                       Kp = -3.0
@@ -215,7 +215,7 @@ class FindTagNode:
                         #la posicion original mas un giro extra
                         #if not go_back:
                         vel.angular.z = -0.7854
-                        print("Giro para el otro dentro del try")
+                        print("Giro para el otro dentro del try aruco fuera rango")
                         #go_back = True
                         #Ya que dio el primer giro da el segundo
                         #else:
@@ -223,7 +223,7 @@ class FindTagNode:
                       else:
                         #Primero se gira hacia este lado (sentido antihorario)
                         no_find_1 = True
-                        print("Giro para un lado dentro del try")
+                        print("Giro para un lado dentro del try aruco fuera rango")
                         vel.angular.z = 0.7854
                         #Aumenta en 1 el numero de giros
                         cont_giro = cont_giro + 1
