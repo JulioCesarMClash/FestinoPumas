@@ -1,7 +1,7 @@
 <launch>
 
 	<!--LAUNCHES-->
-	<include file="$(find config_files)/launch/navigation_rcll_2023.launch"> </include>
+	<include file="$(find config_files)/launch/navigation.launch"> </include>
 	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
 
 	<!--NODES-->
