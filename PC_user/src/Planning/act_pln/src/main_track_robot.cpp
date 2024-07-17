@@ -34,13 +34,17 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
-std::string instructions[] = {"goto CS C_Z44 270 platform",
+std::string instructions[] = {"goto CS C_Z56 270 platform",
                               "goto CS C_Z42 0 entrance",
                               "goto CS C_Z42 0 output",
 
                              "goto CS M_Z61 0 entrance"};
 
 int cont_instructions = 0;
+
+ros::Publisher pubVel;
+//Para el cmd_vel
+geometry_msgs::Twist vel;
 
 //-------------------------------------------------------------------------------//
 //-----------------------PARAMETROS Y FUNCIONES PARA DEBUG-----------------------//
@@ -167,13 +171,13 @@ SMState state = SM_INIT;
 //-------------------------------------------------------------------------------//
 
 //Parametro que multiplica al coseno 
-#define param_x 1
+#define param_x 0.9
 //Parametro que multiplica al seno
-#define param_y 1
+#define param_y 0.9
 //Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
 #define param_calib_dist 0.25
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
-#define steps_to_platform 3
+#define steps_to_platform 4
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
 
@@ -312,6 +316,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
 
     if(flag_wall == true){
+	std::cout<< "Entro al if del flag_wall"<<std::endl;
 	    laserScan = *msg;
 
 	    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
@@ -330,12 +335,13 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 	    laser_l=0;
 	    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
 	    {
-            if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 0.8)
+            if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 1)
             { 
                 laser_l=laser_l+laserScan.ranges[i]; 
                 cont_laser++;
             }
 	    }
+	std::cout<< "El promedio de distancia es: " << laser_l/cont_laser << std::endl;
 
 	    if(laser_l/cont_laser > 0.20)
 	    {
@@ -406,7 +412,7 @@ int main(int argc, char** argv){
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
     ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
-	ros::Publisher pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
+pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     //Declarar servicio para encontrar pieza
     ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     ros::ServiceClient aruco_client 		= n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
@@ -434,8 +440,9 @@ int main(int argc, char** argv){
     //String que guarda la seccion en la que estamos 
     std::string sec_buffer = "indef";
 
-    //Para el cmd_vel
-    geometry_msgs::Twist vel;
+    std::string station_buffer = "NA";
+
+ 
 
 
 	while(ros::ok() && !fail && !success){
@@ -459,7 +466,7 @@ int main(int argc, char** argv){
 				//FestinoHRI::say(voice,5);
 
                 //debug_instructions(instructions[cont_instructions]);
-                //cont_instructions++;
+//                cont_instructions++;
 
                 //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
@@ -514,6 +521,7 @@ int main(int argc, char** argv){
                 
                 zone_buffer = tokens[2];
                 sec_buffer  = tokens[4];
+		station_buffer = tokens[1];
             
                 //Navegacion ROS para hacer pruebas
                 //pub_rosnav_goal.publish(tf_target_zone);
@@ -550,7 +558,7 @@ int main(int argc, char** argv){
                          }
 
                         std::cout << "Alineado!!!" << std::endl;
-                     
+                                                     				
 			            state = SM_WAIT_FOR_INSTRUCTION;	
 			            flag_wall = true;
                         //state = SM_TAKE;	
@@ -577,18 +585,27 @@ int main(int argc, char** argv){
 
                 if(tokens[0] == "takep"){
                     //Tomar de la plataforma
+		std::cout << "Estoy enviando un 1" << std::endl;
                     manipulator_var.data = 1;
                 }
                 else{
-                    //Tomar de la banda
-                    manipulator_var.data = 2;
+ 		  if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
+			std::cout << "Estoy enviando un 4" << std::endl;
+			//Tomar de la banda izq
+			manipulator_var.data = 4;
+		    }
+		    else{
+std::cout << "Estoy enviando un 2" << std::endl;
+			//Tomar de la banda derecha
+			manipulator_var.data = 2;
+		    }
                 }
 
                 pubManipulator.publish(manipulator_var);
                 std::cout << "Estoy tomando" << std::endl;
 
                 //Delay para que pueda tomar la pieza
-	    		ros::Duration(3, 0).sleep();
+	    		ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 		
 		        // FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
@@ -609,16 +626,25 @@ int main(int argc, char** argv){
 	    		
                 if(tokens[0] == "dropp"){
                     //Dejar en la plataforma
+std::cout << "Estoy enviando un 3" << std::endl;
                     manipulator_var.data = 3;
                 }
                 else{
-                    //Dejar en la banda
-                    manipulator_var.data = 0;
+		    if(station_buffer == "CS" || station_buffer == "DS"){
+		std::cout << "Estoy enviando un 5" << std::endl;
+			//Dejar en la banda izq
+			manipulator_var.data = 5;
+		    }
+		    else{
+std::cout << "Estoy enviando un 0" << std::endl;
+			//Dejar en la banda derecha
+			manipulator_var.data = 0;
+		    }
                 }
                 pubManipulator.publish(manipulator_var);
 
                 //Delay para que pueda dejar la pieza
-	    		ros::Duration(3, 0).sleep();
+	    		ros::Duration(30, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 
                 //Al nodo del manipulador se le manda un 2 para DROP
