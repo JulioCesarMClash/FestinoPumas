@@ -566,8 +566,8 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                              }
 				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
-                         //Si estamos en la CS y vamos a la entrada son 3 a la izquierda
-                         else if(tokens[1] == "CS" && tokens[4] == "entrance"){
+                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
+                         else if(tokens[1] == "CS"){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
