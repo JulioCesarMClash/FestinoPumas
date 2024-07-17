@@ -124,7 +124,14 @@ class FindTagNode:
                       min_y = np.min([last_corner[1],first_corner[1]])
                       
                       print("tamano de imagen es: ", aruco_img.shape)
-                      cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+                      cent_i = int(max_x - (max_x-min_x)/2)
+                      if cent_i > 479:
+                        cent_i = 479
+                      cent_j = int(max_y - (max_y-min_y)/2)
+                      cent = (cent_i,cent_j)
+                      print("el centro es: ",cent)
+
+                     
 
                     pos_x = float(arr[cent][0])
                     pos_y = float(arr[cent][1])
@@ -134,70 +141,98 @@ class FindTagNode:
                       #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                       aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                       print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
-      
-                
-                    start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 
-                    # End coordinate, here (250, 250) 
-                    # represents the bottom right corner of image 
+                    if(aruco_pose.point.x  < 0.95):
 
-                    #Esquina para detectar recta superior
-                    #end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
-                    
-                    #Esquina para detectar recta lateral (con esta orientacion estan los Arucos en las maquinas)
-                    end_point = (corneru[(0,1,0)],corneru[(0,1,1)])
+                      start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 
-                    y2 = corneru[(0,1,1)]
-                    y1 = corneru[(0,0,1)]
-                    x2 = corneru[(0,1,0)]
-                    x1 = corneru[(0,0,0)]
-                    
-                    # Green color in BGR 
-                    color = (0, 255, 0) 
-                    
-                    # Line thickness of 9 px 
-                    thickness = 9
-                    
-                    # Using cv2.line() method 
-                    # Draw a diagonal green line with thickness of 9 px 
-                    image = cv2.line(aruco_img, start_point, end_point, color, thickness) 
+                      # End coordinate, here (250, 250) 
+                      # represents the bottom right corner of image 
 
-                    #Si al principio no lo encontro entonces giro
-                    #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
-                    #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
-                    if not already_tag:
-                      vel.angular.z = 0
-                      if no_find_2:
-                        vel.linear.y = -1
-                        pub_vel.publish(vel)
-                        print("Me muevo para un lado hmm")
-                      elif no_find_1 and not no_find_2:
-                        vel.linear.y = 1
-                        pub_vel.publish(vel)
-                        print("Me muevo para el otro lado")
+                      #Esquina para detectar recta superior
+                      #end_point = (corneru[(0,3,0)],corneru[(0,3,1)])
+                      
+                      #Esquina para detectar recta lateral (con esta orientacion estan los Arucos en las maquinas)
+                      end_point = (corneru[(0,1,0)],corneru[(0,1,1)])
 
-                    #Se obtiene la pendiente de la recta
-                    slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
+                      y2 = corneru[(0,1,1)]
+                      y1 = corneru[(0,0,1)]
+                      x2 = corneru[(0,1,0)]
+                      x1 = corneru[(0,0,0)]
+                      
+                      # Green color in BGR 
+                      color = (0, 255, 0) 
+                      
+                      # Line thickness of 9 px 
+                      thickness = 9
+                      
+                      # Using cv2.line() method 
+                      # Draw a diagonal green line with thickness of 9 px 
+                      image = cv2.line(aruco_img, start_point, end_point, color, thickness) 
 
-                    print("la pendiente es: ", slope)
+                      #Si al principio no lo encontro entonces giro
+                      #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
+                      #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
+                      if not already_tag:
+                        vel.angular.z = 0
+                        if no_find_2:
+                          vel.linear.y = -1
+                          pub_vel.publish(vel)
+                          print("Me muevo para un lado hmm")
+                        elif no_find_1 and not no_find_2:
+                          vel.linear.y = 1
+                          pub_vel.publish(vel)
+                          print("Me muevo para el otro lado")
 
-                    rospy.sleep(3)
-                    Kp = -3.0
-                    Kp_m = 3.0
+                      #Se obtiene la pendiente de la recta
+                      slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
 
-                    vel.linear.y = 0
-                    if(slope > 0.01):
-                        vel.angular.z = Kp*abs(slope)
-			                  #Se publica al cmd_vel el giro angular que se requiera
-                        #Meti el publish en los if porque al estar afuera hace un giro extra 
-                        pub_vel.publish(vel)
-                    elif (slope < -0.01):
-                        vel.angular.z = Kp_m*abs(slope)
-                        #Se publica al cmd_vel el giro angular que se requiera
-                        #Meti el publish en los if porque al estar afuera hace un giro extra 
-                        pub_vel.publish(vel)
-                    already_tag = True
-                    rospy.sleep(2)
+                      print("la pendiente es: ", slope)
+
+                      rospy.sleep(3)
+                      Kp = -3.0
+                      Kp_m = 3.0
+
+                      vel.linear.y = 0
+                      if(slope > 0.01):
+                          vel.angular.z = Kp*abs(slope)
+                          #Se publica al cmd_vel el giro angular que se requiera
+                          #Meti el publish en los if porque al estar afuera hace un giro extra 
+                          pub_vel.publish(vel)
+                      elif (slope < -0.01):
+                          vel.angular.z = Kp_m*abs(slope)
+                          #Se publica al cmd_vel el giro angular que se requiera
+                          #Meti el publish en los if porque al estar afuera hace un giro extra 
+                          pub_vel.publish(vel)
+                      already_tag = True
+                      rospy.sleep(2)
+                    else:
+                      already_tag = False 
+                      if next_turn:
+                        #Se gira despues para este lado (sentido horario)
+                        #Si aun no regresa a la posicion original que gire 3 veces para regresar a 
+                        #la posicion original mas un giro extra
+                        #if not go_back:
+                        vel.angular.z = -0.7854
+                        print("Giro para el otro dentro del try")
+                        #go_back = True
+                        #Ya que dio el primer giro da el segundo
+                        #else:
+                        no_find_2 = True
+                      else:
+                        #Primero se gira hacia este lado (sentido antihorario)
+                        no_find_1 = True
+                        print("Giro para un lado dentro del try")
+                        vel.angular.z = 0.7854
+                        #Aumenta en 1 el numero de giros
+                        cont_giro = cont_giro + 1
+                        #Cuando ya se hayan dado dos giros hacia este lado ya se empezara a girar al otro
+                        if(cont_giro == 2):
+                            next_turn = True
+                      pub_vel.publish(vel)
+                      print('No Tag')
+                      rospy.sleep(4)
+
         #Esta excepcion es cuando no encuentra ningun Aruco
         except AttributeError:
             already_tag = False 
