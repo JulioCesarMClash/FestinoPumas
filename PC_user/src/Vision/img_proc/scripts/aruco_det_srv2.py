@@ -124,7 +124,7 @@ class FindTagNode:
                       min_y = np.min([last_corner[1],first_corner[1]])
                       
                       print("tamano de imagen es: ", aruco_img.shape)
-                      cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+                      cent = [int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2)]
                       print("el centro es: ",cent)
 
                       if cent[0] > 479:
