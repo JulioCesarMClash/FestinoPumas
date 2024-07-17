@@ -207,7 +207,7 @@ class FindTagNode:
                         #la posicion original mas un giro extra
                         #if not go_back:
                         vel.angular.z = -0.7854
-                        print("Giro para el otro")
+                        print("Giro para el otro dentro del try")
                         #go_back = True
                         #Ya que dio el primer giro da el segundo
                         #else:
@@ -215,7 +215,7 @@ class FindTagNode:
                       else:
                         #Primero se gira hacia este lado (sentido antihorario)
                         no_find_1 = True
-                        print("Giro para un lado")
+                        print("Giro para un lado dentro del try")
                         vel.angular.z = 0.7854
                         #Aumenta en 1 el numero de giros
                         cont_giro = cont_giro + 1
