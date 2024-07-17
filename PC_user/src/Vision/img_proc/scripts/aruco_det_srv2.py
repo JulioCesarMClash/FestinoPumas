@@ -111,6 +111,30 @@ class FindTagNode:
       
                 for i in range (markerIds.shape[0]):
                     corneru = corners[0]
+                    first_corner = (corneru[(0,0,0)],corneru[(0,0,1)])
+                    last_corner = (corneru[(0,2,0)],corneru[(0,2,1)])
+                    known_markers = ([101,102,103,104,111,112,113,114,121,122,131,132,141,142,201,202,203,204,211,212,213,214,221,222,231,232,241,242])
+
+                    if markerIds[i] in known_markers:
+                      aruco_det_flag = True
+                      max_x = np.max([last_corner[0],first_corner[0]])
+                      min_x = np.min([last_corner[0],first_corner[0]])
+
+                      max_y = np.max([last_corner[1],first_corner[1]])
+                      min_y = np.min([last_corner[1],first_corner[1]])
+                      
+                      print("tamano de imagen es: ", aruco_img.shape)
+                      cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+
+                    pos_x = float(arr[cent][0])
+                    pos_y = float(arr[cent][1])
+                    pos_z = float(arr[cent][2])
+
+                    if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
+                      #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
+                      aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
+                      print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
+      
                 
                     start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 
@@ -176,6 +200,7 @@ class FindTagNode:
                     rospy.sleep(2)
         #Esta excepcion es cuando no encuentra ningun Aruco
         except AttributeError:
+            already_tag = False 
             if next_turn:
                #Se gira despues para este lado (sentido horario)
                #Si aun no regresa a la posicion original que gire 3 veces para regresar a 
