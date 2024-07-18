@@ -359,9 +359,11 @@ std::vector<float> tf_y {0, 1.5, 1.5, 3.5, 3.5, 4.5, 4.5, 1.5, 0.5, 4.5};
 
 void field_color_coords(std::string color){
 	if(color == "CYAN"){
+		std::cout << "\n Definiendo coordenadas para CYAN \n" << std::endl;
 		x_pips = x_pips_c;
 	}
 	else{
+		std::cout << "\n Definiendo coordenadas para MAGENTA \n" << std::endl;
 		x_pips = x_pips_m;
 	}
 }
