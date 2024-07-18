@@ -37,14 +37,9 @@
 std::string instructions[] = {"goto CS C_Z56 270 platform",
                               "goto CS C_Z42 0 entrance",
                               "goto CS C_Z42 0 output",
-
                              "goto CS M_Z61 0 entrance"};
 
 int cont_instructions = 0;
-
-ros::Publisher pubVel;
-//Para el cmd_vel
-geometry_msgs::Twist vel;
 
 //-------------------------------------------------------------------------------//
 //-----------------------PARAMETROS Y FUNCIONES PARA DEBUG-----------------------//
@@ -182,7 +177,12 @@ SMState state = SM_INIT;
 #define steps_to_band 6
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
-
+//Umbral de distancia para tomar en cuenta las lecturas del hokuyo y acercarse a la estacion
+#define dist_station_threshold 1
+//Calibracion del angulo para voltear a ver a la estacion
+#define calib_angle 0
+//Delay para esperar a que el brazo termine de tomar o dejar pieza
+#define arm_delay 30
 
 
 //-------------------------------------------------------------------------------//
@@ -194,6 +194,7 @@ bool request = false;
 //String that storage instruction tokens
 std::vector<std::string> tokens;
 
+//Callback que recibe las instrucciones del planeador 
 void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
     std::cout << "Entré al callback de instrucciones" << msg->data.c_str() <<std::endl;	
@@ -231,7 +232,8 @@ int angulo_int = 0;
 //TF que va guardando la zona objetivo
 geometry_msgs::PoseStamped tf_target_zone;
 
-//Función para ya hacer pruebas con el Refbox
+
+//Funcion que modifica el lugar al que llega el robot dependiendo de la orientacion de la estacion
 void compute_coordinates(){
     //Signo por el que se multiplican los senos y cosenos 
     int dir_sign = 0;
@@ -242,24 +244,25 @@ void compute_coordinates(){
     angulo_pose = angulo_int*(M_PI/180);
 
     if(tokens[4] == "entrance" || tokens[4] == "platform" ){
-	//Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
+	    //Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
         angulo_int = angulo_int - 180;
-	//Si es entrada o plataforma se le suman los senos y cosenos   
-	dir_sign = 1;                    
+	    //Si es entrada o plataforma se le suman los senos y cosenos   
+	    dir_sign = 1;                    
     }
     if(tokens[4] == "output"){
-	//Si es salida se le restan los senos y cosenos  
-	dir_sign = -1; 
+	    //Si es salida se le restan los senos y cosenos  
+	    dir_sign = -1; 
     }
 
+    //La coordenada original se modifica para que el robot llegue en la orientacion adecuada de la estacion
     tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + dir_sign*param_x*cos(angulo_pose);
     tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + dir_sign*param_y*sin(angulo_pose); 
 
-    //Se convierte el angulo de degrees a radianes
+    //Se convierte el angulo de degrees a radianes, esto se usa en el main para que el robot voltee a ver hacia la maquina
     angulo_rad = angulo_int*(M_PI/180);
 }
 
-//Funcion para ya hacer pruebas con el refbox
+//Funcion que obtiene las coordenadas de las zonas con el lookupTransform
 void transform_zone()
 {
 	tf::TransformListener listener;
@@ -315,56 +318,49 @@ sensor_msgs::LaserScan laserScan;
 bool flag_wall = false;
 float move_to_machine = 0.0f;
 
+//Callback que recibe las lecturas del hokuyo para cuando se necesite acercar a la maquina
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-
+    //Solo cuando flag_wall sea true se realizara todo esto
     if(flag_wall == true){
-	std::cout<< "Entro al if del flag_wall"<<std::endl;
+	    std::cout<< "Entro al if del flag_wall"<<std::endl;
 	    laserScan = *msg;
 
 	    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
 	    float laser_l=0;
 	    range=laserScan.ranges.size();
-	    //std::cout<<laserScan.ranges.size()<<std::endl;
+
 	    range_c=range/2;
 	    range_i=range_c-(range/10);
 	    range_f=range_c+(range/10);
-	    //std::cout<<"Range Size: "<< range << "\n ";
-	    //std::cout<<"Range Central: "<< range_c << "\n ";
-	    //std::cout<<"Range Initial: "<< range_i << "\n ";
-	    //std::cout<<"Range Final: "<< range_f << "\n ";
 
 	    cont_laser=0;
 	    laser_l=0;
 	    for(int i=range_c-(range/10); i < range_c+(range/10); i++)
 	    {
-            if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < 1)
+            //Si la distancia de la lectura es mayor a cero y menor al umbral definido entonces se toma en cuenta para la suma
+            if(laserScan.ranges[i] > 0 && laserScan.ranges[i] < dist_station_threshold)
             { 
                 laser_l=laser_l+laserScan.ranges[i]; 
+                //Se va contando el numero de lecturas que se suman para despues sacar un promedio de distancia
                 cont_laser++;
             }
 	    }
-	std::cout<< "El promedio de distancia es: " << laser_l/cont_laser << std::endl;
+	    std::cout<< "El promedio de distancia es: " << laser_l/cont_laser << std::endl;
 
+        //Si el promedio de distancia es mayor a 0.20 entonces avanza hacia adelante
 	    if(laser_l/cont_laser > 0.20)
 	    {
-	std::cout<< "Entro al if del callback del hokuyo"<<std::endl;
+	        std::cout<< "Entro al if del callback del hokuyo"<<std::endl;
             flag_wall = false;
+            //La distancia que avanza hacia adelante es el promedio de distancia menos un parametro de calibracion para que no choque
             move_to_machine = laser_l/cont_laser - param_calib_dist;
             FestinoNavigation::moveDistAngle(move_to_machine, 0, 1000);
 	    }
     } 
 }
 
-
-/*void callbackMoveLat(const std_msgs::Float32::ConstPtr& msg){
-	
-	float mov_lat = (*msg).data;	
-	FestinoNavigation::moveLateral(mov_lat, 10000);
-	FestinoNavigation::moveDistAngle(0.2, 0, 10000);
-	std::cout << "Entro al callback lateral, mov_lat es: " << mov_lat << std::endl;
-}*/
-
+//Funcion que va recorriendo el arreglo de instrucciones falsas para hacer pruebas
 void debug_instructions(std::string instruction)
 {
     std::cout << "Entré a la funció de instrucciones" <<std::endl;	
@@ -415,7 +411,7 @@ int main(int argc, char** argv){
     ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
     ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
-pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
+    ros::Publisher pubVel           = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     //Declarar servicio para encontrar pieza
     ros::ServiceClient piece_client 		= n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
     ros::ServiceClient aruco_client 		= n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
@@ -424,8 +420,11 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     img_proc::Find_tag_Srv aruco_srv;
 
     ros::Rate loop(30);
-
+    
     std::string voice;
+
+    //Para el cmd_vel
+    geometry_msgs::Twist vel;
 
     //String que se le envía al planeador para pedirle una instrucción 
     std_msgs::String request_string;
@@ -444,9 +443,6 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
     std::string sec_buffer = "indef";
 
     std::string station_buffer = "NA";
-
- 
-
 
 	while(ros::ok() && !fail && !success){
 	    switch(state){
@@ -469,7 +465,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 				//FestinoHRI::say(voice,5);
 
                 //debug_instructions(instructions[cont_instructions]);
-//                cont_instructions++;
+                //cont_instructions++;
 
                 //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
@@ -480,8 +476,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                  }
 
 			    //Waiting for instruction
-	
-	    	state = SM_WAIT_FOR_INSTRUCTION;
+	    	    state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
 	    	case SM_GO_TO:
@@ -499,14 +494,14 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                         ros::Duration(1, 0).sleep();
                     }
 
-		            //FestinoNavigation::moveLateral(dist_to_platform, 1000);
-
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
+                //Si se trata de la zona final hay que ir al centro de la misma
                 else if (tokens[1] == "ES"){
                     FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
                     transform_zone();
                     navigate_to_location(tf_target_zone);
+
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else{
@@ -524,17 +519,18 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     navigate_to_location(tf_target_zone);
 
                     //Movimiento angular para que vea hacia la máquina
-		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-0.1, 1000);
+		            FestinoNavigation::moveDistAngle(0.0, angulo_rad-calib_angle, 1000);
                     state = SM_ALIGN;
                 }
                 
+                //Variables que guardan la zona, la seccion y la estacion en la que estamos
+
+                //Zona
                 zone_buffer = tokens[2];
+                //Seccion
                 sec_buffer  = tokens[4];
+                //Estacion
 		        station_buffer = tokens[1];
-            
-                //Navegacion ROS para hacer pruebas
-                //pub_rosnav_goal.publish(tf_target_zone);
-				//ros::Duration(5, 0).sleep();
                 
 	    		break;
 
@@ -564,27 +560,26 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                                 pubVel.publish(vel);
 			                    ros::Duration(1, 0).sleep();
                              }
-				            //FestinoNavigation::moveLateral(-dist_to_platform, 1000);
                          }
-                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
-                         else if(tokens[1] == "CS"){
+                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda (ya sea entrada o salida)
+                         else if((tokens[1] == "CS") || (tokens[1] == "BS" && tokens[4] == "output")){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
-                            std::cout << "Publico uno en vel para quedar a la izquierda de la banda de CS" << std::endl;
+                            std::cout << "Publico uno en vel para quedar a la izquierda de la banda de salida de BS y cualquiera de CS" << std::endl;
                             pubVel.publish(vel);
                             ros::Duration(1, 0).sleep();
                          }
-                         //si estamos en la BS y vamos a la output entonces que se mueva uno a la izquierda
-                         else if(tokens[1] == "BS" && tokens[4] == "output"){
-                            //Mueve uno a la izquierda de la banda
-                            //Positivo a la izquierda
-                            vel.linear.y = 2;
-                            std::cout << "Publico uno en vel para quedar a la izquierda de la banda de BS" << std::endl;
+                         //si estamos en la BS y vamos a la entrance entonces que se mueva uno a la derecha
+                         else if(tokens[1] == "BS" && tokens[4] == "entrance"){
+                            //Mueve uno a la derecha de la banda
+                            //Negativo a la derecha
+                            vel.linear.y = -2;
+                            std::cout << "Publico uno en vel para quedar a la derecha de la banda de entrada de BS" << std::endl;
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
                          }
-                         /*else if(tokens[1] == "CS" && tokens[4] == "output"){
+                         /*else if(tokens[1] == "RS" && tokens[4] == "output"){
                             //Mueve uno a la derecha de la banda
                             //Negativo a la derecha
                             vel.linear.y = -2;
@@ -613,6 +608,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 					state = SM_ALIGN;
 				}
                 break;
+
 			case SM_TAKE:
 	    		std::cout << "State machine: SM_TAKE" << std::endl;	
 	            voice = "Grasping the piece";
@@ -625,7 +621,7 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                     manipulator_var.data = 1;
                 }
                 else{
- 		            if(station_buffer == "BS" || station_buffer == "RS" || station_buffer == "CS"){
+ 		            if((station_buffer == "BS" && sec_buffer == "output") || station_buffer == "RS" || station_buffer == "CS"){
                         std::cout << "Estoy enviando un 4" << std::endl;
                         //Tomar de la banda izq
                         manipulator_var.data = 4;
@@ -641,18 +637,10 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                 std::cout << "Estoy tomando" << std::endl;
 
                 //Delay para que pueda tomar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		ros::Duration(arm_delay, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
-		
-		        // FestinoNavigation::moveDistAngle(0, 90*M_PI/180, 10000);
-		        // FestinoNavigation::moveDistAngle(0.4, 0, 10000);
-		        // FestinoNavigation::moveDistAngle(0, -90*M_PI/180, 10000);
-		
-                // std::cout << "Me estoy moviendo" << std::endl;
-		        // ros::Duration(10, 0).sleep();
 
                 state = SM_WAIT_FOR_INSTRUCTION;
-                //state = SM_DROP;
 	    		break;
 			case SM_DROP:
 	    		std::cout << "State machine: SM_DROP" << std::endl;	
@@ -685,14 +673,9 @@ pubVel   = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
                 pubManipulator.publish(manipulator_var);
 
                 //Delay para que pueda dejar la pieza
-	    		ros::Duration(30, 0).sleep();
+	    		ros::Duration(arm_delay, 0).sleep();
                 std::cout << "Ya pasaron los 30 seg" << std::endl;
 
-                //Al nodo del manipulador se le manda un 2 para DROP
-                //manipulator_var.data = 2;
-                //pubManipulator.publish(manipulator_var);
-
-                //state = SM_FINAL_STATE;
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
