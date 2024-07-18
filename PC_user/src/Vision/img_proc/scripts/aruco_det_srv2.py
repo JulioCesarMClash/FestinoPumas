@@ -123,13 +123,13 @@ class FindTagNode:
                       max_y = np.max([last_corner[1],first_corner[1]])
                       min_y = np.min([last_corner[1],first_corner[1]])
                       
-                      print("tamano de imagen es: ", aruco_img.shape)
+                      print("veo un aruco y el tamano de imagen es: ", aruco_img.shape)
                       cent_i = int(max_x - (max_x-min_x)/2)
                       if cent_i > 479:
                         cent_i = 479
                       cent_j = int(max_y - (max_y-min_y)/2)
                       cent = (cent_i,cent_j)
-                      print("el centro es: ",cent)
+                      #print("el centro es: ",cent)
 
                      
 
@@ -170,6 +170,30 @@ class FindTagNode:
                       # Draw a diagonal green line with thickness of 9 px 
                       image = cv2.line(aruco_img, start_point, end_point, color, thickness) 
 
+                      #Se obtiene la pendiente de la recta
+                      slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
+
+                      print("veo un aruco dentro del rango y la pendiente es: ", slope)
+
+                      
+                      Kp = -3.0
+                      Kp_m = 3.0
+
+                      vel.linear.y = 0
+                      if(slope > 0.01):
+                          print("giro giro")
+                          vel.angular.z = Kp*abs(slope)
+                          #Se publica al cmd_vel el giro angular que se requiera
+                          #Meti el publish en los if porque al estar afuera hace un giro extra 
+                          pub_vel.publish(vel)
+                      elif (slope < -0.01):
+                          print("giro giro")
+                          vel.angular.z = Kp_m*abs(slope)
+                          #Se publica al cmd_vel el giro angular que se requiera
+                          #Meti el publish en los if porque al estar afuera hace un giro extra 
+                          pub_vel.publish(vel)
+
+                      rospy.sleep(3)
                       #Si al principio no lo encontro entonces giro
                       #Estos ifs son para que se mueva hacia el lado que giro para que al querer alinearse no lo pierda de nuevo
                       #Primero se tiene que hacer esto y despues se tiene que sacar la pendiente
@@ -183,27 +207,7 @@ class FindTagNode:
                           vel.linear.y = 1
                           pub_vel.publish(vel)
                           print("Me muevo para el otro lado")
-
-                      #Se obtiene la pendiente de la recta
-                      slope = (y2-y1)/(x2-x1) if (x2-x1)!=0 else 0
-
-                      print("la pendiente es: ", slope)
-
-                      rospy.sleep(3)
-                      Kp = -3.0
-                      Kp_m = 3.0
-
-                      vel.linear.y = 0
-                      if(slope > 0.01):
-                          vel.angular.z = Kp*abs(slope)
-                          #Se publica al cmd_vel el giro angular que se requiera
-                          #Meti el publish en los if porque al estar afuera hace un giro extra 
-                          pub_vel.publish(vel)
-                      elif (slope < -0.01):
-                          vel.angular.z = Kp_m*abs(slope)
-                          #Se publica al cmd_vel el giro angular que se requiera
-                          #Meti el publish en los if porque al estar afuera hace un giro extra 
-                          pub_vel.publish(vel)
+                          
                       already_tag = True
                       rospy.sleep(2)
                     else:
@@ -214,7 +218,7 @@ class FindTagNode:
                         #la posicion original mas un giro extra
                         #if not go_back:
                         vel.angular.z = -0.7854
-                        print("Giro para el otro dentro del try")
+                        print("Giro para el otro dentro del try aruco fuera rango")
                         #go_back = True
                         #Ya que dio el primer giro da el segundo
                         #else:
@@ -222,7 +226,7 @@ class FindTagNode:
                       else:
                         #Primero se gira hacia este lado (sentido antihorario)
                         no_find_1 = True
-                        print("Giro para un lado dentro del try")
+                        print("Giro para un lado dentro del try aruco fuera rango")
                         vel.angular.z = 0.7854
                         #Aumenta en 1 el numero de giros
                         cont_giro = cont_giro + 1

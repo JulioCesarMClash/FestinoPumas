@@ -53,21 +53,29 @@
 //#define HOST "localhost"
 
 //ROBOCUP
-#define HOST "192.168.0.198"//"172.26.255.255"
+#define HOST "192.168.1.255"//"172.26.255.255"
 
 
 //#define HOST "172.23.134.255"
 //#define TEAM_COLOR "MAGENTA"
 #define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
+
+//robot 1
 #define ROBOT_NAME "Festino"
+#define ROBOT_NO 1
+//robot 2
+/*
+#define ROBOT_NAME "Festina"
+#define ROBOT_NO 2
+*/
 #define CRYPTO_KEY "randomkey"
 #define PUBLIC_PORT_S 4444
 #define PUBLIC_PORT_R 4445//4445
 #define CYAN_PORT_S 4441
-#define CYAN_PORT_R 4441//4446
-#define MAGENTA_PORT_S 4447
-#define MAGENTA_PORT_R 4442//4447
+#define CYAN_PORT_R 4446//4446
+#define MAGENTA_PORT_S 4442
+#define MAGENTA_PORT_R 4447//4447
 
 #define TCPPORT 9002
 
@@ -930,12 +938,27 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                                         //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
 
 string my_msg = "";
-for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
-   // ROS_INFO_STREAM("UNA ZONA " << i);
-    //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
-    my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+    for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
+    // ROS_INFO_STREAM("UNA ZONA " << i);
+        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+    }
+    /*2 robots, each plan on each robot*/
+    /*
+if(ROBOT_NO == 1){
+    for(int i = 0; i < navigation_routes->routes().Get(0).route_size() / 2; i++){
+    // ROS_INFO_STREAM("UNA ZONA " << i);
+        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+    }
+} else {//ROBOT_NO == 2
+    for(int i = navigation_routes->routes().Get(0).route_size() / 2; i < navigation_routes->routes().Get(0).route_size(); i++){
+    // ROS_INFO_STREAM("UNA ZONA " << i);
+        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+    }
 }
-
+*/
 
        std_msgs::String el_msg;
    
@@ -1592,7 +1615,7 @@ pub_zone.publish(el_msg);
                 
 
                 msg->set_seq(++m_sequence_nr_);
-                msg->set_number(1);
+                msg->set_number(ROBOT_NO);
                 msg->set_team_name(m_team_name);
                 msg->set_peer_name(ROBOT_NAME);
 
@@ -1741,9 +1764,9 @@ int main(int argc, char** argv)
     tf::StampedTransform transform_rob;
 
     try{
-      listener_rob.waitForTransform("/base_link","/map",   
+      listener_rob.waitForTransform("/Log_origin", "/base_link",   
                                    ros::Time(0), ros::Duration(1000.0));
-      listener_rob.lookupTransform("/base_link","/map",   
+      listener_rob.lookupTransform("/Log_origin","/base_link",   
                                    ros::Time(0), transform_rob);
     }
     catch (tf::TransformException ex){
