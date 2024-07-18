@@ -57,8 +57,8 @@
 
 
 //#define HOST "172.23.134.255"
-//#define TEAM_COLOR "MAGENTA"
-#define TEAM_COLOR "CYAN"
+#define TEAM_COLOR "MAGENTA"
+//#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
 
 //robot 1
@@ -1782,13 +1782,13 @@ int main(int argc, char** argv)
 
     pose_x = transform_rob.getOrigin().x();
 	pose_y = transform_rob.getOrigin().y();
-/*
+
 if(TEAM_COLOR == "CYAN"){
 	pose_x -= 2;
 } else {
 	pose_x += 2;
 }
-*/
+
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
 
     pose_ori = 0.0f;
