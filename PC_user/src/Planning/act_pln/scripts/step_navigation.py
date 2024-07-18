@@ -55,8 +55,8 @@ def main():
 
 	#ros_refbox_comm 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "surge_et_ambula/launch/robot_comm.launch"])
 
-	ros_nav_launch 		=  roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/explore_n_map.launch"])
-	doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/late_navigation.launch"])
+	exp_stage_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "surge_et_ambula/launch/exploration_stage.launch"])
+	doc_nav_launch 		= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/config_files/launch/navigation.launch"])
 	log_zones_launch 	= roslaunch.parent.ROSLaunchParent(uuid, [path + "Navigation/Pos_control/movement_functions/launch/logisticsZones.launch"])
 	main_track_robot_launch = roslaunch.parent.ROSLaunchParent(uuid, [path + "surge_et_ambula/launch/main_track_robot.launch"])
 
@@ -83,65 +83,40 @@ def main():
 	while(not time_over):
 		rospy.sleep(3)
 		print("Starting  Exploration")
-		ros_nav_launch.start()
+		exp_stage_launch.start()
 		rospy.loginfo("Robot-Server communication started")
 
 		now = rospy.get_rostime()
-		rospy.loginfo("Mapping started at %i", now.secs)
 
 		rospy.sleep(180)
 
-		now = rospy.Time.now()
-		listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
-		(first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
-		print("Robot a map - FIRST POS", first_trans, "\t", first_rot, "at %i", now.secs)
-
-		os.system("rosrun map_server map_saver -f " + path + "Navigation/config_files/maps/dirty_latemap")
-		os.system("rosrun map_server map_saver -f " + path + "Navigation/config_files/prohibition_maps/dirty_latemap_pro")
-		rospy.loginfo("Map saved")
-
-		now = rospy.get_rostime()
-		rospy.loginfo("Mapping killed at %i", now.secs)
-		ros_nav_launch.shutdown()
-
-		now = rospy.get_rostime()
-		rospy.loginfo("Doc Nav started at %i", now.secs)
-		doc_nav_launch.start()
-		#log_zones_launch.start()
-		rospy.sleep(10)
-
-		now = rospy.Time.now()
-		listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
-		(first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
+		listener.waitForTransform("/base_link", "/map", now, rospy.Duration(4.0))
+		(first_trans,first_rot) = listener.lookupTransform("/base_link", "/map", now)
 		print("\n Robot a map - SEC POS", first_trans, "\t", first_rot, "at %i", now.secs)
 
 		print("WRITING ORIGIN IN PREV-MAP")
-		robot_init_pose.pose.pose.position.x = first_trans[0]
-		robot_init_pose.pose.pose.position.y = first_trans[1]
-		robot_init_pose.pose.pose.position.z = first_trans[2]
-		robot_init_pose.pose.pose.orientation.x = first_rot[0]
-		robot_init_pose.pose.pose.orientation.y = first_rot[1]
-		robot_init_pose.pose.pose.orientation.z = first_rot[2]
-		robot_init_pose.pose.pose.orientation.w = first_rot[3]
-		robot_init_pose.pose.covariance = [0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06853892326654787]
-		position_pub.publish(robot_init_pose)
+		robot_last_pose.pose.pose.position.x = first_trans[0]
+		robot_last_pose.pose.pose.position.y = first_trans[1]
+		robot_last_pose.pose.pose.position.z = first_trans[2]
+		robot_last_pose.pose.pose.orientation.x = first_rot[0]
+		robot_last_pose.pose.pose.orientation.y = first_rot[1]
+		robot_last_pose.pose.pose.orientation.z = first_rot[2]
+		robot_last_pose.pose.pose.orientation.w = first_rot[3]
+		robot_last_pose.pose.covariance = [0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.06853892326654787]
+		position_pub.publish(robot_last_pose)
 
 		rospy.sleep(3)
 
 		now = rospy.Time.now()
-		listener.waitForTransform("/odom", "/map", now, rospy.Duration(4.0))
-		(first_trans,first_rot) = listener.lookupTransform("/odom", "/map", now)
+		listener.waitForTransform("/base_link", "/map", now, rospy.Duration(4.0))
+		(first_trans,first_rot) = listener.lookupTransform("/base_link", "/map", now)
 		print("Robot a map - LAST POS", first_trans, "\t", first_rot, "at %i", now.secs)
 		
 	if(time_over):
+		exp_stage_launch.shutdown()
 		print("Time over, start Rebecas launch")
-		ros_nav_launch.shutdown()
-		rospy.sleep(2)
-		ejec_script()
-		doc_nav_launch.start()
-		rospy.sleep(2)
+		#ejec_script()
 		main_track_robot_launch.start()
-
 
 	try:
 	    rospy.spin()
