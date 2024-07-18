@@ -835,7 +835,7 @@ int main(int argc, char** argv){
 	    switch(state){
 			case SM_INIT:{
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;
-				field_color_coords("CYAN");
+				field_color_coords("MAGENTA");
 	            std::cout << "I am ready - Exploration route has  " << x_pips.size() << " points" << std::endl;
 				try{
 					listener.waitForTransform("/map", "/Log_origin", ros::Time(0), ros::Duration(1.0));
@@ -848,16 +848,16 @@ int main(int argc, char** argv){
 				Log_origin.pose.position.x = transform.getOrigin().x();
 				Log_origin.pose.position.y = transform.getOrigin().y();
 				Log_origin.pose.position.z = transform.getOrigin().z();
-				//std::cout << "Logistics Origin" << Log_origin.pose.position << std::endl;
-	    		state = SM_FINAL_STATE;
+
+	    		state = SM_NAV_PIPS;
 	    		break;
 			}
 
 			case SM_NAV_PIPS:{
 				std::cout << "\n State machine: SM_NAV_PIPS" << std::endl;
-				robot_next_pos.pose.position.x = Log_origin.pose.position.x + x_pips_c[curr_pip];
-				robot_next_pos.pose.position.y = Log_origin.pose.position.y + y_pips_c[curr_pip];
-				if(curr_pip <= x_pips_c.size()){
+				robot_next_pos.pose.position.x = Log_origin.pose.position.x + x_pips[curr_pip];
+				robot_next_pos.pose.position.y = Log_origin.pose.position.y + y_pips[curr_pip];
+				if(curr_pip <= x_pips.size()){
 					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
 					//navigate_to_location(pips_poses.at(curr_pip));
 					state = SM_TURN_AROUND;
@@ -912,7 +912,7 @@ int main(int argc, char** argv){
 	    		//Finish
 	    		std::cout << "\n State machine: SM_FINAL_STATE" << std::endl;	
 	            std::cout << "Exploration finished" << std::endl;
-	            //std::cout << "\n PIPS successfully visited \t" << pips_vis << "PIPS missed \t" << x_pips_m.size() - pips_vis << std::endl;
+	            //std::cout << "\n PIPS successfully visited \t" << pips_vis << "PIPS missed \t" << x_pips.size() - pips_vis << std::endl;
 	            //std::cout << "\n Machine information" << std::endl;
 	            print_vector(mps_name);
 				print_vector(mps_PointStamped);
