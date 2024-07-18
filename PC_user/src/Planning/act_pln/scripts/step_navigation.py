@@ -19,7 +19,7 @@ time_start = False
 
 
 def ejec_script():
-        script_shell='/home/festino/FestinoPumas/PC_user/src/surge_et_ambula/include/map_transfer.sh'
+        script_shell='/home/pumas/FestinoPumas/PC_user/src/surge_et_ambula/include/map_transfer.sh'
         try:
                 print("Sending maps files")
                 res=subprocess.call([script_shell],shell=True)
@@ -43,7 +43,7 @@ def main():
 	global time_over
 	global time_start
 
-	path = '/home/festino/FestinoPumas/PC_user/src/'
+	path = '/home/pumas/FestinoPumas/PC_user/src/'
 
 	sub_time_over	= rospy.Subscriber("/time_over",String,callback_time_over)
 
