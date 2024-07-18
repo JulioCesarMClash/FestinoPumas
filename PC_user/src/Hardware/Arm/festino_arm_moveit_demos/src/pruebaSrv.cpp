@@ -11,7 +11,7 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 
-#include <festino_arm_moveit_demos/srv_arm.h>
+//#include <festino_arm_moveit_demos/srv_arm.h>
 
 #include <tf/transform_listener.h>
 #include "geometry_msgs/PoseStamped.h"
@@ -21,7 +21,7 @@
 void move_effector(float x, float y, float z, float pitch);
 void move_gripper(bool state);
 void kinect_hide(bool flag);
-bool callback_arm(festino_arm_moveit_demos::srv_arm::Request &req, festino_arm_moveit_demos::srv_arm::Response &res);
+//bool callback_arm(festino_arm_moveit_demos::srv_arm::Request &req, festino_arm_moveit_demos::srv_arm::Response &res);
 
 //Variables for inverse kinematics
 float x = 0.23;
@@ -40,9 +40,10 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "srv_arm");
 	std::cout << "pruebaSrv_node INITIALIZING" << std::endl;
 	ros::NodeHandle nh;
-	ros::ServiceServer service = nh.advertiseService("srv_arm", callback_arm);
-	ros::WallDuration(1.0).sleep();
-	ros::spin();
+	//ros::ServiceServer service = //nh.advertiseService("srv_arm", callback_arm);
+	//ros::WallDuration(1.0).sleep();
+	
+//ros::spin();
 	return 0;
 }
 
@@ -113,7 +114,7 @@ void move_gripper(bool state)
 		group.asyncMove();
 	}
 }
-
+/*
 bool callback_arm(festino_arm_moveit_demos::srv_arm::Request &req, festino_arm_moveit_demos::srv_arm::Response &res)
 {
 	res.success = false;
@@ -146,7 +147,7 @@ bool callback_arm(festino_arm_moveit_demos::srv_arm::Request &req, festino_arm_m
 	res.success = true;
 	return true;
 }
-
+*/
 // For z, the 0 value ref is: 0.06
 // the max value is: 0.357 when Pitch = -pi/2
 // -----------------------------------
