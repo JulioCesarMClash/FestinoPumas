@@ -690,6 +690,10 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
 
         void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
         {
+
+            /*TODO REMOVE */
+return;
+
             ROS_INFO_STREAM("-------------------------------\n\n\n\n\nRecv message on private A\n\n\n\n\n------------------------------------------------------------------");
             //ROS_INFO_STREAM(""<< msg->ShortDebugString() << " typeOOOO " << msg_type);
             switch (msg_type) {
@@ -1131,6 +1135,8 @@ pub_zone.publish(el_msg);
 
         void handleRefboxMessage(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
 
+            /*TODO REMOVE */
+    return;
 //cout<< "types: " << typeid(msg).name() << " :O "<<endl;
 
 
