@@ -1,13 +1,13 @@
 //De la arena completa solo se usa una mitad (Magenta o Cyan) y de esa solo se agarra 5x5.
-//La arena completa mide 14 x 8, pero en este caso solo se usará 5x5. 
+//La arena completa mide 14 x 8. 
 
 
 //¿Qué pasa si una máquina está muy cerca de un punto de escaneo? El kinect no verá el Aruco.
-//¿Qué pasa si hay una máquina en un punto de escaneo?
-//¿Qué pasa si un aruco está muy lejos para que la nube de puntos lo detecte?
+//¿Qué pasa si hay una máquina en un punto de escaneo?  Se queda en el punto más cercano y escanea desde ahí
+//¿Qué pasa si un aruco está muy lejos para que la nube de puntos lo detecte? pos fracasa la detección :c
 
 //Explore the Field
-//Report the position and orientation of the MPS
+//Report the name, zone and orientation of the MPS
 #include<iostream>
 #include <cmath>
 #include "ros/ros.h"
@@ -63,12 +63,11 @@ void print_vector(const std::vector<T> & vec, std::string sep=" ")
     std::cout<<std::endl;
 }
 
-//MitChanges (Last slot)
-
 std_msgs::String mps_data2send;
+//std_msgs::String mps_name2send;
 std_msgs::String mps_name2send;
 
-//MitChanges (Last slot)
+float deg_rob_mps;
 
 bool fail = false;
 bool success = false;
@@ -80,6 +79,7 @@ geometry_msgs::PoseStamped robot_curr_pos;
 geometry_msgs::PoseStamped robot_next_pos;
 geometry_msgs::PoseStamped robot_first_pos;
 geometry_msgs::PoseStamped robot_last_pos;
+geometry_msgs::PoseStamped robot_pos;
 
 std_msgs::Bool time_over;
 
@@ -296,6 +296,8 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 //Agrego el punto de salida en cada mitad como primer elemento del arreglo
 
 
+std::vector<float> x_pips;
+std::vector<float> y_pips;
 //MAGENTA
 
 //HOME: (-4.5,0.5)
@@ -355,6 +357,16 @@ std::vector<float> tf_x {0, -6.5, -1.5, -1.5, -3.5, -4.5, -4.5, -0.5, -0.5};
 //Y respecto al mapa
 std::vector<float> tf_y {0, 1.5, 1.5, 3.5, 3.5, 4.5, 4.5, 1.5, 0.5, 4.5}; 
 
+void field_color_coords(std::string color){
+	if(color == "CYAN"){
+		std::cout << "\n Definiendo coordenadas para CYAN \n" << std::endl;
+		x_pips = x_pips_c;
+	}
+	else{
+		std::cout << "\n Definiendo coordenadas para MAGENTA \n" << std::endl;
+		x_pips = x_pips_m;
+	}
+}
 
 // Este es para NavigationCH
 //Lo comente, pero lo llama despues
@@ -393,10 +405,6 @@ void callback_time_over(const std_msgs::Bool::ConstPtr& msg)
 /*void callback_mps_name(const std_msgs::String::ConstPtr& msg){
     mps_name2send = *msg;
 }*/
-
-void callback_mps_data(const std_msgs::String::ConstPtr& msg){
-    mps_data2send = *msg;
-}
 
 //Encontro un TAG
 void callback_mps_flag(const std_msgs::Bool::ConstPtr& msg){
@@ -496,90 +504,115 @@ void transform_aruco_map(geometry_msgs::PoseStamped location)
 std::string zone_name;
 std::string zone_name_obtained;
 
-void define_zone(geometry_msgs::PoseStamped location)
+bool define_zone(geometry_msgs::PoseStamped location)
 {
 	if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z11";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z12";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z13";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z14";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z15";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z21";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z22";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z23";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z24";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z25";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z31";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z32";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z33";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z34";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z35";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z41";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z42";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z43";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z44";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z45";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z51";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z52";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z53";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z54";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z55";
+		return true;
 	}
 	else{
 		zone_name = "invalid";
+		return false;
 	}
-	
 }
 
-bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_tag_Srv srv)
+bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_tag_Srv srv, ros::Publisher pub_mps_name, ros::Publisher pub_mps_pos)
 {
 	tf::TransformListener listener;
 	tf::StampedTransform transform;
@@ -589,22 +622,38 @@ bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_t
 	if(client.call(srv)){
 		tag_flag = srv.response.success;
 		std::cout << "Request accepted" << std::endl;
-		if (tag_flag == true){
+		if(tag_flag == true){
 			mps_name = srv.response.mps_name;
 			mps_PointStamped = srv.response.point_stamped;
 			std::cout << "Saving MPS info" << std::endl;
 			if(mps_name.size())
 			{
-				std::cout << "Station \t" << mps_name[0] << std::endl;
+				std::cout << "Station \t" << mps_name[0] << std::endl;				
 				try{
-					listener.waitForTransform("/camera_link",mps_name[0], ros::Time(0), ros::Duration(1000.0));
+					listener.waitForTransform("/camera_link",mps_name[0],ros::Time(0), ros::Duration(1000.0));
 					listener.lookupTransform("/camera_link", mps_name[0],ros::Time(0), transform);
+					//listener.waitForTransform("/map","M_Z22",ros::Time(0), ros::Duration(1000.0));
+					//listener.lookupTransform("/map","M_Z22",ros::Time(0), transform);
 					det_mps.pose.position.x = transform.getOrigin().x();
 					det_mps.pose.position.y = transform.getOrigin().y();
 					det_mps.pose.position.z = transform.getOrigin().z();
-					std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl; //<< det_mps << std::endl;
-					define_zone(det_mps);
-					std::cout << "\n MPS_Zone " << zone_name << std::endl;
+					std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl;
+					if(det_mps.pose.position.x < 7.0 || det_mps.pose.position.y < 8.0)
+					{
+						std::cout << "\n Coordinates within limits " << std::endl;
+						deg_rob_mps = (180 / 3.141592)*atan2(det_mps.pose.position.x,det_mps.pose.position.y);
+						std::cout << "\n MPS_Orientation wrt robot \n" << deg_rob_mps << std::endl;
+						if(deg_rob_mps > 45 && deg_rob_mps < 135){
+							listener.waitForTransform("/map","M_Z22",ros::Time(0), ros::Duration(1000.0));
+							listener.lookupTransform("/map","M_Z22",ros::Time(0), transform);
+							robot_pos.pose.position.x = transform.getOrigin().x();
+							robot_pos.pose.position.y = transform.getOrigin().y();
+							robot_pos.pose.position.z = transform.getOrigin().z();
+						}
+						if(define_zone(det_mps)){
+							std::cout << "\n MPS_Zone " << zone_name << std::endl;
+						}
+					}
 				}	
 				catch(tf::TransformException ex){
 					ROS_ERROR("%s",ex.what());
@@ -613,17 +662,20 @@ bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_t
 			}
 			else
 			{
-				std::cout << "\n Not found " << zone_name << std::endl;
+				std::cout << "\n Not identified " << zone_name << std::endl;
 			}
+			std::cout << "\n Not identified " << zone_name << std::endl;
 		}
 		
     }
     return tag_flag;
 }
 
-void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
+/*void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
 	std::cout <<"Publish info"<<std::endl;
-}
+	pub_mps_pos.publish(det_mps);
+	pub_mps_name.publish(mps_name);
+}*/
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
@@ -771,11 +823,20 @@ int main(int argc, char** argv){
 	robot_last_pos.pose.orientation.z = 0.0;
 	robot_last_pos.pose.orientation.w = 0.0;
 
+	robot_pos.pose.position.x = 5.5;
+	robot_pos.pose.position.y = 1.5;
+	robot_pos.pose.position.z = 0.0;
+	robot_pos.pose.orientation.x = 0.0;
+	robot_pos.pose.orientation.y = 0.0;
+	robot_pos.pose.orientation.z = 0.0;
+	robot_pos.pose.orientation.w = 0.0;
+
 	while(ros::ok() && !fail && !success && !time_over.data){
 	    switch(state){
 			case SM_INIT:{
-	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;	
-	            std::cout << "I am ready - Exploration route has  " << x_pips_c.size() << " points" << std::endl;
+	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;
+				field_color_coords("CYAN");
+	            std::cout << "I am ready - Exploration route has  " << x_pips.size() << " points" << std::endl;
 				try{
 					listener.waitForTransform("/map", "/Log_origin", ros::Time(0), ros::Duration(1.0));
 					listener.lookupTransform("/map", "/Log_origin", ros::Time(0), transform);
@@ -788,7 +849,7 @@ int main(int argc, char** argv){
 				Log_origin.pose.position.y = transform.getOrigin().y();
 				Log_origin.pose.position.z = transform.getOrigin().z();
 				//std::cout << "Logistics Origin" << Log_origin.pose.position << std::endl;
-	    		state = SM_NAV_PIPS;
+	    		state = SM_FINAL_STATE;
 	    		break;
 			}
 
@@ -798,7 +859,7 @@ int main(int argc, char** argv){
 				robot_next_pos.pose.position.y = Log_origin.pose.position.y + y_pips_c[curr_pip];
 				if(curr_pip <= x_pips_c.size()){
 					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
-					navigate_to_location(pips_poses.at(curr_pip));
+					//navigate_to_location(pips_poses.at(curr_pip));
 					state = SM_TURN_AROUND;
 				}
 				else{
@@ -818,9 +879,11 @@ int main(int argc, char** argv){
 					}
 					std::cout << "Step \t" << turn_step_pip << std::endl;
 					ros::Duration(3, 0).sleep();
-					tag_flag = look_for_tag(n, client, srv);
+					tag_flag = look_for_tag(n, client, srv, pub_mps_name, pub_mps_pos);
 					if(tag_flag){
-						publish_info(pub_mps_pos, pub_mps_name);
+						//publish_info(pub_mps_pos, pub_mps_name);
+						pub_mps_pos.publish(det_mps);
+						pub_mps_name.publish(mps_names[0]);
 						state = SM_TAG_DETECTED;
 					}
 					else{
