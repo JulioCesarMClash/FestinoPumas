@@ -807,13 +807,13 @@ int main(int argc, char** argv){
 					}
 					else{
 						std::cout << "No Tag" << std::endl;
+						if(turn_step_pip > n_steps_pip){
+							curr_pip++;
+							std::cout << "Steps finished" << std::endl;
+							state = SM_NAV_PIPS;
+						}
 					}
 				}
-				if(turn_step_pip > n_steps_pip){
-					curr_pip++;
-					std::cout << "Steps finished" << std::endl;
-					state = SM_NAV_PIPS;
-					}
 				break;
 			}
 

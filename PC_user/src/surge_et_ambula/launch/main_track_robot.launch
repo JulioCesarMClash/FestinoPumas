@@ -5,7 +5,7 @@
     <!--navegación-->
 	<!--include file="$(find config_files)/launch/navigation.launch"> </include-->
     <!--Zonas logistics-->
-	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
+	<include file="$(find movement_functions)/launch/logisticsZones_challenges.launch"> </include>
     <!--Kinect-->
     <include file="$(find freenect_launch)/launch/freenect.launch"> </include>
 
@@ -14,7 +14,7 @@
     <!--Comunicación refbox-->
 	<!--node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/-->
     <!--Detector de Arucos-->
-    <node name="find_tag_service" pkg="img_proc" type="aruco_det_srv2.py"/>
+    <!--node name="find_tag_service" pkg="img_proc" type="aruco_det_srv2.py"/-->
     <!--node name="main_track_robot" pkg="act_pln" type="main_track_robot" output="screen"/-->
 	
 </launch>
