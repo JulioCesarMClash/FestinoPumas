@@ -199,7 +199,7 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
     std::cout << "Entré al callback de instrucciones" << msg->data.c_str() <<std::endl;	
     //Tokenize instruction string
-    //std::cout << "La instrucción es: " <<  *msg << "holis" << std::endl;	
+    std::cout << "La instrucción es: " <<  *msg << std::endl;	
     tokens.clear();
     boost::algorithm::split(tokens, (*msg).data, boost::algorithm::is_any_of(" "));
     request = false;
