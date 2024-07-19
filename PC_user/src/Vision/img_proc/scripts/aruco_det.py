@@ -262,28 +262,17 @@ def callback_depth_points(data):
               mps_type = "RS"
               print("RingStation")
 
-            #mps_type_pub.publish(mps_info)
+            mps_type_pub.publish(mps_info)
               
-            mps_info = mps_name + "," + mps_type;
+            mps_info = mps_name + "," + mps_type
             mps_data_pub.publish(mps_info)
 
             if not (math.isnan(pos_x) or math.isnan(pos_y) or math.isnan(pos_z)):
-                #aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y, -pos_x
                 aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                 br_ar = tf.TransformBroadcaster()
                 br_ar.sendTransform((aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z), (0.0, 0.0, 0.0, 1.0),rospy.Time.now(), mps_name, frame_id)
                 print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                 aruco_pos_pub.publish(aruco_pose)
-		print("Holi")
-                """try:
-                  print("nop")
-                  tf_name = "/"+mps_name
-                  now = rospy.Time.now()
-                  listener.waitForTransform(tf_name, "/base_link", now, rospy.Duration(4.0))
-                  (trans,rot) = listener.lookupTransform(tf_name, "/base_link", now)
-                  print("nop",trans)
-                except fracaso:
-                  print(fracaso)"""
           except IndexError:
             print('Not identified')
   except AttributeError:
