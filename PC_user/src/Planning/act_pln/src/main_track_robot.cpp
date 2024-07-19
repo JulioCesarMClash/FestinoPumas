@@ -166,9 +166,9 @@ SMState state = SM_INIT;
 //-------------------------------------------------------------------------------//
 
 //Parametro que multiplica al coseno 
-#define param_x 0.9
+#define param_x 1.1
 //Parametro que multiplica al seno
-#define param_y 0.9
+#define param_y 1.1
 //Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
 #define param_calib_dist 0.25
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
