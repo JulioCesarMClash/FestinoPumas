@@ -140,7 +140,7 @@ class FindTagNode:
                         aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                         print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
 
-                      if(aruco_pose.point.x  < 2):
+                      if(markerIds[i] == 111 or markerIds[i] == 112 or markerIds[i] == 113 or markerIds[i] == 114):
 
                         start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 
