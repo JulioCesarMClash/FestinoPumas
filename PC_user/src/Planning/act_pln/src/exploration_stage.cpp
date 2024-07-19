@@ -80,6 +80,7 @@ geometry_msgs::PoseStamped robot_next_pos;
 geometry_msgs::PoseStamped robot_first_pos;
 geometry_msgs::PoseStamped robot_last_pos;
 geometry_msgs::PoseStamped robot_pos;
+geometry_msgs::PoseStamped goal_tosend;
 
 std_msgs::Bool time_over;
 
@@ -126,20 +127,11 @@ geometry_msgs::Twist tw_tomap;
 
 bool act = false;
 
-void nav_zone_to_cords(ros::NodeHandle n,std_msgs::String zone, ros::Publisher pub_rosnav_goal, float timeout)
+void nav_zone_to_cords(ros::NodeHandle n, std::string zone, geometry_msgs::PoseStamped)
 {
-    std::cout << "Zone recieved, publishing coords to navigate \n" << zone << std::endl;
+    std::cout << "Zone " << zone << " recieved, coords to navigate: " << std::endl;
     tf::TransformListener listener;
 	tf::StampedTransform transform;
-	geometry_msgs::PoseStamped goal_tosend;
-    goal_tosend.header.frame_id = "/map";
-    goal_tosend.pose.position.x = 0.0;
-	goal_tosend.pose.position.y = 0.0;
-	goal_tosend.pose.position.z = 0.0;
-	goal_tosend.pose.orientation.x = 0.0;
-	goal_tosend.pose.orientation.y = 0.0;
-	goal_tosend.pose.orientation.z = 0.0;
-	goal_tosend.pose.orientation.w = 0.0;
 
 	geometry_msgs::PoseStamped robot_pos;
     robot_pos.header.frame_id = "/map";
@@ -152,10 +144,9 @@ void nav_zone_to_cords(ros::NodeHandle n,std_msgs::String zone, ros::Publisher p
 	robot_pos.pose.orientation.w = 0.0;
 
 	try{
-		std::cout << zone.data << std::endl;
 		ros::Duration(1.0).sleep();
-		listener.waitForTransform("/map", zone.data, ros::Time(0), ros::Duration(1.0));
-		listener.lookupTransform("/map", zone.data, ros::Time(0), transform);
+		listener.waitForTransform("/map", zone, ros::Time(0), ros::Duration(1.0));
+		listener.lookupTransform("/map", zone, ros::Time(0), transform);
 	}
 	catch(tf::TransformException ex){
 		ROS_ERROR("%s",ex.what());
@@ -172,75 +163,6 @@ void nav_zone_to_cords(ros::NodeHandle n,std_msgs::String zone, ros::Publisher p
 
 	std::cout << goal_tosend.pose << std::endl;
 }
-
-/*bool navigate_to_location(ros::NodeHandle n, float x_piis, float y_piis, ros::Publisher pub_rosnav_goal, float timeout, geometry_msgs::PoseStamped robot_first_pos)
-{
-    std::cout << "Coords recieved, publishing coords to navigate \n" << std::endl;
-    tf::TransformListener listener;
-	tf::StampedTransform transform;
-
-	geometry_msgs::PoseStamped robot_pos;
-    robot_pos.header.frame_id = "/map";
-    robot_pos.pose.position.x = 0.0;
-	robot_pos.pose.position.y = 0.0;
-	robot_pos.pose.position.z = 0.0;
-	robot_pos.pose.orientation.x = 0.0;
-	robot_pos.pose.orientation.y = 0.0;
-	robot_pos.pose.orientation.z = 0.0;
-	robot_pos.pose.orientation.w = 0.0;
-
-	geometry_msgs::PoseStamped goal_tosend;
-    goal_tosend.header.frame_id = "/map";
-    goal_tosend.pose.position.x = robot_first_pos.pose.position.x + x_piis;
-	goal_tosend.pose.position.y = robot_first_pos.pose.position.y + y_piis;
-	goal_tosend.pose.position.z = 0.0;
-	goal_tosend.pose.orientation.x = 0.0;
-	goal_tosend.pose.orientation.y = 0.0;
-	goal_tosend.pose.orientation.z = 0.0;
-	goal_tosend.pose.orientation.w = 0.0;
-
-	std::cout << "Voy al punto \t" << goal_tosend.pose.position.x << "," << goal_tosend.pose.position.y << std::endl;
-	pub_rosnav_goal.publish(goal_tosend);
-
-
-	ros::Duration(timeout).sleep();
-
-	try{
-		listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
-		listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
-	}
-	catch(tf::TransformException ex){
-		ROS_ERROR("%s",ex.what());
-		ros::Duration(1.0).sleep();
-	}
-
-	robot_pos.pose.position.x = transform.getOrigin().x();
-	robot_pos.pose.position.y = transform.getOrigin().y();
-	robot_pos.pose.position.z = transform.getOrigin().z();
-	robot_pos.pose.orientation.x = transform.getRotation().x();
-	robot_pos.pose.orientation.y = transform.getRotation().y();
-	robot_pos.pose.orientation.z = transform.getRotation().z();
-	robot_pos.pose.orientation.w = transform.getRotation().w();
-	//std::cout << robot_pos.pose << std::endl;
-
-	if((goal_tosend.pose.position.x - robot_pos.pose.position.x) < 0.2 && (goal_tosend.pose.position.y - robot_pos.pose.position.y) < 0.2)
-	{
-		std::cout << "Sí llegué" << std::endl;
-		std::cout << "Coords goal \n" << goal_tosend.pose.position << "Coords robot \n" << robot_pos.pose.position << std::endl;
-		std::cout << "Diff en x: " << goal_tosend.pose.position.x - robot_pos.pose.position.x << std::endl;
-		std::cout << "Diff en y: " << goal_tosend.pose.position.y - robot_pos.pose.position.y << std::endl;
-		nav_success = true;
-	}
-	else
-	{
-		std::cout << "No llegué, lo siento :c \t Voy a girar" << std::endl;
-		std::cout << "Diff en x: " << goal_tosend.pose.position.x - robot_pos.pose.position.x << std::endl;
-		std::cout << "Diff en y: " << goal_tosend.pose.position.y - robot_pos.pose.position.y << std::endl;
-		nav_success = false;
-	}
-	return nav_success;
-
-}*/
 
 void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {	
@@ -307,10 +229,10 @@ std::vector<float> y_pips;
 
 //X respecto al mapa de logistics
 //std::vector<float> x_pips_m {-4.5, -6.5, -0.5, -6.5, -0.5};
-std::vector<float> x_pips_m {-6.5, -0.5, -6.5, -0.5};
+std::vector<float> x_pips_m {-4.5, -1.5, -6.5, -0.5};
 //Y respecto al mapa
 //std::vector<float> y_pips_m {0.5, 1.5, 7.5, 7.5, 1.5}; 
-std::vector<float> y_pips_m {1.5, 7.5, 7.5, 1.5}; 
+std::vector<float> y_pips_m {1.5, 2.5, 7.5, 1.5}; 
 
 //X respecto a la posición inicial del robot M_Z51                       ->Cyan
 //std::vector<float> x_pips_m {1.0,1.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,1.0,2.0,3.0,4.0,5.0,5.0,5.0,4.0,3.0,2.0};
@@ -359,11 +281,20 @@ std::vector<float> tf_y {0, 1.5, 1.5, 3.5, 3.5, 4.5, 4.5, 1.5, 0.5, 4.5};
 
 void field_color_coords(std::string color){
 	if(color == "CYAN"){
-		std::cout << "\n Definiendo coordenadas para CYAN \n" << std::endl;
+		std::cout << "\n Definiendo coordenadas y zonas para CYAN \n" << std::endl;
+		pips_as_zones[0].data = "/C_Z42";
+		pips_as_zones[1].data = "/C_Z22";
+		pips_as_zones[2].data = "/C_Z24";
+		pips_as_zones[3].data = "/C_Z44";
+
 		x_pips = x_pips_c;
 	}
 	else{
-		std::cout << "\n Definiendo coordenadas para MAGENTA \n" << std::endl;
+		std::cout << "\n Definiendo coordenadas y zonas para MAGENTA \n" << std::endl;
+		pips_as_zones[0].data = "/M_Z42";
+		pips_as_zones[1].data = "/M_Z22";
+		pips_as_zones[2].data = "/M_Z24";
+		pips_as_zones[3].data = "/M_Z44";
 		x_pips = x_pips_m;
 	}
 }
@@ -701,7 +632,7 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 		//std::cout << "\n Turn Left" << std::endl;
 		pub_cmd_vel.publish(tw_tomap);
 	}
-	ros::Duration(3);
+	ros::Duration(5);
 	std::cout << "\n Movement Finished " << std::endl;
 	return true;
 }
@@ -831,35 +762,31 @@ int main(int argc, char** argv){
 	robot_pos.pose.orientation.z = 0.0;
 	robot_pos.pose.orientation.w = 0.0;
 
+    goal_tosend.header.frame_id = "/map";
+    goal_tosend.pose.position.x = 0.0;
+	goal_tosend.pose.position.y = 0.0;
+	goal_tosend.pose.position.z = 0.0;
+	goal_tosend.pose.orientation.x = 0.0;
+	goal_tosend.pose.orientation.y = 0.0;
+	goal_tosend.pose.orientation.z = 0.0;
+	goal_tosend.pose.orientation.w = 0.0;
+
 	while(ros::ok() && !fail && !success && !time_over.data){
 	    switch(state){
 			case SM_INIT:{
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;
 				field_color_coords("MAGENTA");
 	            std::cout << "I am ready - Exploration route has  " << x_pips.size() << " points" << std::endl;
-				try{
-					listener.waitForTransform("/map", "/Log_origin", ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/map", "/Log_origin", ros::Time(0), transform);
-				}
-				catch(tf::TransformException ex){
-					ROS_ERROR("%s",ex.what());
-					ros::Duration(1.0).sleep();
-				}
-				Log_origin.pose.position.x = transform.getOrigin().x();
-				Log_origin.pose.position.y = transform.getOrigin().y();
-				Log_origin.pose.position.z = transform.getOrigin().z();
-
 	    		state = SM_NAV_PIPS;
 	    		break;
 			}
 
 			case SM_NAV_PIPS:{
 				std::cout << "\n State machine: SM_NAV_PIPS" << std::endl;
-				robot_next_pos.pose.position.x = Log_origin.pose.position.x + x_pips[curr_pip];
-				robot_next_pos.pose.position.y = Log_origin.pose.position.y + y_pips[curr_pip];
 				if(curr_pip <= x_pips.size()){
-					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_poses.at(curr_pip) << "\n" << std::endl;
-					//navigate_to_location(pips_poses.at(curr_pip));
+					std::cout << "Navigating PIP \t" << curr_pip << "\t" << pips_as_zones[curr_pip].data << "\n" << std::endl;
+					nav_zone_to_cords(n, pips_as_zones[curr_pip].data, goal_tosend);
+					//navigate_to_location(goal_tosend);
 					state = SM_TURN_AROUND;
 				}
 				else{
@@ -881,19 +808,16 @@ int main(int argc, char** argv){
 					ros::Duration(3, 0).sleep();
 					tag_flag = look_for_tag(n, client, srv, pub_mps_name, pub_mps_pos);
 					if(tag_flag){
-						//publish_info(pub_mps_pos, pub_mps_name);
-						pub_mps_pos.publish(det_mps);
-						pub_mps_name.publish(mps_names[0]);
 						state = SM_TAG_DETECTED;
 					}
 					else{
 						std::cout << "No Tag" << std::endl;
+						if(turn_step_pip > n_steps_pip){
+							curr_pip++;
+							std::cout << "Steps finished" << std::endl;
+							state = SM_NAV_PIPS;
+						}
 					}
-				}
-				if(turn_step_pip > n_steps_pip){
-					curr_pip++;
-					std::cout << "Steps finished" << std::endl;
-					state = SM_NAV_PIPS;
 				}
 				break;
 			}
