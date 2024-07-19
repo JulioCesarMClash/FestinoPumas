@@ -199,7 +199,7 @@ void callback_instructions(const std_msgs::String::ConstPtr& msg)
 {
     std::cout << "Entré al callback de instrucciones" << msg->data.c_str() <<std::endl;	
     //Tokenize instruction string
-    std::cout << "La instrucción es: " <<  *msg <<std::endl;	
+    std::cout << "La instrucción es: " <<  *msg << std::endl;	
     tokens.clear();
     boost::algorithm::split(tokens, (*msg).data, boost::algorithm::is_any_of(" "));
     request = false;
@@ -561,7 +561,7 @@ int main(int argc, char** argv){
 			                    ros::Duration(1, 0).sleep();
                              }
                          }
-                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda (ya sea entrada o salida)
+                         //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
                          else if((tokens[1] == "CS") || (tokens[1] == "BS" && tokens[4] == "output")){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
@@ -664,6 +664,7 @@ int main(int argc, char** argv){
 			            //Dejar en el piso
 			            manipulator_var.data = 30;
                     }
+                    //Si es la entrada de un RS lo deja por la derecha 
                     else{
                         std::cout << "Estoy enviando un 0" << std::endl;
 			            //Dejar en la banda derecha

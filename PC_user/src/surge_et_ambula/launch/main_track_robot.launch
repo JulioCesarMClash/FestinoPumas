@@ -5,7 +5,7 @@
     <!--navegación-->
 	<!--include file="$(find config_files)/launch/navigation.launch"> </include-->
     <!--Zonas logistics-->
-	<include file="$(find movement_functions)/launch/logisticsZones.launch"> </include>
+	<include file="$(find movement_functions)/launch/logisticsZones_challenges.launch"> </include>
     <!--Kinect-->
     <include file="$(find freenect_launch)/launch/freenect.launch"> </include>
 
