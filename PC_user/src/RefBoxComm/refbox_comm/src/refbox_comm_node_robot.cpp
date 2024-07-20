@@ -9,6 +9,11 @@
 //--------------------------------NAVIGATION CHALLENGE
 #include <refbox_protobuf_msgs/NavigationChallenge.pb.h>
 #include <refbox_protobuf_msgs/Zone.pb.h>
+//--------------------------------NAVIGATION CHALLENGE
+
+//--------------------------------EXPLORATION CHALLENGE
+#include <refbox_protobuf_msgs/MachineReport.pb.h>
+//--------------------------------EXPLORATION CHALLENGE
 
 #include <refbox_protobuf_msgs/GameState.pb.h>
 
@@ -141,6 +146,10 @@ class Handler {
 
     using GameState = llsf_msgs::GameState;
 
+//--------------------------------EXPLORATION CHALLENGE
+    using MachineReport = llsf_msgs::MachineReport;
+    using MachineReportEntry = llsf_msgs::MachineReportEntry;
+//--------------------------------EXPLORATION CHALLENGE
     private:
         std::string m_host;
         int m_port_s;
@@ -166,6 +175,10 @@ class Handler {
         std::map<Zone, std::string> zones_map;
         std::map<std::string, Zone> zones_map_str;
         //--------------------------------NAVIGATION CHALLENGE
+
+        //--------------------------------EXPLORATION CHALLENGE
+
+        //--------------------------------EXPLORATION CHALLENGE
 
     public:
         Handler(std::string host, int port_s, int port_r)
@@ -337,6 +350,64 @@ class Handler {
         }
         
 
+        void reportAMachine(const std_msgs::String::ConstPtr& machine_data){
+            //ROS_INFO_STREAM("------A MACHINE REPORT SENT TO REFBOX--------- " << machine << " : ");
+            std::shared_ptr<MachineReport> machine_report_message(new MachineReport());
+
+                if(!team_color_set){
+                    return;
+                }
+
+                if(m_is_cyan){
+                    if(/*TODO message is NOT from a cyan machine*/ false) {
+                        return;
+                    }
+                    machine_report_message->set_team_color(Team::CYAN);
+                } else {
+                    if(/*TODO message is NOT from a magenta machine*/ false){
+                        return;
+                    }
+                    machine_report_message->set_team_color(Team::MAGENTA);
+                }
+
+
+            MachineReportEntry* new_machine_entry = machine_report_message->add_machines();
+
+//            std::shared_ptr<MachineReportEntry> new_machine_entry(new MachineReportEntry());
+
+            /*string my_msg;
+            std_msgs::String el_msg;
+            
+                //std::stringstream ss;
+                //ss << my_msg << count;
+                el_msg.data = my_msg;//ss.str();
+            
+
+            ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);*/
+            std::vector<std::string> tokens;
+            tokens.clear();
+            boost::algorithm::split(tokens, machine_data->data, boost::algorithm::is_any_of(","));
+
+                    for(std::string token : tokens){
+                        ROS_INFO_STREAM("Un token: " << token);
+                    }
+
+            new_machine_entry->set_name(tokens[0]);
+            new_machine_entry->set_type(tokens[1]);
+            new_machine_entry->set_zone(zones_map_str[tokens[2]]);
+            //new_machine_entry->set_rotation(uint32_t(std::stoul(tokens[3])));
+//ROS_INFO_STREAM("El numero ° " << uint32_t(std::stoul(tokens[3])));
+            
+            //machine_report_message->add_machines();
+           //machine_report_message->add_machines();
+
+           //m_public_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           if(m_private_peer != nullptr){
+            ROS_INFO_STREAM("NOT NULL PTR, SENDING PRIVATE");
+            m_private_peer->send(MachineReport::COMP_ID, MachineReport::MSG_TYPE, machine_report_message);
+           }
+        }
+
         /*void handleRefboxMessagePrivate(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg)
         {
             
@@ -345,16 +416,15 @@ class Handler {
 
         void handleRefboxMessage(boost::asio::ip::udp::endpoint &endpoint, uint16_t comp_id, uint16_t msg_type, std::shared_ptr<google::protobuf::Message> msg) {
             std::shared_ptr<GameState> game_state;
-            if ((game_state = std::dynamic_pointer_cast<GameState>(msg)))
-            {
+            if ((game_state = std::dynamic_pointer_cast<GameState>(msg))) {
                 //ROS_INFO_STREAM("----------------" << comp_id << " : " << msg_type);
                 //ROS_INFO_STREAM(""<< game_state->ShortDebugString());
                 if(!beca_start && game_state->phase() == llsf_msgs::GameState::PRODUCTION && game_state->game_time().sec() > 180){
-			beca_start = true;
-			std_msgs::Bool time_over;
-			time_over.data = true;
-			pub_time_over.publish(time_over);
-		}
+			        beca_start = true;
+			        std_msgs::Bool time_over;
+        			time_over.data = true;
+		        	pub_time_over.publish(time_over);
+		        }
 
                 if(!team_color_set){
                     auto cyan = game_state->team_cyan();
