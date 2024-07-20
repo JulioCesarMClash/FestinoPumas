@@ -60,7 +60,7 @@ class FindTagNode:
       r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
       aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
       ######## Filling msg for aruco_pose publisher ########
-      frame_id = "camera_link"
+      frame_id = "base_link"
       aruco_pose = PointStamped()
       aruco_pose.header.stamp = rospy.Time.now()
       aruco_pose.header.frame_id = frame_id
