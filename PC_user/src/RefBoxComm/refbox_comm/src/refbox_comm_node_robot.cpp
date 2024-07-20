@@ -55,6 +55,8 @@ using PrepareInstructionBS = llsf_msgs::PrepareInstructionBS;
 using PrepareMachine = llsf_msgs::PrepareMachine;
 using GameState = llsf_msgs::GameState;
 
+        bool m_is_cyan = false;
+
 //--------------------------------ROBOT POSE
         float pose_x = 3.0f;
         float pose_y = 2.0f;
@@ -153,7 +155,7 @@ class Handler {
         std::string m_robot_name = "Festino";
         int m_robot_number = 1;
         //Default values 2
-        bool m_is_cyan = false;
+
 
         bool m_running;
         bool team_color_set;
@@ -542,6 +544,12 @@ int main(int argc, char** argv)
         //real
         pose_x = transform_rob.getOrigin().x();
 	    pose_y = transform_rob.getOrigin().y();
+        //CHALLENGE TRACK, REMOVE WHEN IN MAIN TRACK
+        if(m_is_cyan){
+            pose_x -= 2;
+        } else {
+            pose_y += 2;
+        }
         tfScalar yaw, pitch, roll;
         tf::Matrix3x3 mat(transform_rob.getRotation());
         mat.getEulerYPR(yaw, pitch, roll);
