@@ -140,14 +140,7 @@ class FindTagNode:
                         aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z = pos_z, -pos_y+0.21, -pos_x-0.25
                         print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
 
-                      #Para el C0
-                      #if(aruco_pose.point.x  < 4):
-
-                      #if para que solo detecte RS (grasping challenge) Festina
-                      #if(markerIds[i] == 111 or markerIds[i] == 112 or markerIds[i] == 113 or markerIds[i] == 114):
-                        
-                      #if para que solo detecte CS (grasping challenge) Festino
-                      if(markerIds[i] == 101 or markerIds[i] == 102 or markerIds[i] == 103 or markerIds[i] == 104):
+                      if(aruco_pose.point.x  < 0.95):
 
                         start_point = (corneru[(0,0,0)],corneru[(0,0,1)])
 

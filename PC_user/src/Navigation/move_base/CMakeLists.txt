@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(act_pln)
+project(move_base)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,15 +8,12 @@ project(act_pln)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
   roscpp
+  geometry_msgs
   rospy
-  sensor_msgs
   std_msgs
+  nav_msgs
   tf
-  robotino_msgs
-  festino_tools
-  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -60,13 +57,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   Locate_server.srv
-   FaceRecogSrv.srv
-   FaceTrainSrv.srv
-   Set_location_server.srv
- )
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -76,11 +71,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   geometry_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   geometry_msgs#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -113,8 +107,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES act_pln
-  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs robotino_msgs message_runtime
+#  LIBRARIES move_base
+#  CATKIN_DEPENDS geometry_msgs rospy std_msgs
 #  DEPENDS system_lib
 )
 
@@ -131,7 +125,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/act_pln.cpp
+#   src/${PROJECT_NAME}/move_base.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -142,7 +136,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/act_pln_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/move_base_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -206,7 +200,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_act_pln.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_move_base.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -215,54 +209,5 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(test_planning_1 src/test_planning_1.cpp)
-add_dependencies(test_planning_1 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_planning_1 ${catkin_LIBRARIES})
-
-add_executable(test_planning_2 src/test_planning_2.cpp)
-add_dependencies(test_planning_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_planning_2 ${catkin_LIBRARIES})
-
-add_executable(loc_goal_pub src/loc_goal_pub.cpp)
-add_dependencies(loc_goal_pub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(loc_goal_pub ${catkin_LIBRARIES})
-
-add_executable(random_navigation src/random_navigation.cpp)
-add_dependencies(random_navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(random_navigation ${catkin_LIBRARIES})
-
-add_executable(carry_my_luggage src/carry_my_luggage.cpp)
-add_dependencies(carry_my_luggage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(carry_my_luggage ${catkin_LIBRARIES})
-
-add_executable(navigation_challenge_track src/navigation_challenge_track.cpp)
-add_dependencies(navigation_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(navigation_challenge_track ${catkin_LIBRARIES})
-
-add_executable(exploration_challenge_track src/exploration_challenge_track.cpp)
-add_dependencies(exploration_challenge_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(exploration_challenge_track ${catkin_LIBRARIES})
-
-add_executable(grasping src/grasping.cpp)
-add_dependencies(grasping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(grasping ${catkin_LIBRARIES})
-
-add_executable(exploration_stage src/exploration_stage.cpp)
-add_dependencies(exploration_stage ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(exploration_stage ${catkin_LIBRARIES})
-
-add_executable(exploration_stage_laser src/exploration_stage_laser.cpp)
-add_dependencies(exploration_stage_laser ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(exploration_stage_laser ${catkin_LIBRARIES})
-
-add_executable(main_track_robot src/main_track_robot.cpp)
-add_dependencies(main_track_robot ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(main_track_robot ${catkin_LIBRARIES})
-
-add_executable(scan_cleaner src/scan_cleaner.cpp)
-add_dependencies(scan_cleaner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(scan_cleaner ${catkin_LIBRARIES})
-
-add_executable(test_mvbase src/test_mvbase.cpp)
-add_dependencies(test_mvbase ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_mvbase ${catkin_LIBRARIES})
+add_executable(move_base src/move_base.cpp)
+target_link_libraries(move_base ${catkin_LIBRARIES})

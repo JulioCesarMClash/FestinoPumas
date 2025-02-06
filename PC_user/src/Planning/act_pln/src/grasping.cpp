@@ -5,6 +5,13 @@
 //5 Tomar la pieza
 //6 Ir a la entrada y dejar la pieza
 
+/*pubManipulator.publish(manipulator_var);
+std::cout << "Estoy tomando" << std::endl;
+
+//Delay para que pueda tomar la pieza
+ros::Duration(arm_delay, 0).sleep();
+std::cout << "Ya pasaron los 30 seg" << std::endl;*/
+
 #include<iostream>
 #include <cmath>
 #include "ros/ros.h"
@@ -20,6 +27,8 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 #include <math.h>
+#include <std_msgs/Int32.h>
+
 
 //Festino Tools
 #include "festino_tools/FestinoHRI.h"
@@ -27,11 +36,16 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
-#include "img_proc/Find_piece_Srv.h"
-#include "festino_arm_moveit_demos/srv_arm.h"
+//#include "img_proc/Find_piece_Srv.h"
+//#include "festino_arm_moveit_demos/srv_arm.h"
 
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/Twist.h"
+
+
+#define arm_delay 30
+
+ros::Subscriber send_plan_signal_sub;
 
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState
@@ -78,6 +92,10 @@ geometry_msgs::PoseStamped piece;
 
 geometry_msgs::Twist posNew;
 
+void sendPlanCallback(const std_msgs::String::ConstPtr& send_plan_msg){
+    state = SM_GRASPING_PIECE;
+}
+
 //Zonas de prueba para el escaneo (se eligieron de forma que cubrieran gran parte del lab)
 //M_Z53 //M_Z14 //M_Z22 //M_Z21
 
@@ -119,15 +137,17 @@ void navigate_to_location(geometry_msgs::PoseStamped location)
 }
 
 int main(int argc, char** argv){
+	
 	ros::Time::init();
 	bool latch;
 	bool tag_flag;
 	bool giro =false;
 
-	std::cout << "INITIALIZING EXPLORATION NODE... " << std::endl;
+	std::cout << "INITIALIZING GRASPING NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
 
+	send_plan_signal_sub = n.subscribe("/send_plan_msg",100, sendPlanCallback);
 	FestinoNavigation::setNodeHandle(&n);
 	FestinoHRI::setNodeHandle(&n);
 
@@ -136,12 +156,13 @@ int main(int argc, char** argv){
 
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000); //, latch=True);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
+	ros::Publisher pubManipulator = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
     
-    ros::ServiceClient client = n.serviceClient<festino_arm_moveit_demos::srv_arm>("srv_arm");
-    festino_arm_moveit_demos::srv_arm srv;
+    //ros::ServiceClient client = n.serviceClient<festino_arm_moveit_demos::srv_arm>("srv_arm");
+    //festino_arm_moveit_demos::srv_arm srv;
 
-    ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
-    img_proc::Find_piece_Srv srvFindPiece;
+    //ros::ServiceClient clientFindPiece = n.serviceClient<img_proc::Find_piece_Srv>("/vision/find_piece/point_stamped");
+    //img_proc::Find_piece_Srv srvFindPiece;
 
     ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>(cmd_vel_name, 1000);
 
@@ -153,6 +174,8 @@ int main(int argc, char** argv){
     geometry_msgs::PointStamped locProduct;
 
     //tf2_ros::Buffer
+	std_msgs::Int32 manipulator_var;
+
 
     robotino_msgs::DigitalReadings arr_values;
     arr_values.stamp.sec = 0;
@@ -178,17 +201,17 @@ int main(int argc, char** argv){
 	            voice = "I am ready for the grasping challenge";
 	            std::cout << voice << std::endl;
 
-				//FestinoHRI::say(voice,3);
-				state = SM_ALLIGN;
-
-				//arr_values.values = {0,0,0,1,1,1};
-                //pub_digital.publish(arr_values);
+				state = SM_GRASPING_PIECE;
                 break;
               }
+
 			case SM_ALLIGN:
 			{
 				std::cout << "State machine: SM_ALLIGN" << std::endl;
-				srv.request.manipBlocker = false;
+				FestinoNavigation::moveDist(-1.00,30000);
+
+
+				/*srv.request.manipBlocker = false;
 				srv.request.x = 0.04;
 				srv.request.y = -0.18;
 				srv.request.z = -0.06;
@@ -204,7 +227,7 @@ int main(int argc, char** argv){
 				}
 
 				std::cout<<"Moviendo hacia atras 45 cm"<<std::endl;
-				FestinoNavigation::moveDist(-1.00,30000);
+				FestinoNavigation::moveDist(-1.00,30000);*/
 
 
 				//-------------------------------------------
@@ -214,7 +237,7 @@ int main(int argc, char** argv){
 				//Alling_srv
 				//FestinoNavigation::moveDist(0.45, 30000);
 
-				srv.request.manipBlocker = false;
+				/*srv.request.manipBlocker = false;
 				srv.request.x = 0.04;
 				srv.request.y = 0.0;
 				srv.request.z = 0.18;
@@ -229,7 +252,7 @@ int main(int argc, char** argv){
 					std::cout<<"No pudeeeee mover el brazo, sad sad sad (pre-grasp)"<<std::endl;
 				}
 
-				FestinoNavigation::moveDist(1.00,30000);
+				FestinoNavigation::moveDist(1.00,30000);*/
 				state = SM_FIND_PIECE;
 				break;
 			}
@@ -238,7 +261,7 @@ int main(int argc, char** argv){
 			{
 				std::cout << "State machine: SM_FIND_PIECE" << std::endl;	
 
-				srvFindPiece.request.is_find_piece_enabled = true;
+				/*srvFindPiece.request.is_find_piece_enabled = true;
 				if(clientFindPiece.call(srvFindPiece))
 				{
 					locProduct = srvFindPiece.response.point_stamped;
@@ -259,7 +282,7 @@ int main(int argc, char** argv){
 					//--------------------------------------------------
 
 				}
-
+				*/
 		    	state = SM_GRASPING_PIECE;
 	    		break;
 			}
@@ -269,12 +292,12 @@ int main(int argc, char** argv){
 				std::cout << "State machine: SM_GRASPING_PIECE" << std::endl;	
 
 				//Coordenates for pre-grasping
-				srv.request.manipBlocker = false;
+				//srv.request.manipBlocker = false;
 				//srv.request.x = locProduct.point.x;
 				//srv.request.y = locProduct.point.y;
 				//srv.request.z = locProduct.point.z;
 
-				srv.request.x = 0.23;
+				/*srv.request.x = 0.23;
 				srv.request.y = 0.0;
 				srv.request.z = 0.10;
 				srv.request.pitch = 0.0;
@@ -300,10 +323,10 @@ int main(int argc, char** argv){
 					std::cout<<"No pude abrir pinzaaaa (pre-grasp), sad sad sad"<<std::endl;
 				}
 
-				ros::Duration(2, 0).sleep();
+				ros::Duration(2, 0).sleep();*/
 
 				//Coordenates for grasping
-				srv.request.manipBlocker = false;
+				/*srv.request.manipBlocker = false;
 				
 				srv.request.x = 0.23;
 				srv.request.y = 0.0;
@@ -368,7 +391,18 @@ int main(int argc, char** argv){
 					std::cout<<"No pudeeeee mover el brazo a guardadito, sad sad sad"<<std::endl;
 				}
 				ros::Duration(1, 0).sleep();
-				state = SM_GO_INPUT;
+				state = SM_GO_INPUT;*/
+
+
+				//Nuevo brazo
+				manipulator_var.data = 4;
+
+				pubManipulator.publish(manipulator_var);
+				std::cout << "Estoy tomando" << std::endl;
+
+				//Delay para que pueda tomar la pieza
+				ros::Duration(arm_delay, 0).sleep();
+				std::cout << "Ya pasaron los 30 seg" << std::endl;
 				break;
 			}
 
@@ -421,7 +455,7 @@ int main(int argc, char** argv){
 			case SM_GRASPING_DELIVER:
 			{
 				std::cout << "State machine: SM_GRASPING_DELIVER" << std::endl;	
-				srv.request.manipBlocker = false;
+				/*srv.request.manipBlocker = false;
 				srv.request.x = -0.05;
 				srv.request.y = -0.18;
 				srv.request.z = -0.06;
@@ -522,7 +556,14 @@ int main(int argc, char** argv){
 				else
 				{
 					std::cout<<"No pudeeeee mover el brazo a guardadito, sad sad sad"<<std::endl;
-				}
+				}*/
+				manipulator_var.data = 0;
+				pubManipulator.publish(manipulator_var);
+				std::cout << "Estoy tomando" << std::endl;
+
+				//Delay para que pueda tomar la pieza
+				ros::Duration(arm_delay, 0).sleep();
+				std::cout << "Ya pasaron los 30 seg" << std::endl;
 				state = SM_GO_INIT;
 				ros::Duration(1, 0).sleep();
 				break;
@@ -556,7 +597,7 @@ int main(int argc, char** argv){
 				std::cout<<"Conde -> "<<conde<<std::endl;
 				if(conde < 3)
 				{
-					state = SM_ALLIGN;
+					state = SM_INIT;
 					std::cout << "state = "<< state<<std::endl;
 					std::cout << "ALINEAAAAR"<<std::endl;
 				}

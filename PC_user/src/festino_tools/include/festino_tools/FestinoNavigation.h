@@ -31,6 +31,7 @@ private:
     static ros::Publisher pubMvnPlnGetCloseLoc;
     static ros::Publisher pubMvnPlnGetCloseXYA;
     static ros::Publisher pubNavigationStop;
+    static ros::Publisher pubCmdVel;
     //Publishers and subscribers for localization
     static tf::TransformListener* tf_listener;
 
@@ -74,4 +75,6 @@ public:
     static void callbackNavigationStop(const std_msgs::Empty::ConstPtr& msg);
     static void callbackSimpleMoveStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg);
     static void callbackNavigationStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg);
+
+    static void move_base(double x, double y, double theta, double time_out);
 };

@@ -51,6 +51,7 @@ class FindTagNode:
     name_list = []
     aruco_list = PointStamped()
     aruco_list = []
+    reg_list = []
     if request.is_find_tag_enabled:
       tfBuffer = tf2_ros.Buffer()
       depth_img_bgr = np.zeros((480, 640))
@@ -60,7 +61,7 @@ class FindTagNode:
       r,g,b = ((rgb_arr >> 16) & 255), ((rgb_arr >> 8) & 255), (rgb_arr & 255)
       aruco_img = cv2.merge((np.asarray(b,dtype='uint8'),np.asarray(g,dtype='uint8'),np.asarray(r,dtype='uint8')))
       ######## Filling msg for aruco_pose publisher ########
-      frame_id = "base_link"
+      frame_id = "camera_link"
       aruco_pose = PointStamped()
       aruco_pose.header.stamp = rospy.Time.now()
       aruco_pose.header.frame_id = frame_id
@@ -70,6 +71,12 @@ class FindTagNode:
       dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_ARUCO_ORIGINAL)
       parameters = cv2.aruco.DetectorParameters_create()
       markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(aruco_img, dictionary, parameters=parameters)
+
+      ######## Dividiendo las zonas de la imagen en 3 ########
+      # z_left de 1 a 213
+      # z_right de 214 a 427
+      # z_center de 428 a 630
+
 
       color = (255, 0, 0)
       thickness = 2
@@ -94,8 +101,16 @@ class FindTagNode:
 
               max_y = np.max([last_corner[1],first_corner[1]])
               min_y = np.min([last_corner[1],first_corner[1]])
-              
-              cent = (int(max_x - (max_x-min_x)/2),int(max_y - (max_y-min_y)/2))
+
+              cent_i = int(max_x - (max_x-min_x)/2)
+              cent_j = int(max_y - (max_y-min_y)/2)
+              cent = (cent_i,cent_j)
+              if(cent_i > 0 & cent_i < 213):
+                aruco_reg = 1
+              if(cent_i > 214 & cent_i < 427):
+                aruco_reg = 2
+              if(cent_i > 428 & cent_i < 480):
+                aruco_reg = 3
               aruco_img = cv2.rectangle(aruco_img, first_corner, last_corner, (255, 255, 0), thickness)
               cv2.circle(aruco_img, (cent), 5, (0, 255, 255), -1)
               try:
@@ -115,6 +130,7 @@ class FindTagNode:
                     aruco_pose_aux.point.z = aruco_pose.point.z
                     name_list.append(mps_name)
                     aruco_list.append(aruco_pose_aux)
+                    reg_list.append(aruco_reg)
                     print(aruco_pose.point.x, aruco_pose.point.y, aruco_pose.point.z, '\n')
                     #self.aruco_pos_pub.publish(aruco_pose)
                     #print(aruco_pose)
@@ -131,6 +147,7 @@ class FindTagNode:
       response.success = True
       response.mps_name = name_list
       response.point_stamped = aruco_list
+      response.cam_region = reg_list
 
       return response
     
@@ -143,6 +160,7 @@ class FindTagNode:
       aruco_pose_fake.point.y = 0.0
       aruco_pose_fake.point.z = 0.0
       response.point_stamped.append(aruco_pose_fake)
+      response.cam_reg = 0
       name = " "
       response.mps_name.append(name)  
       return response

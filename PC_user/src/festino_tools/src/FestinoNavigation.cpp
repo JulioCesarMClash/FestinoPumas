@@ -19,6 +19,8 @@ ros::Publisher FestinoNavigation::pubSimpleMoveLateral;
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseLoc;
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseXYA;
 ros::Publisher FestinoNavigation::pubNavigationStop;
+ros::Publisher FestinoNavigation::pubCmdVel;
+
 //Publishers and subscribers for localization
 tf::TransformListener* FestinoNavigation::tf_listener;
 
@@ -40,6 +42,8 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubMvnPlnGetCloseXYA   = nh->advertise<geometry_msgs::PoseStamped >("/move_base_simple/goal", 10);
     pubMvnPlnGetCloseLoc   = nh->advertise<std_msgs::String>           ("/navigation/mvn_pln/get_close_loc", 1);
     pubNavigationStop      = nh->advertise<std_msgs::Empty>            ("/navigation/stop", 10);
+    pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
+
     tf_listener = new tf::TransformListener();
 
     is_node_set = true;
@@ -158,6 +162,22 @@ void FestinoNavigation::startMoveLateral(float distance)
     pubSimpleMoveLateral.publish(msg);
     ros::spinOnce();
     ros::Duration(0.0333333).sleep();
+}
+
+
+void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
+{
+    geometry_msgs::Twist vel_msg;
+    vel_msg.linear.x = x;
+    vel_msg.linear.y = y;
+    vel_msg.angular.z = theta;
+    
+    ros::Time init = ros::Time::now();
+    while(ros::ok() && (ros::Time::now() - init).toSec() < time_out)
+    {
+        pubCmdVel.publish(vel_msg);
+        ros::Duration(0.01).sleep();
+    }
 }
 
 bool FestinoNavigation::moveDist(float distance, int timeOut_ms)

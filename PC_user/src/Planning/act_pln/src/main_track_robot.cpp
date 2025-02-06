@@ -166,9 +166,9 @@ SMState state = SM_INIT;
 //-------------------------------------------------------------------------------//
 
 //Parametro que multiplica al coseno 
-#define param_x 1
+#define param_x 0.9
 //Parametro que multiplica al seno
-#define param_y 1
+#define param_y 0.9
 //Parametro que modifica la distancia que avanza el robot para pegarse a la maquina
 #define param_calib_dist 0.25
 //Parametro que modifica el numero de pasos laterales para llegar a la plataforma (Si se usa cmd_vel)
@@ -178,7 +178,7 @@ SMState state = SM_INIT;
 //Parametro que modifica la distancia a recorrer para llegar a la plataforma (Si se usa funcion moveLateral)
 #define dist_to_platform 0.2
 //Umbral de distancia para tomar en cuenta las lecturas del hokuyo y acercarse a la estacion
-#define dist_station_threshold 1.3
+#define dist_station_threshold 1
 //Calibracion del angulo para voltear a ver a la estacion
 #define calib_angle 0
 //Delay para esperar a que el brazo termine de tomar o dejar pieza

@@ -9,6 +9,7 @@
 #include "std_msgs/String.h"
 #include "act_pln/FaceRecogSrv.h"
 #include "act_pln/FaceTrainSrv.h"
+#include "img_proc/Tag_with_tf.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
@@ -27,11 +28,12 @@ private:
     static std::vector<std::string> _nameRecog;
     static ros::ServiceClient cltFindPersons;
     static ros::ServiceClient cltTrainPersons;
+    static ros::ServiceClient cltArucoTf;
+
 
     //Aruco detector
     static std::vector<std::string> _nameArUcoDet;
     static std::vector<geometry_msgs::PoseStamped> _posArUcoDet;
-    static ros::ServiceClient cltArucoDet;
 
 
 public:

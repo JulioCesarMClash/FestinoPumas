@@ -9,7 +9,10 @@ bool FestinoVision::_pointing_hand;
 //Face Recog
 ros::ServiceClient FestinoVision::cltFindPersons;
 ros::ServiceClient FestinoVision::cltTrainPersons;
+ros::ServiceClient FestinoVision::cltArucoTf;
+
 std::vector<std::string> FestinoVision::_nameRecog(5);
+
 
 //Aquí se configuran los nodos, el tipo de mensaje, buffer, el topico, etc.
 bool FestinoVision::setNodeHandle(ros::NodeHandle* nh)
@@ -26,6 +29,7 @@ bool FestinoVision::setNodeHandle(ros::NodeHandle* nh)
     //face_recog
     cltFindPersons = nh->serviceClient<act_pln::FaceRecogSrv>("/vision/recognize_face/names");
     cltTrainPersons = nh->serviceClient<act_pln::FaceTrainSrv>("/vision/training_face/name");
+    cltArucoTf = nh->serviceClient<img_proc::Tag_with_tf>("/vision/find_tag");
     return true;
 }
 
@@ -81,4 +85,13 @@ void FestinoVision::TrainingPerson(std::string person)
     }
 }
 
-
+void FestinoVision::enableArucoDet(bool flag)
+{
+    std::cout<< "FestinoVision.-> Detect Aruco Mark with TF" << std::endl;
+    img_proc::Tag_with_tf srv;
+    srv.request.is_find_tag_enabled = flag;
+    if(cltArucoTf.call(srv))
+    {
+        std::cout << "Success: " << srv.response.success << std:: endl;
+    }
+}

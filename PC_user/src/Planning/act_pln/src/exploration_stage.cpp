@@ -41,10 +41,6 @@
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/Twist.h"
 
-//Biblioteca para tokenizar
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>	
-
 using namespace std;
 
 //Se puede cambiar, agregar o eliminar los estados
@@ -71,6 +67,8 @@ std_msgs::String mps_data2send;
 //std_msgs::String mps_name2send;
 std_msgs::String mps_name2send;
 
+float deg_rob_mps;
+
 bool fail = false;
 bool success = false;
 SMState state = SM_INIT;
@@ -79,7 +77,7 @@ std::vector<std_msgs::String> target_zones;
 geometry_msgs::PoseStamped det_mps;
 geometry_msgs::PoseStamped robot_curr_pos;
 geometry_msgs::PoseStamped robot_next_pos;
-geometry_msgs::PoseStamped robot2mps;
+geometry_msgs::PoseStamped robot_first_pos;
 geometry_msgs::PoseStamped robot_last_pos;
 geometry_msgs::PoseStamped robot_pos;
 geometry_msgs::PoseStamped goal_tosend;
@@ -129,16 +127,6 @@ bool flag_door = true;
 geometry_msgs::Twist tw_tomap;
 
 bool act = false;
-
-bool contains_str(std::string str, std::string word){
-	std::vector<std::string> tokens;
-	boost::algorithm::split(tokens, str, boost::algorithm::is_any_of("-"));
-	for(int i=0;i<tokens.size();i++){
-		if(tokens[i]==word){return true;} 
-	}
-
-	return false;
-}
 
 void nav_zone_to_cords(ros::NodeHandle n, std::string zone, geometry_msgs::PoseStamped)
 {
@@ -194,6 +182,12 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     for(int i=1060; i<1081;i++){
     	laserScan.ranges[i] = 10.0;
     }
+
+    //std::cout<< laserScan << "\n ";
+    //std::cout<<"Range Size: "<< range << "\n ";
+    //std::cout<<"Range Central: "<< range_c << "\n ";
+    //std::cout<<"Range Initial: "<< range_i << "\n ";
+    //std::cout<<"Range Final: "<< range_f << "\n ";
 
     cont_laser=0;
     laser_l=0;
@@ -406,9 +400,6 @@ std::vector<float> arreglo_alfa = {0.7853, 1.5708, 2.356, 3.14159, 3.9269, 4.712
 //Nuevas coordeandas del aruco respecto al mapa
 float aruco_x;
 float aruco_y;
-std::string mps_name_contains;
-
-float deg_rob_mps;
 
 //Paso en el que se encuentre el robot para saber su posicion
 int step = 0;
@@ -431,197 +422,119 @@ void transform_aruco_map(geometry_msgs::PoseStamped location)
 
 std::string zone_name;
 std::string zone_name_obtained;
-bool m_is_cyan = true;
-//TODO CHANGE TO FALSE
-bool m_team_set = true;
 
-void define_zone(geometry_msgs::PoseStamped location)
+bool define_zone(geometry_msgs::PoseStamped location)
 {
 	if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z11";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z12";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z13";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z14";
+		return true;
 	}
 	else if(location.pose.position.x  > -1 && location.pose.position.x <= 0 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z15";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z21";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z22";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z23";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z24";
+		return true;
 	}
 	else if(location.pose.position.x  > -2 && location.pose.position.x <= -1 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z25";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z31";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z32";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z33";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z34";
+		return true;
 	}
 	else if(location.pose.position.x  > -3 && location.pose.position.x <= -2 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z35";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z41";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z42";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z43";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z44";
+		return true;
 	}
 	else if(location.pose.position.x  > -4 && location.pose.position.x <= -3 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z45";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 0 && location.pose.position.y < 1){
 		zone_name = "M_Z51";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 1 && location.pose.position.y < 2){
 		zone_name = "M_Z52";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 2 && location.pose.position.y < 3){
 		zone_name = "M_Z53";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 3 && location.pose.position.y < 4){
 		zone_name = "M_Z54";
+		return true;
 	}
 	else if(location.pose.position.x  > -5 && location.pose.position.x <= -4 && location.pose.position.y >= 4 && location.pose.position.y < 5){
 		zone_name = "M_Z55";
-	}
-	/*else{
-		zone_name = "invalid";
-	}*/
-	//CYAN
-	if(location.pose.position.x  > 4 && location.pose.position.x <= 5 && location.pose.position.y >= 0 && location.pose.position.y < 1){
-		zone_name = "C_Z51";
-	}
-	else if(location.pose.position.x  > 4 && location.pose.position.x <= 5 && location.pose.position.y >= 1 && location.pose.position.y < 2){
-		zone_name = "C_Z52";
-	}
-	else if(location.pose.position.x  > 4 && location.pose.position.x <= 5 && location.pose.position.y >= 2 && location.pose.position.y < 3){
-		zone_name = "C_Z53";
-	}
-	else if(location.pose.position.x  > 4 && location.pose.position.x <= 5 && location.pose.position.y >= 3 && location.pose.position.y < 4){
-		zone_name = "C_Z54";
-	}
-	else if(location.pose.position.x  > 4 && location.pose.position.x <= 5 && location.pose.position.y >= 4 && location.pose.position.y < 5){
-		zone_name = "C_Z55";
-	}
-	else if(location.pose.position.x  > 3 && location.pose.position.x <= 4 && location.pose.position.y >= 0 && location.pose.position.y < 1){
-		zone_name = "C_Z41";
-	}
-	else if(location.pose.position.x  > 3 && location.pose.position.x <= 4 && location.pose.position.y >= 1 && location.pose.position.y < 2){
-		zone_name = "C_Z42";
-	}
-	else if(location.pose.position.x  > 3 && location.pose.position.x <= 4 && location.pose.position.y >= 2 && location.pose.position.y < 3){
-		zone_name = "C_Z43";
-	}
-	else if(location.pose.position.x  > 3 && location.pose.position.x <= 4 && location.pose.position.y >= 3 && location.pose.position.y < 4){
-		zone_name = "C_Z44";
-	}
-	else if(location.pose.position.x  > 3 && location.pose.position.x <= 4 && location.pose.position.y >= 4 && location.pose.position.y < 5){
-		zone_name = "C_Z45";
-	}
-	else if(location.pose.position.x  > 2 && location.pose.position.x <= 3 && location.pose.position.y >= 0 && location.pose.position.y < 1){
-		zone_name = "C_Z31";
-	}
-	else if(location.pose.position.x  > 2 && location.pose.position.x <= 3 && location.pose.position.y >= 1 && location.pose.position.y < 2){
-		zone_name = "C_Z32";
-	}
-	else if(location.pose.position.x  > 2 && location.pose.position.x <= 3 && location.pose.position.y >= 2 && location.pose.position.y < 3){
-		zone_name = "C_Z33";
-	}
-	else if(location.pose.position.x  > 2 && location.pose.position.x <= 3 && location.pose.position.y >= 3 && location.pose.position.y < 4){
-		zone_name = "C_Z34";
-	}
-	else if(location.pose.position.x  > 2 && location.pose.position.x <= 3 && location.pose.position.y >= 4 && location.pose.position.y < 5){
-		zone_name = "C_Z35";
-	}
-	else if(location.pose.position.x  > 1 && location.pose.position.x <= 2 && location.pose.position.y >= 0 && location.pose.position.y < 1){
-		zone_name = "C_Z21";
-	}
-	else if(location.pose.position.x  > 1 && location.pose.position.x <= 2 && location.pose.position.y >= 1 && location.pose.position.y < 2){
-		zone_name = "C_Z22";
-	}
-	else if(location.pose.position.x  > 1 && location.pose.position.x <= 2 && location.pose.position.y >= 2 && location.pose.position.y < 3){
-		zone_name = "C_Z23";
-	}
-	else if(location.pose.position.x  > 1 && location.pose.position.x <= 2 && location.pose.position.y >= 3 && location.pose.position.y < 4){
-		zone_name = "C_Z24";
-	}
-	else if(location.pose.position.x  > 1 && location.pose.position.x <= 2 && location.pose.position.y >= 4 && location.pose.position.y < 5){
-		zone_name = "C_Z25";
-	}
-	else if(location.pose.position.x  > 0 && location.pose.position.x <= 1 && location.pose.position.y >= 0 && location.pose.position.y < 1){
-		zone_name = "C_Z11";
-	}
-	else if(location.pose.position.x  > 0 && location.pose.position.x <= 1 && location.pose.position.y >= 1 && location.pose.position.y < 2){
-		zone_name = "C_Z12";
-	}
-	else if(location.pose.position.x  > 0 && location.pose.position.x <= 1 && location.pose.position.y >= 2 && location.pose.position.y < 3){
-		zone_name = "C_Z13";
-	}
-	else if(location.pose.position.x  > 0 && location.pose.position.x <= 1 && location.pose.position.y >= 3 && location.pose.position.y < 4){
-		zone_name = "C_Z14";
-	}
-	else if(location.pose.position.x  > 0 && location.pose.position.x <= 1 && location.pose.position.y >= 4 && location.pose.position.y < 5){
-		zone_name = "C_Z15";
+		return true;
 	}
 	else{
 		zone_name = "invalid";
+		return false;
 	}
 }
 
-bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_tag_Srv srv, ros::Publisher pub_mps_name, ros::Publisher pub_mps_zone, ros::Publisher pub_mps_ori)
+bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_tag_Srv srv, ros::Publisher pub_mps_name, ros::Publisher pub_mps_pos)
 {
-	if(!m_team_set){
-		return false;
-	}
 	tf::TransformListener listener;
 	tf::StampedTransform transform;
-	geometry_msgs::PoseStamped station_pos;
-    station_pos.header.frame_id = "/map";
-    station_pos.pose.position.x = 0.0;
-	station_pos.pose.position.y = 0.0;
-	station_pos.pose.position.z = 0.0;
-	station_pos.pose.orientation.x = 0.0;
-	station_pos.pose.orientation.y = 0.0;
-	station_pos.pose.orientation.z = 0.0;
-	station_pos.pose.orientation.w = 0.0;
-
-	geometry_msgs::PoseStamped robotsito_pos;
-    robotsito_pos.header.frame_id = "/map";
-    robotsito_pos.pose.position.x = 0.0;
-	robotsito_pos.pose.position.y = 0.0;
-	robotsito_pos.pose.position.z = 0.0;
-	robotsito_pos.pose.orientation.x = 0.0;
-	robotsito_pos.pose.orientation.y = 0.0;
-	robotsito_pos.pose.orientation.z = 0.0;
-	robotsito_pos.pose.orientation.w = 0.0;
 	tag_flag = false;
 	std::cout << "\n Look for Tag" << std::endl;
 	srv.request.is_find_tag_enabled = true;
@@ -631,138 +544,58 @@ bool look_for_tag(ros::NodeHandle n, ros::ServiceClient client, img_proc::Find_t
 		if(tag_flag == true){
 			mps_name = srv.response.mps_name;
 			mps_PointStamped = srv.response.point_stamped;
-			//print_vector(mps_PointStamped);
+			//cam_reg = srv.responpumas
 			std::cout << "Saving MPS info" << std::endl;
 			if(mps_name.size())
 			{
+				std::cout << "Station \t" << mps_name[0] << std::endl;				
 				try{
-					listener.waitForTransform("/Log_origin", mps_name[0], ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/Log_origin", mps_name[0], ros::Time(0), transform);
-				}
+					listener.waitForTransform("/camera_link",mps_name[0],ros::Time(0), ros::Duration(1000.0));
+					listener.lookupTransform("/camera_link", mps_name[0],ros::Time(0), transform);
+					//listener.waitForTransform("/map","M_Z22",ros::Time(0), ros::Duration(1000.0));
+					//listener.lookupTransform("/map","M_Z22",ros::Time(0), transform);
+					det_mps.pose.position.x = transform.getOrigin().x();
+					det_mps.pose.position.y = transform.getOrigin().y();
+					det_mps.pose.position.z = transform.getOrigin().z();
+					std::cout << "\n MPS_Position \n" << det_mps.pose.position << std::endl;
+					if(det_mps.pose.position.x < 7.0 || det_mps.pose.position.y < 8.0)
+					{
+						std::cout << "\n Coordinates within limits " << std::endl;
+						deg_rob_mps = (180 / 3.141592)*atan2(det_mps.pose.position.x,det_mps.pose.position.y);
+						std::cout << "\n MPS_Orientation wrt robot \n" << deg_rob_mps << std::endl;
+						if(deg_rob_mps > 45 && deg_rob_mps < 135){
+							listener.waitForTransform("/map","M_Z22",ros::Time(0), ros::Duration(1000.0));
+							listener.lookupTransform("/map","M_Z22",ros::Time(0), transform);
+							robot_pos.pose.position.x = transform.getOrigin().x();
+							robot_pos.pose.position.y = transform.getOrigin().y();
+							robot_pos.pose.position.z = transform.getOrigin().z();
+						}
+						if(define_zone(det_mps)){
+							std::cout << "\n MPS_Zone " << zone_name << std::endl;
+						}
+					}
+				}	
 				catch(tf::TransformException ex){
 					ROS_ERROR("%s",ex.what());
 					ros::Duration(1.0).sleep();
-				}
-				station_pos.pose.position.x = transform.getOrigin().x();
-
-				try{
-					listener.waitForTransform("/Log_origin", "base_link", ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/Log_origin", "base_link", ros::Time(0), transform);
-				}
-				catch(tf::TransformException ex){
-					ROS_ERROR("%s",ex.what());
-					ros::Duration(1.0).sleep();
-				}
-				station_pos.pose.position.x = transform.getOrigin().x();
-
-				if(m_is_cyan){
-					station_pos.pose.position.x -= 2;
-				} else {
-					station_pos.pose.position.x += 2;
-				}
-				station_pos.pose.position.y = transform.getOrigin().y();
-
-				std::cout << "Station \t" << mps_name[0] << std::endl;	
-				define_zone(station_pos);
-				std::cout << "\n MPS_Zone " << zone_name << std::endl;
-				std::cout << "\n Coords " << station_pos << " w " << station_pos << " z " << std::endl;
-				std_msgs::String orientation;
-				float norte,oeste,este,noreste,noroeste,offset,sureste,suroeste;
-				norte = 0.70;
-				oeste = 0.0;
-				este = 1;
-				noreste = 0.015;
-				noroeste = 0.345;
-				suroeste = -0.4;
-				sureste = 0.9;
-				offset = 0.05;
-				if(station_pos.pose.orientation.w <= norte + offset  && station_pos.pose.orientation.w >= norte - offset){						
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Norte " << zone_name << std::endl;
-						orientation.data = "90"; // si veo Output
-					}
-					else{
-						std::cout << "\n Norte " << zone_name << std::endl;
-						orientation.data = "270"; // si veo Input
-					}
-
-					std::cout << station_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= este + offset  && station_pos.pose.orientation.w >= este - offset){
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Este " << zone_name << std::endl;
-						orientation.data = "0"; // si veo out
-					} 
-					else{
-						std::cout << "\n Este " << zone_name << std::endl;
-						orientation.data = "180"; // si veo in
-					}
-					std::cout << robot_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= oeste + offset  && station_pos.pose.orientation.w >= oeste - offset){
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Oeste " << zone_name << std::endl;
-						orientation.data = "180";
-					}
-					else{
-						std::cout << "\n Oeste " << zone_name << std::endl;
-						orientation.data = "0"; 
-					}
-					std::cout << robot_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= noreste + offset  && station_pos.pose.orientation.w >= noreste - offset){
-					std::cout << "\n Noreste " << zone_name << std::endl;
-					if(contains_str(mps_name[0],"O")){
-						orientation.data = "45";
-					} 
-					else{
-						std::cout << "\n Noreste " << zone_name << std::endl;
-						orientation.data = "225";
-					}
-					std::cout << robot_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= noroeste + offset  && station_pos.pose.orientation.w >= noroeste - offset){
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Noroeste " << zone_name << std::endl;
-						orientation.data = "135";
-					} 
-					else{
-						std::cout << "\n Noroeste " << zone_name << std::endl;
-						orientation.data = "315";
-					}
-					std::cout << robot_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= sureste + offset  && station_pos.pose.orientation.w >= sureste - offset){
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Sureste " << zone_name << std::endl;
-						orientation.data = "315";
-					}
-					else{
-						std::cout << "\n Sureste " << zone_name << std::endl;
-						orientation.data = "135";
-					}
-					std::cout << robot_pos.pose.orientation.w << " w " << orientation.data << std::endl;
-				}
-				else if(station_pos.pose.orientation.w <= suroeste + offset  && station_pos.pose.orientation.w >= suroeste - offset){
-					if(contains_str(mps_name[0],"O")){
-						std::cout << "\n Suroeste " << zone_name << std::endl;
-						orientation.data = "225";
-					} 
-					else{
-						std::cout << "\n Suroeste " << zone_name << std::endl;
-						orientation.data = "45";
-					}
-					std::cout << station_pos.pose.orientation.w << " w " << orientation.data << std::endl;
 				}
 			}
 			else
 			{
-				std::cout << "\n Not identified " << std::endl;
+				std::cout << "\n Not identified " << zone_name << std::endl;
 			}
+			std::cout << "\n Not identified " << zone_name << std::endl;
 		}
+		
     }
     return tag_flag;
 }
+
+/*void publish_info(ros::Publisher pub_mps_pos, ros::Publisher pub_mps_name){
+	std::cout <<"Publish info"<<std::endl;
+	pub_mps_pos.publish(det_mps);
+	pub_mps_name.publish(mps_name);
+}*/
 
 bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 {
@@ -793,6 +626,20 @@ bool fwd_n_turn(ros::Publisher pub_cmd_vel, float t_fwd, float t_turn)
 	return true;
 }
 
+/*void find_ori(region){
+	if(region == 1){
+		std::cout << "\n P to the left " << std::endl;
+	}
+	else if(region == 2){
+		std::cout << "\n P in front " << std::endl;
+	}
+	if(region == 3){
+		std::cout << "\n P_ to the right " << std::endl;
+	}
+
+}*/
+
+
 int main(int argc, char** argv){
 	ros::Time::init();
 	int curr_pip = 0;
@@ -815,12 +662,10 @@ int main(int argc, char** argv){
     ros::Subscriber sub_time_over 			= n.subscribe("/time_over", 1, callback_time_over);
 
 	ros::Publisher pub_mps_name 	= n.advertise<std_msgs::String>("/mps_name", 1000, true);
-	ros::Publisher pub_mps_zone		= n.advertise<std_msgs::String>("/mps_zone", 1000,true);
-	ros::Publisher pub_mps_ori		= n.advertise<std_msgs::String>("/mps_ori", 1000,true);
-
+	ros::Publisher pub_mps_pos 		= n.advertise<geometry_msgs::PoseStamped>("/mps_pos", 1000);
 	ros::Publisher pub_cmd_vel      = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
 	ros::Publisher pub_zone_goal 	= n.advertise<std_msgs::String>("/zone_goal", 1000, true);
-	ros::Publisher pub_mps_pos 	= n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
+	ros::Publisher pub_rosnav_goal 	= n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
 	
     ros::ServiceClient client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv srv;
@@ -897,13 +742,13 @@ int main(int argc, char** argv){
 	robot_next_pos.pose.orientation.z = 0.0;
 	robot_next_pos.pose.orientation.w = 0.0;
 
-	robot2mps.pose.position.x = 0.0;
-	robot2mps.pose.position.y = 0.0;
-	robot2mps.pose.position.z = 0.0;
-	robot2mps.pose.orientation.x = 0.0;
-	robot2mps.pose.orientation.y = 0.0;
-	robot2mps.pose.orientation.z = 0.0;
-	robot2mps.pose.orientation.w = 0.0;
+	robot_first_pos.pose.position.x = 0.0;
+	robot_first_pos.pose.position.y = 0.0;
+	robot_first_pos.pose.position.z = 0.0;
+	robot_first_pos.pose.orientation.x = 0.0;
+	robot_first_pos.pose.orientation.y = 0.0;
+	robot_first_pos.pose.orientation.z = 0.0;
+	robot_first_pos.pose.orientation.w = 0.0;
 
 	robot_last_pos.pose.position.x = 0.0;
 	robot_last_pos.pose.position.y = 0.0;
@@ -936,8 +781,7 @@ int main(int argc, char** argv){
 	    		std::cout << "\n Exploration STAGE: SM_INIT" << std::endl;
 				field_color_coords("MAGENTA");
 	            std::cout << "I am ready - Exploration route has  " << x_pips.size() << " points" << std::endl;
-	    		//state = SM_NAV_PIPS;
-				state = SM_NAV_PIPS;
+	    		state = SM_NAV_PIPS;
 	    		break;
 			}
 
@@ -966,9 +810,8 @@ int main(int argc, char** argv){
 					}
 					std::cout << "Step \t" << turn_step_pip << std::endl;
 					ros::Duration(3, 0).sleep();
-					tag_flag = look_for_tag(n, client, srv, pub_mps_name, pub_mps_zone, pub_mps_ori);
+					tag_flag = look_for_tag(n, client, srv, pub_mps_name, pub_mps_pos);
 					if(tag_flag){
-						std::cout << "Yes Tag" << std::endl;
 						state = SM_TAG_DETECTED;
 					}
 					else{
@@ -984,27 +827,13 @@ int main(int argc, char** argv){
 			}
 
 			case SM_TAG_DETECTED:{
-				std::cout << "\n State machine: SM_TAG_DETECTED" << std::endl;
 	    		//Scan Tag and Send Information
+	    		std::cout << "\n State machine: SM_TAG_DETECTED" << std::endl;
 	            print_vector(mps_name);
-				print_vector(mps_PointStamped);
-				try{
-					listener.waitForTransform("/map", "/base_link", ros::Time(0), ros::Duration(1.0));
-					listener.lookupTransform("/map", "/base_link", ros::Time(0), transform);
-				}
-				catch(tf::TransformException ex){
-					ROS_ERROR("%s",ex.what());
-					ros::Duration(1.0).sleep();
-				}
-				robot_pos.pose.position.x = transform.getOrigin().x();
-				robot_pos.pose.position.y = transform.getOrigin().y();
-				robot_pos.pose.position.z = transform.getOrigin().z();
-				robot_pos.pose.orientation.x = transform.getRotation().x();
-				robot_pos.pose.orientation.y = transform.getRotation().y();
-				robot_pos.pose.orientation.z = transform.getRotation().z();
-				robot_pos.pose.orientation.w = transform.getRotation().w();
-				
-				state = SM_FINAL_STATE;
+				print_vector(mps_PointStamped);	
+				//find_ori();
+				std::cout << "Back to the route" << std::endl;
+				state = SM_TURN_AROUND;
 	    		break;
 			}
 			
