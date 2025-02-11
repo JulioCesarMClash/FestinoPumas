@@ -2,10 +2,9 @@
 
 	<!--LAUNCHES-->
 	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
-	<include file="$(find config_files)/launch/navigation_rcll_2023.launch"> </include>	
 
 	<!--NODES-->
 	<!--node name="speaker" pkg="robotino_talk" type="speaker.py"/-->
-	<node name="find_tag_service" pkg="img_proc" type="aruco_det_srv_array.py"/>
+	<node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv"/>
 	
 </launch>

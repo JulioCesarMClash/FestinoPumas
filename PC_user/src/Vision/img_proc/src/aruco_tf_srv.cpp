@@ -133,7 +133,7 @@ class ArucoDistanceTF
                                     << ", y=" << centroid_3d.y << ", z=" << centroid_3d.z 
                                     << ", yaw=" << yaw << std::endl;
 
-                            publishTF_without_map(centroid_3d.x, centroid_3d.y, centroid_3d.z, q, ids[i]);
+                            publishTF(centroid_3d.x, centroid_3d.y, centroid_3d.z, q, ids[i]);
                         }
                         else
                         {
@@ -214,7 +214,7 @@ class ArucoDistanceTF
                 std::cout << "Publish TF for marker "<< marker_id <<" @ x: " << x << "; y: " << y << "; z:" << z << std::endl;
             }
 
-            void publishTF(float x, float y, float z, int marker_id)
+            void publishTF(float x, float y, float z, const tf2::Quaternion& q, int marker_id)
             {
                 static tf2_ros::StaticTransformBroadcaster static_broadcaster_;
                 tf2_ros::Buffer tf_buffer;
@@ -243,11 +243,11 @@ class ArucoDistanceTF
                     transform.transform.translation.y = marker_in_map.y();
                     transform.transform.translation.z = marker_in_map.z();
 
-                    transform.transform.rotation.x = 0.0;
-                    transform.transform.rotation.y = 0.0;
-                    transform.transform.rotation.z = 0.0;
-                    transform.transform.rotation.w = 1.0;
-
+                    transform.transform.rotation.x = q.x();
+                    transform.transform.rotation.y = q.y();
+                    transform.transform.rotation.z = q.z();
+                    transform.transform.rotation.w = q.w();
+                    
                     // Publicar la transformada estática
                     static_broadcaster_.sendTransform(transform);
 
