@@ -1,0 +1,5 @@
+bool is_find_piece_enabled
+string piece
+---
+bool success       
+geometry_msgs/PointStamped point_stamped     
