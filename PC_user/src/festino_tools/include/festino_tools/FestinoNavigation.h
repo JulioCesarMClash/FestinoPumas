@@ -41,7 +41,7 @@ private:
     //Variables for Festino navigation:
     static actionlib_msgs::GoalStatus  _navigation_status;
     static actionlib_msgs::GoalStatus  _simple_move_status;
-    std::unique_ptr<actionlib::SimpleActionClient<move_base::move_baseAction>> actionMoveBase;  // Usando unique_ptr
+    typedef actionlib::SimpleActionClient<move_base::move_baseAction> actionMoveBase;
     static bool _stop;
 
 public:

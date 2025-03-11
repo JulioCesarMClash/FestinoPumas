@@ -44,10 +44,9 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubNavigationStop      = nh->advertise<std_msgs::Empty>            ("/navigation/stop", 10);
     pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
     tf_listener = new tf::TransformListener();
-
     is_node_set = true;
     _stop = false;
-    actionMoveBase = std::make_unique<actionlib::SimpleActionClient<move_base::move_baseAction>>("move_base", true);
+    //actionMoveBase1.waitForServer();
     _navigation_status.status  = actionlib_msgs::GoalStatus::PENDING;
     _simple_move_status.status = actionlib_msgs::GoalStatus::PENDING;
     return true;
@@ -166,19 +165,9 @@ void FestinoNavigation::startMoveLateral(float distance)
 
 
 void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
-{
-    /*geometry_msgs::Twist vel_msg;
-    vel_msg.linear.x = x;
-    vel_msg.linear.y = y;
-    vel_msg.angular.z = theta;
-    
-    ros::Time init = ros::Time::now();
-    while(ros::ok() && (ros::Time::now() - init).toSec() < time_out)
-    {
-        pubCmdVel.publish(vel_msg);
-        ros::Duration(0.01).sleep();
-    }*/
-    
+{   
+    FestinoNavigation::actionMoveBase actionMoveBase1("move_base", true);
+    actionMoveBase1.waitForServer();
     
     move_base::move_baseGoal goal;
     goal.x = x;
@@ -186,17 +175,18 @@ void FestinoNavigation::move_base(double x, double y, double theta, double time_
     goal.theta = theta;
     goal.time_out = time_out;
 
-    actionMoveBase.sendGoal(goal);
+    actionMoveBase1.sendGoal(goal);
 
-    bool finished_before_timeout = actionMoveBase.waitForResult(ros::Duration(30.0));
+    bool finished_before_timeout = actionMoveBase1.waitForResult(ros::Duration(30.0));
     if (finished_before_timeout)
     {
-        actionlib::SimpleClientGoalState state = actionMoveBase.getState();
-        ROS_INFO("Action finished: %s", state.toString().c_str());
+        actionlib::SimpleClientGoalState state = actionMoveBase1.getState();
+        std::cout<<"FestinoNavigation - move base already"<<std::endl;
     }
     else
     {
-        ROS_INFO("Action did not finish before the time out.");
+
+        std::cout<<"FestinoNavigation - move base did not finish before the time outy"<<std::endl;
     }
 
 }

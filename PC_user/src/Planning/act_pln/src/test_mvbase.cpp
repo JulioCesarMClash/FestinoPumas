@@ -89,7 +89,7 @@ int main(int argc, char **argv)
             continue;
         }   
     }while(aux);*/
-    FestinoNavigation::move_base(0.1, 0.0, 0.0, 1.0);
+    FestinoNavigation::move_base(0.1, 0.0, 0.0, 4.5);
     std::cout<<"holiis"<<std::endl;
     rate.sleep();
     return 0;
