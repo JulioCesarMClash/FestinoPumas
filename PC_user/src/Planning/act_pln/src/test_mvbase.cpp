@@ -13,15 +13,15 @@
 #include <festino_tools/FestinoKnowledge.h>
 #include <cmath>
 
-/*geometry_msgs::TransformStamped coord_Aruco;
-geometry_msgs::TransformStamped coord_cam_robot;
-float error_x = 0.0;
-float error_y = 0.0;
-int aux = 1;
-std::vector<float> goal_vec(3);*/
-
 int main(int argc, char **argv)
 {
+    geometry_msgs::TransformStamped coord_Aruco;
+    geometry_msgs::TransformStamped coord_cam_robot;
+    float error_x = 0.0;
+    float error_y = 0.0;
+    int aux = 1;
+    std::vector<float> goal_vec(3);
+    
     std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle nh;
@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-    std::cout << "Cannot move to inspection point" << std::endl;
+    std::cout << "Cannot move to inspection point" << std::endl;*/
 
     FestinoVision::enableArucoDet(true);
 
@@ -72,10 +72,13 @@ int main(int argc, char **argv)
             error_x = abs(coord_Aruco.transform.translation.y - coord_cam_robot.transform.translation.y);
             error_y = coord_cam_robot.transform.translation.x- coord_Aruco.transform.translation.x;
             
-                FestinoNavigation::move_base(error_x, error_y, 0.0, 0.01);
+            error_x = (error_x > 0.25) ? 0.5 : error_x;
+            error_y = (error_y > 0.25) ? 0.5 : error_y;
+
+            FestinoNavigation::move_base(error_x, error_y, 0.0, 0.005);
             ros::spinOnce();
 
-            if ( error_x < 0.18 && abs(error_y) < 0.05)
+            if ( error_x < 0.20 && abs(error_y) < 0.05)
             {
                 FestinoNavigation::move_base(0.0, 0.0, 0.0, 0.01);
                 aux = 0;
@@ -88,8 +91,7 @@ int main(int argc, char **argv)
             ros::Duration(0.1).sleep();
             continue;
         }   
-    }while(aux);*/
-    FestinoNavigation::move_base(0.1, 0.0, 0.0, 4.5);
+    }while(aux);
     std::cout<<"holiis"<<std::endl;
     rate.sleep();
     return 0;
