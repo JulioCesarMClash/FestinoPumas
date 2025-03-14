@@ -64,21 +64,21 @@ int main(int argc, char **argv)
                 ROS_WARN("Transform for camera_link not available");
                 continue;
             }
-            std::cout << "Aruco x:" << coord_Aruco.transform.translation.x << std::endl;
-            std::cout << "Robot x:" << coord_cam_robot.transform.translation.x << std::endl;
+            std::cout << "Aruco x:" << coord_Aruco.transform.translation.x << " -- Robot x:" << coord_cam_robot.transform.translation.x << std::endl;
+            std::cout << "Aruco y:" << coord_Aruco.transform.translation.y << " -- Robot y:" << coord_cam_robot.transform.translation.y << std::endl;
             std::cout << "Aruco - robot:" << abs(coord_Aruco.transform.translation.y - coord_cam_robot.transform.translation.y) << std::endl;
             ros::spinOnce();
 
-            error_x = abs(coord_Aruco.transform.translation.y - coord_cam_robot.transform.translation.y);
-            error_y = coord_cam_robot.transform.translation.x- coord_Aruco.transform.translation.x;
+            error_y = (coord_Aruco.transform.translation.y - coord_cam_robot.transform.translation.y);
+            error_x = abs(coord_cam_robot.transform.translation.x - coord_Aruco.transform.translation.x);
             
-            error_x = (error_x > 0.25) ? 0.5 : error_x;
-            error_y = (error_y > 0.25) ? 0.5 : error_y;
+            //error_x = (error_x > 0.25) ? 0.5 : error_x;
+            //error_y = (error_y > 0.25) ? 0.5 : error_y;
 
-            FestinoNavigation::move_base(error_x, error_y, 0.0, 0.005);
+            FestinoNavigation::move_base(error_x, error_y, 0.0, 0.001);
             ros::spinOnce();
 
-            if ( error_x < 0.20 && abs(error_y) < 0.05)
+            if ( error_x < 0.18 && abs(error_y) < 0.1)
             {
                 FestinoNavigation::move_base(0.0, 0.0, 0.0, 0.01);
                 aux = 0;

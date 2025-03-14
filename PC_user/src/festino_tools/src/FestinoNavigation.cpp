@@ -21,6 +21,8 @@ ros::Publisher FestinoNavigation::pubMvnPlnGetCloseXYA;
 ros::Publisher FestinoNavigation::pubNavigationStop;
 ros::Publisher FestinoNavigation::pubCmdVel;
 
+actionlib::SimpleActionClient<move_base::move_baseAction>* FestinoNavigation::actionMoveBase = nullptr;
+
 //Publishers and subscribers for localization
 tf::TransformListener* FestinoNavigation::tf_listener;
 
@@ -46,6 +48,14 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     tf_listener = new tf::TransformListener();
     is_node_set = true;
     _stop = false;
+    if (actionMoveBase == nullptr) {
+        actionMoveBase = new actionlib::SimpleActionClient<move_base::move_baseAction>("move_base", true);
+        std::cout << "FestinoNavigation.->Waiting for action server..." << std::endl;
+        if (!actionMoveBase->waitForServer(ros::Duration(5.0))) {
+            std::cerr << "FestinoNavigation.->Action server not available after 5 seconds" << std::endl;
+            return false;
+        }
+    }
     //actionMoveBase1.waitForServer();
     _navigation_status.status  = actionlib_msgs::GoalStatus::PENDING;
     _simple_move_status.status = actionlib_msgs::GoalStatus::PENDING;
@@ -166,8 +176,11 @@ void FestinoNavigation::startMoveLateral(float distance)
 
 void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
 {   
-    FestinoNavigation::actionMoveBase actionMoveBase1("move_base", true);
-    actionMoveBase1.waitForServer();
+
+    if (actionMoveBase == nullptr) {
+        std::cerr << "FestinoNavigation.->Action client not initialized!" << std::endl;
+        return;
+    }
     
     move_base::move_baseGoal goal;
     goal.x = x;
@@ -175,12 +188,12 @@ void FestinoNavigation::move_base(double x, double y, double theta, double time_
     goal.theta = theta;
     goal.time_out = time_out;
 
-    actionMoveBase1.sendGoal(goal);
+    actionMoveBase->sendGoal(goal);
 
-    bool finished_before_timeout = actionMoveBase1.waitForResult(ros::Duration(30.0));
+    bool finished_before_timeout = actionMoveBase->waitForResult(ros::Duration(30.0));
     if (finished_before_timeout)
     {
-        actionlib::SimpleClientGoalState state = actionMoveBase1.getState();
+        actionlib::SimpleClientGoalState state = actionMoveBase->getState();
         std::cout<<"FestinoNavigation - move base already"<<std::endl;
     }
     else

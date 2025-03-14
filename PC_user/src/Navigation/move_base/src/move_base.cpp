@@ -56,7 +56,7 @@ public:
 
     void executeCB(const move_base::move_baseGoalConstPtr &goal)
     {
-        ros::Rate rate(1000);
+        ros::Rate rate(100000);
         geometry_msgs::Twist vel_msg;
         vel_msg.linear.x = goal->x;
         vel_msg.linear.y = goal->y;
