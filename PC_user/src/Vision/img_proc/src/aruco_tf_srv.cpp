@@ -32,6 +32,10 @@ class ArucoDistanceTF
 
             sensor_msgs::PointCloud2::ConstPtr latest_pointcloud_;
             cv::Mat latest_image_;
+            
+            std::vector<std::string> mps_names;
+            bool success;
+
 
     public:
             ArucoDistanceTF() : nh_("~"), it_(nh_)
@@ -42,7 +46,8 @@ class ArucoDistanceTF
                 image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ArucoDistanceTF::imageCallback, this);
                 pointcloud_sub_ = nh_.subscribe("/camera/depth/points", 1, &ArucoDistanceTF::pointCloudCallback, this);
                 service_ = nh_.advertiseService("/vision/find_tag", &ArucoDistanceTF::getArucoTFService, this);;
-                std::cout << "Aruco with TF --- Soft by Joshua M" << std::endl;
+                
+                std::cout << "Aruco with TF Service --- Soft by Joshua M" << std::endl;
             }
 
             void imageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -65,16 +70,20 @@ class ArucoDistanceTF
 
             bool getArucoTFService(img_proc::Tag_with_tf::Request &req, img_proc::Tag_with_tf::Response &res)
             {
+                
                 if(req.is_find_tag_enabled)
                 {
                     process();
-                    res.success = true;
+                    res.success = success;
+                    res.mps_name = mps_names;
                 }
                 else
                 {
                     res.success = false;
                 }
-                return true;
+
+                //Actualizar tooodos los valores
+                return success;
             }
 
             void process()
@@ -97,6 +106,7 @@ class ArucoDistanceTF
 
                 if (!ids.empty())
                 {
+                    std::cout << "Aruco with TF Service --- No tag detected" << std::endl;
                     for (size_t i = 0; i < ids.size(); ++i)
                     {
                         plane_x.clear();
@@ -269,7 +279,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "aruco_distance_tf_service");
     ArucoDistanceTF node;
-        ros::Rate rate(1000);
+    ros::Rate rate(100000);
 
     ros::spin();
     return 0;

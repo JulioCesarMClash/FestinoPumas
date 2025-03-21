@@ -35,9 +35,7 @@ add_message_files(
 ## Generate services in the 'srv' folder
 add_service_files(
  FILES
- Find_piece_Srv.srv
- Find_tag_Srv.srv
- Align_Srv.srv
+ #Find_tag_Srv.srv
  Tag_with_tf.srv
 )
 
