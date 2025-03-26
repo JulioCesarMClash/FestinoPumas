@@ -20,7 +20,7 @@ class MoveBaseService
 
         bool executeCB(simple_move::MoveBase::Request &req, simple_move::MoveBase::Response &res)
         {
-            ros::Rate rate(1000);
+            ros::Rate rate(10000);
             geometry_msgs::Twist vel_msg;
             vel_msg.linear.x = req.x;
             vel_msg.linear.y = req.y;
