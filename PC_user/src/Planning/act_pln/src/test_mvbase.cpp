@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     int aux = 1;
     std::vector<float> goal_vec(3);
     
-    std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
+    std::cout << "ACTION - Aling with MPS... Soft by Joshua M" << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle nh;
     ros::Rate rate(100000);
@@ -70,7 +70,8 @@ int main(int argc, char **argv)
             ros::spinOnce();
 
             error_y = (coord_Aruco.transform.translation.y - coord_cam_robot.transform.translation.y);
-            error_x = abs(coord_cam_robot.transform.translation.x - coord_Aruco.transform.translation.x);
+            error_x = (coord_Aruco.transform.translation.x - coord_cam_robot.transform.translation.x);
+            //error_x = abs(coord_cam_robot.transform.translation.x - coord_Aruco.transform.translation.x);
             
             //error_x = (error_x > 0.25) ? 0.5 : error_x;
             //error_y = (error_y > 0.25) ? 0.5 : error_y;
@@ -92,7 +93,7 @@ int main(int argc, char **argv)
             continue;
         }   
     }while(aux);
-    std::cout<<"holiis"<<std::endl;
+    std::cout<<"End"<<std::endl;
     rate.sleep();
     return 0;
 }
