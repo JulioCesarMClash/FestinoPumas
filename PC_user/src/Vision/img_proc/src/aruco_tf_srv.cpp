@@ -38,7 +38,7 @@ class ArucoDistanceTF
 
 
     public:
-            ArucoDistanceTF() : nh_("~"), it_(nh_)
+            ArucoDistanceTF() : nh_("~"), it_(nh_), success(false)
             {
                 aruco_dict_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
                 aruco_params_ = cv::aruco::DetectorParameters::create();
@@ -71,23 +71,19 @@ class ArucoDistanceTF
             bool getArucoTFService(img_proc::Tag_with_tf::Request &req, img_proc::Tag_with_tf::Response &res)
             {
                 
-                if(req.is_find_tag_enabled)
+                res.success = false; 
+                if (req.is_find_tag_enabled)
                 {
                     process();
                     res.success = success;
                     res.mps_name = mps_names;
                 }
-                else
-                {
-                    res.success = false;
-                }
-
-                //Actualizar tooodos los valores
-                return success;
+                return true;
             }
 
             void process()
             {
+                success = false;
                 if (latest_image_.empty() || !latest_pointcloud_)
                 {
                     ROS_INFO("Waiting image data and point cloud...");
@@ -106,7 +102,7 @@ class ArucoDistanceTF
 
                 if (!ids.empty())
                 {
-                    std::cout << "Aruco with TF Service --- No tag detected" << std::endl;
+                    mps_names.clear();
                     for (size_t i = 0; i < ids.size(); ++i)
                     {
                         plane_x.clear();
@@ -116,26 +112,26 @@ class ArucoDistanceTF
                             plane_x.push_back(getPointFromCloud(corner.x, corner.y));
                         }
 
-                        if (plane_x.size() == 4)  // Asegurar que tenemos las 4 esquinas
+                        if (plane_x.size() == 4) 
                         {
-                            // Calcular el centroide en 3D
+                            
                             geometry_msgs::Point centroid_3d;
                             centroid_3d.x = (plane_x[0].x + plane_x[1].x + plane_x[2].x + plane_x[3].x) / 4.0;
                             centroid_3d.y = (plane_x[0].y + plane_x[1].y + plane_x[2].y + plane_x[3].y) / 4.0;
                             centroid_3d.z = (plane_x[0].z + plane_x[1].z + plane_x[2].z + plane_x[3].z) / 4.0;
 
-                            // Definir vectores en el espacio 3D
+                        
                             Eigen::Vector3d v1(plane_x[1].x - plane_x[0].x, plane_x[1].y - plane_x[0].y, plane_x[1].z - plane_x[0].z);
                             Eigen::Vector3d v2(plane_x[3].x - plane_x[0].x, plane_x[3].y - plane_x[0].y, plane_x[3].z - plane_x[0].z);
 
-                            // Calcular el vector normal al plano del marcador
+                            
                             Eigen::Vector3d normal = v1.cross(v2);
                             normal.normalize();
 
-                            // Definir el ángulo de rotación respecto al eje Z (plano XY)
+                            
                             double yaw = atan2(normal.y(), normal.x());
 
-                            // Convertir a cuaternión
+                            
                             tf2::Quaternion q;
                             q.setRPY(0, 0, yaw);
 
@@ -143,13 +139,20 @@ class ArucoDistanceTF
                                     << ", y=" << centroid_3d.y << ", z=" << centroid_3d.z 
                                     << ", yaw=" << yaw << std::endl;
 
+                            mps_names.push_back(std::to_string(ids[i]));
                             publishTF(centroid_3d.x, centroid_3d.y, centroid_3d.z, q, ids[i]);
                         }
                         else
                         {
                             ROS_WARN("Not enough corner points detected.");
+                            success = false;
                         }
                     }   
+                }
+                else
+                {
+                    std::cout << "Aruco with TF Service --- No tag detected" << std::endl;
+                    success = false;
                 }
             }
 
@@ -160,6 +163,7 @@ class ArucoDistanceTF
                 if (!latest_pointcloud_)
                 {
                     point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN();
+                    success = false;
                     return point;
                 }
 
@@ -168,15 +172,14 @@ class ArucoDistanceTF
 
                 if (u < 0 || v < 0 || u >= width || v >= height)
                 {
-                    ROS_WARN("Coordenadas (%f, %f) estan fuera de los limites de la nube de puntos.", u, v);
+                    ROS_WARN("Coordinates (%f, %f) are outside of point cloud", u, v);
                     point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN();
+                    success= false;
                     return point;
                 }
 
-                // Índice lineal en la nube de puntos
                 int index = static_cast<int>(v) * width + static_cast<int>(u);
 
-                // Iterar sobre la nube de puntos
                 sensor_msgs::PointCloud2ConstIterator<float> iter_x(*latest_pointcloud_, "x");
                 sensor_msgs::PointCloud2ConstIterator<float> iter_y(*latest_pointcloud_, "y");
                 sensor_msgs::PointCloud2ConstIterator<float> iter_z(*latest_pointcloud_, "z");
@@ -266,10 +269,12 @@ class ArucoDistanceTF
                             << "; y: " << marker_in_map.y()
                             << "; z: " << marker_in_map.z()
                             << " referenced to map." << std::endl;
+                    success = true;
                 }
                 catch (tf2::TransformException& ex)
                 {
                     ROS_WARN("Could not transform from 'map' to 'camera_link': %s", ex.what());
+                    success = false;
                 }
             }
 };

@@ -57,12 +57,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message2.msg
 # )
 
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  MoveBase.srv
+  LaserScanAling.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -140,6 +139,8 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(simple_move_node src/simple_move_node.cpp)
 add_executable(shortmv_rosnav src/shortmv_rosnav.cpp)
+add_executable(move_base src/move_base.cpp)
+add_executable(aling_with_line src/aling_with_line.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,6 +152,8 @@ add_executable(shortmv_rosnav src/shortmv_rosnav.cpp)
 ## same as for the library above
 add_dependencies(simple_move_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(shortmv_rosnav ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(move_base ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(aling_with_line ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 
@@ -163,6 +166,13 @@ target_link_libraries(shortmv_rosnav
   ${catkin_LIBRARIES}
 )
 
+target_link_libraries(move_base
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(aling_with_line
+  ${catkin_LIBRARIES}
+)
 #############
 ## Install ##
 #############

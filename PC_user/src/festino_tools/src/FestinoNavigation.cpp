@@ -15,13 +15,16 @@ ros::Subscriber FestinoNavigation::subSimpleMoveStatus;
 ros::Publisher FestinoNavigation::pubSimpleMoveDist;
 ros::Publisher FestinoNavigation::pubSimpleMoveDistAngle;
 ros::Publisher FestinoNavigation::pubSimpleMoveLateral;
+ros::ServiceClient FestinoNavigation::cltMoveBase;
+ros::ServiceClient FestinoNavigation::cltAlingWithLine;
+
 //Publishers and subscribers for mvn_pln
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseLoc;
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseXYA;
 ros::Publisher FestinoNavigation::pubNavigationStop;
 ros::Publisher FestinoNavigation::pubCmdVel;
 
-actionlib::SimpleActionClient<move_base::move_baseAction>* FestinoNavigation::actionMoveBase = nullptr;
+//actionlib::SimpleActionClient<move_base::move_baseAction>* FestinoNavigation::actionMoveBase = nullptr;
 
 //Publishers and subscribers for localization
 tf::TransformListener* FestinoNavigation::tf_listener;
@@ -45,18 +48,23 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubMvnPlnGetCloseLoc   = nh->advertise<std_msgs::String>           ("/navigation/mvn_pln/get_close_loc", 1);
     pubNavigationStop      = nh->advertise<std_msgs::Empty>            ("/navigation/stop", 10);
     pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
+    cltMoveBase            = nh->serviceClient<simple_move::MoveBase>  ("/navigation/move_base");
+    cltAlingWithLine       = nh->serviceClient<simple_move::LaserScanAling>  ("/navigation/align_with_line");
+
     tf_listener = new tf::TransformListener();
     is_node_set = true;
     _stop = false;
-    if (actionMoveBase == nullptr) {
+    
+    /*if (actionMoveBase == nullptr) {
         actionMoveBase = new actionlib::SimpleActionClient<move_base::move_baseAction>("move_base", true);
         std::cout << "FestinoNavigation.->Waiting for action server..." << std::endl;
         if (!actionMoveBase->waitForServer(ros::Duration(5.0))) {
             std::cerr << "FestinoNavigation.->Action server not available after 5 seconds" << std::endl;
             return false;
         }
-    }
-    //actionMoveBase1.waitForServer();
+    }*/
+    
+    
     _navigation_status.status  = actionlib_msgs::GoalStatus::PENDING;
     _simple_move_status.status = actionlib_msgs::GoalStatus::PENDING;
     return true;
@@ -174,7 +182,7 @@ void FestinoNavigation::startMoveLateral(float distance)
 }
 
 
-void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
+/*void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
 {   
 
     if (actionMoveBase == nullptr) {
@@ -202,7 +210,51 @@ void FestinoNavigation::move_base(double x, double y, double theta, double time_
         std::cout<<"FestinoNavigation - move base did not finish before the time outy"<<std::endl;
     }
 
+}*/
+
+void FestinoNavigation::alingWithLine(bool enable)
+{
+    std::cout<< "FestinoNavigation.-> Aling with line" << std::endl;
+    simple_move::LaserScanAling srv;
+    srv.request.isAlingEnabled = enable;
+    if(cltAlingWithLine.call(srv))
+    {
+        std::cout << "FestinoNavigation.-> Aling with line -- Success: " << srv.response.success << std:: endl;
+    }
 }
+
+void FestinoNavigation::move_base(double x, double y, double theta, double time_out)
+{   
+    if (!cltMoveBase.isValid()) {
+        std::cerr << "FestinoNavigation.->Service client not initialized!" << std::endl;
+        return;
+    }
+    
+    simple_move::MoveBase::Request req;
+    simple_move::MoveBase::Response res;
+
+    req.x = x;
+    req.y = y;
+    req.theta = theta;
+    req.time_out = time_out;
+
+    if (cltMoveBase.call(req, res))
+    {
+        if (res.success)
+        {
+            std::cout << "FestinoNavigation.-> move base already" << std::endl;
+        }
+        else
+        {
+            std::cout << "FestinoNavigation.-> move base failed. " << std::endl;
+        }
+    } 
+    else
+    {
+        std::cout << "FestinoNavigation.-> move base service call failed" << std::endl;
+    }
+}
+
 
 bool FestinoNavigation::moveDist(float distance, int timeOut_ms)
 {

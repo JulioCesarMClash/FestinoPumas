@@ -10,11 +10,11 @@
 #include "nav_msgs/GetMap.h"
 #include "nav_msgs/Path.h"
 #include "actionlib_msgs/GoalStatus.h"
-//#include "hardware_msgs/GetRgbd.h"
 #include "tf/transform_listener.h"
-
+#include <simple_move/MoveBase.h>
+#include <simple_move/LaserScanAling.h>
 #include <actionlib/client/simple_action_client.h>
-#include <move_base/move_baseAction.h>
+//#include <move_base/move_baseAction.h>
 
 class FestinoNavigation
 {
@@ -30,6 +30,9 @@ private:
     static ros::Publisher pubSimpleMoveDist;
     static ros::Publisher pubSimpleMoveDistAngle;
     static ros::Publisher pubSimpleMoveLateral;
+    static ros::ServiceClient cltMoveBase;
+    static ros::ServiceClient cltAlingWithLine;
+
     //Publishers and subscribers for mvn_pln
     static ros::Publisher pubMvnPlnGetCloseLoc;
     static ros::Publisher pubMvnPlnGetCloseXYA;
@@ -40,8 +43,8 @@ private:
 
     //Variables for Festino navigation:
     static actionlib_msgs::GoalStatus  _navigation_status;
-    static actionlib_msgs::GoalStatus  _simple_move_status;
-    static actionlib::SimpleActionClient<move_base::move_baseAction>* actionMoveBase;    static bool _stop;
+    static actionlib_msgs::GoalStatus  _simple_move_status;    
+    static bool _stop;
 
 public:
     //
@@ -80,4 +83,5 @@ public:
     static void callbackNavigationStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg);
 
     static void move_base(double x, double y, double theta, double time_out);
+    static void alingWithLine(bool enable);
 };
