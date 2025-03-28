@@ -4,4 +4,3 @@
   <xacro:include filename="$(find robotino_description)/urdf/robotino_parts.urdf.xacro"/>
   <robotino_body/>
 </robot>
-
