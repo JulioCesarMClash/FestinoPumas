@@ -1,5 +1,6 @@
 #Python extentions 
-*.pyc 
+*.pyc
+*.vscode 
 
 
 #Cmake constructions 
