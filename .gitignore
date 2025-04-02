@@ -1,6 +1,5 @@
 #Python extentions 
-*.pyc 
-
+*.pyc
 
 #Cmake constructions 
 
@@ -8,4 +7,7 @@ Robotino/build/
 Robotino/devel/
 PC_user/build/
 PC_user/devel/
+PC_user/.vscode/
+PC_user/src/Hardware/freenect_stack/
+.vscode/
 
