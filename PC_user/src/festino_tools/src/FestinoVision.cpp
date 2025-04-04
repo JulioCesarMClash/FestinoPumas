@@ -27,8 +27,8 @@ bool FestinoVision::setNodeHandle(ros::NodeHandle* nh)
     subPointingHand = nh->subscribe("/vision/pointing_hand/status", 1, &FestinoVision::callbackPointingHand);
 
     //face_recog
-    cltFindPersons = nh->serviceClient<act_pln::FaceRecogSrv>("/vision/recognize_face/names");
-    cltTrainPersons = nh->serviceClient<act_pln::FaceTrainSrv>("/vision/training_face/name");
+    cltFindPersons = nh->serviceClient<img_proc::FaceRecogSrv>("/vision/recognize_face/names");
+    cltTrainPersons = nh->serviceClient<img_proc::FaceTrainSrv>("/vision/training_face/name");
     cltArucoTf = nh->serviceClient<img_proc::Tag_with_tf>("/vision/find_tag");
     return true;
 }
@@ -47,7 +47,7 @@ void FestinoVision::callbackPointingHand(const std_msgs::Bool::ConstPtr& msg)
 
 std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
 {
-    act_pln::FaceRecogSrv srv;
+    img_proc::FaceRecogSrv srv;
     srv.request.is_face_recognition_enabled = flag;
 
     if (cltFindPersons.call(srv))
@@ -75,7 +75,7 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
 void FestinoVision::TrainingPerson(std::string person)
 {
     std::cout << "FestinoVision.->Train person: " << person << std::endl;
-    act_pln::FaceTrainSrv srv;
+    img_proc::FaceTrainSrv srv;
     srv.request.name.data = person;
 
     if (cltTrainPersons.call(srv))

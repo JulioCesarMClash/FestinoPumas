@@ -10,8 +10,8 @@
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
-#include "act_pln/Locate_server.h"
-#include "act_pln/Set_location_server.h"
+#include "known_locations_parser/Locate_server.h"
+#include "known_locations_tf_server/Locations_server.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 

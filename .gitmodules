@@ -1,3 +1,6 @@
 [submodule "src/Hardware"]
 	path = src/Hardware
 	url = https://github.com/ros-drivers/freenect_stack.git
+[submodule "PC_user/src/Hardware/freenect_stack"]
+	path = PC_user/src/Hardware/freenect_stack
+	url = https://github.com/ros-drivers/freenect_stack.git

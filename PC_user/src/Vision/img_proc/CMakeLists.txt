@@ -34,8 +34,10 @@ add_message_files(
 
 ## Generate services in the 'srv' folder
 add_service_files(
- FILES
- #Find_tag_Srv.srv
+  FILES
+  #Find_tag_Srv.srv
+  FaceRecogSrv.srv
+  FaceTrainSrv.srv
  Tag_with_tf.srv
 )
 
