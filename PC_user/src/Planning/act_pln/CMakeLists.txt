@@ -60,13 +60,13 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
- add_service_files(
-   FILES
-   Locate_server.srv
-   FaceRecogSrv.srv
-   FaceTrainSrv.srv
-   Set_location_server.srv
- )
+# add_service_files(
+#   FILES
+#   Locate_server.srv
+#   FaceRecogSrv.srv
+#   FaceTrainSrv.srv
+#   Set_location_server.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
