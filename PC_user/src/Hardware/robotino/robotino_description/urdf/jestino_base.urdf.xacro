@@ -46,49 +46,49 @@
   <xacro:wheel name="wheel2" x="0.090625" y="0.156867" z="0.059154" rpy="-0.523599"/>
 
   <!-- ***************************** Tower ******************************************* -->
-  <link name="tower_link">
-    <visual>
-      <origin xyz="0 0 0.41" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.045 0.045 0.585"/>
-      </geometry>
-      <material name="aluminium">
-        <color rgba="0.8 0.8 0.8 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.045 0.045 0.585"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="tower_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="tower_link"/>
-    <origin xyz="0 0 0.06" rpy="0 0 1.5707"/>
-  </joint>
+<link name="tower_link">
+  <visual>
+    <!-- Caja (torre principal) -->
+    <origin xyz="0 0 0.41" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.045 0.045 0.585"/>
+    </geometry>
+    <material name="aluminium">
+      <color rgba="0.8 0.8 0.8 1"/>
+    </material>
+  </visual>
 
-  <!-- ***************************** Generic Platform ********************************* -->
-  <link name="generic_platform">
-    <visual>
-      <geometry>
-        <cylinder radius="0.075" length="0.005"/>
-      </geometry>
-      <material name="aluminium">
-        <color rgba="0.8 0.8 0.8 1"/>
-      </material>
-    </visual>
-    <collision>
-      <geometry>
-        <cylinder radius="0.075" length="0.005"/>
-      </geometry>
-    </collision>
-  </link>
-  <joint name="platform_generic_joint" type="fixed">
-    <parent link="tower_link"/>
-    <child link="generic_platform"/>
-    <origin xyz="0 0 0.70" rpy="0 0 0"/>
-  </joint>
+  <visual>
+    <!-- Cilindro encima de la caja -->
+    <origin xyz="0 0 0.705" rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.075" length="0.005"/>
+    </geometry>
+    <material name="aluminium"/>
+  </visual>
+
+  <collision>
+    <!-- Caja -->
+    <origin xyz="0 0 0.41" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.045 0.045 0.585"/>
+    </geometry>
+  </collision>
+
+  <collision>
+    <!-- Cilindro -->
+    <origin xyz="0 0 0.705" rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.075" length="0.005"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="tower_joint" type="fixed">
+  <parent link="base_link"/>
+  <child link="tower_link"/>
+  <origin xyz="0 0 0.06" rpy="0 0 0"/>
+</joint>
 
   <!-- ***************************** Platform ***************************************** -->
   <link name="platform_link"/>

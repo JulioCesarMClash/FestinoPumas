@@ -102,6 +102,7 @@
     </material>
     </visual>
     <collision>
+      <origin xyz="0 0 0.41" rpy="0 0 0"/>
       <geometry>
         <!--mesh filename="package://robotino_description/model/Robotino3_Platform.dae" scale="0.009 0.009 0.009"/-->
         <box size="0.045 0.045 0.585"/>

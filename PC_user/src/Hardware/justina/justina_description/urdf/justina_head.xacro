@@ -5,8 +5,8 @@
   <!--HEAD LINKS AND JOINTS-->
   <link name="head_link1">
     <visual>
-      <origin xyz= "-0.01 0 0.03" rpy="0 0 0"/>
-      <geometry><box size="0.06 0.04 0.04"/></geometry>
+      <origin xyz= "-0.01 0 0.03" rpy="0 0 -1.5707"/>
+      <geometry><mesh filename="package://justina_description/stl/servos/Mx64.dae"/></geometry>
       <material name="blue"/>
     </visual>
     <collision>
@@ -22,14 +22,14 @@
   
   <link name="head_link2">
     <visual>
-      <origin xyz= "0.0 0 0.035" rpy="0 0 0"/>
+      <origin xyz= "-0.01 0.0 0.06" rpy="1.5707 0 0"/>
       <geometry>
-        <box size="0.04 0.04 0.06"/>
+        <mesh filename="package://justina_description/stl/servos/Mx64.dae"/>    
       </geometry>
       <material name="orange"/>
     </visual>
     <collision>
-      <origin xyz= "0.0 0 0.035" rpy="0 0 0"/>
+      <origin xyz= "0.0 0 0.0" rpy="0 0 0"/>
       <geometry>
         <box size = "0.04 0.04 0.06"/>
       </geometry>
@@ -52,9 +52,10 @@
 
   <link name="neck_link">
     <visual>
-      <origin xyz="0 0 0.035" rpy="0 0 0"/>
+      <origin xyz="0 0 -0.125" rpy="0 0 0"/>
       <geometry>
-        <box size="0.02 0.02 0.02"/>
+        <!--box size="0.02 0.02 0.02"/-->
+        <mesh filename="package://justina_description/stl/head/careta.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
@@ -82,9 +83,10 @@
   
   <link name="camera_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 1.5707"/>
       <geometry>
-        <box size=" 0.029 0.103 0.02"/>
+        <!--box size=" 0.029 0.103 0.02"/-->
+        <mesh filename="package://robotino_description/meshes/sensors/kinect.dae" scale="1 1 1"/>
       </geometry>
       <material name="gray"/>
     </visual>

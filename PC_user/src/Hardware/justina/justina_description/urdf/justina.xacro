@@ -5,11 +5,11 @@
   <xacro:include filename="$(find robotino_description)/urdf/jestino_base.urdf.xacro"/>
   <xacro:include filename="$(find justina_description)/urdf/justina_torso.xacro"/>
   <xacro:include filename="$(find justina_description)/urdf/justina_left_arm.xacro"/>
-  <xacro:include filename="$(find justina_description)/urdf/justina_right_arm.xacro"/>
+  <!--xacro:include filename="$(find justina_description)/urdf/justina_right_arm.xacro"/-->
   <xacro:include filename="$(find justina_description)/urdf/justina_head.xacro"/>
   
   <joint name="torso_connect" type="fixed">
-    <origin xyz= "0.03 0 1.08" rpy="0 0 0"/>
+    <origin xyz= "0.0 0.0 0.80" rpy="0 0 0"/>
     <parent link="base_link"/>
     <child link="torso_link"/>
   </joint>
@@ -18,11 +18,11 @@
     <parent link="spine_link"/>
     <child link="shoulders_left_link"/>
   </joint>
-  <joint name="shoulder_right_connect" type="fixed">
+  <!--joint name="shoulder_right_connect" type="fixed">
     <origin xyz="0 -0.225 -0.08" rpy="0 0 0"/>
     <parent link="spine_link"/>
     <child link="shoulders_right_link"/>
-  </joint>
+  </joint-->
   <joint name="spine_head_connect" type="fixed">
     <origin xyz="0 0 0.13" rpy="0 0 0"/>
     <parent link="spine_link"/>
