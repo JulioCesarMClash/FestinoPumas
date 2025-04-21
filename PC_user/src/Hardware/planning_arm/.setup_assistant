@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: justina_description
+    relative_path: urdf/justina.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/justina.srdf
+  CONFIG:
+    author_name: biorobotics-unam
+    author_email: joshuayz@comunidad.unam.mx
+    generated_timestamp: 1745127647

@@ -79,7 +79,7 @@
 
   <!-- ******************** Plataforma para la cámara ******************** -->
   <link name="platform_link">
-
+ 
   </link>
 
   <joint name="platform_joint" type="fixed">

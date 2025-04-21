@@ -1,0 +1,21 @@
+controller_list:
+  - name: fake_left_arm_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - la_1_joint
+      - la_2_joint
+      - la_3_joint
+      - la_4_joint
+      - la_5_joint
+      - la_6_joint
+      - la_7_joint
+  - name: fake_Gripper_controller
+    type: $(arg fake_execution_type)
+    joints:
+      - la_grip_left
+      - la_grip_right
+initial:  # Define initial robot poses per group
+#  - group: left_arm
+#    pose: home
+
+  []

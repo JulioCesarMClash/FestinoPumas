@@ -47,8 +47,8 @@
 
   <!-- ***************************** Tower ******************************************* -->
 <link name="tower_link">
+  <!-- aluminium axis -->
   <visual>
-    <!-- Caja (torre principal) -->
     <origin xyz="0 0 0.41" rpy="0 0 0"/>
     <geometry>
       <box size="0.045 0.045 0.585"/>
@@ -59,7 +59,6 @@
   </visual>
 
   <visual>
-    <!-- Cilindro encima de la caja -->
     <origin xyz="0 0 0.705" rpy="0 0 0"/>
     <geometry>
       <cylinder radius="0.075" length="0.005"/>
@@ -67,8 +66,8 @@
     <material name="aluminium"/>
   </visual>
 
+  <!-- aluminium axis -->
   <collision>
-    <!-- Caja -->
     <origin xyz="0 0 0.41" rpy="0 0 0"/>
     <geometry>
       <box size="0.045 0.045 0.585"/>
@@ -76,10 +75,17 @@
   </collision>
 
   <collision>
-    <!-- Cilindro -->
     <origin xyz="0 0 0.705" rpy="0 0 0"/>
     <geometry>
       <cylinder radius="0.075" length="0.005"/>
+    </geometry>
+  </collision>
+
+  <!-- Laptop -->
+  <collision>
+    <origin xyz="-0.04 0.0 0.30" rpy="0 0 0"/>
+    <geometry>
+      <box size = "0.03 0.35 0.20"/> 
     </geometry>
   </collision>
 </link>
@@ -106,6 +112,12 @@
       </geometry>
       <origin xyz="0 0 -0.055" rpy="0 0 1.57"/>
     </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotino_description/meshes/sensors/hokuyo.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <origin xyz="0 0 -0.055" rpy="0 0 1.57"/>
+    </collision>
   </link>
   <joint name="base_to_hokuyo" type="fixed">
     <parent link="base_link"/>
