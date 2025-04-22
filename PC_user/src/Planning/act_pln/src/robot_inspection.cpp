@@ -39,6 +39,7 @@ std::vector<float> goal_vec(3);
 std::string location = "nuevito";
 //sensor_msgs::LaserScan laserScan;
 //std::string grammarCommandsID = "robotInspectionCommands";
+std::string recog = " ";
 bool flag_door = true;
 
 /*void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
@@ -180,17 +181,18 @@ int main(int argc, char** argv)
                 arr_values.values = {0,0,0,1,0,0};
                 pub_digital.publish(arr_values);
                 FestinoHRI::enableSpeechRecognized(true);
-
-                if(!FestinoHRI::waitForSpecificSentence("continue",5000))
+                */
+                recog = FestinoHRI::lastRecogSpeech();
+                if(recog != "continue")
                 {
+                    std::cout << "Listen:" << std::endl;
                     state = SM_WAIT_FOR_COMMAND;
                 }
                 else
                 {
-                    FestinoHRI::enableSpeechRecognized(false);
                     std::cout << "Parsing word..." << std::endl;
                     state = SM_NAVIGATE_TO_EXIT;
-                }*/
+                }
                 /*int a = 0;
                 for(int j = 0; j ++; j < 5)
                 {
@@ -205,8 +207,6 @@ int main(int argc, char** argv)
                     std::cout << "Parsing word..." << std::endl;
                     state = SM_NAVIGATE_TO_EXIT;
                 }*/
-                sleep(5.0);
-                state = SM_NAVIGATE_TO_EXIT;
                 break;
 
             /*case SM_REPEAT_COMMAND:
@@ -303,7 +303,7 @@ int main(int argc, char** argv)
                             state = SM_NAVIGATE_TO_EXIT;
                         }
 
-                FestinoNavigation::moveDist(0.75, 5000);
+                //FestinoNavigation::moveDist(0.75, 5000);
                 state = SM_FINAL_STATE;
                 break;
 

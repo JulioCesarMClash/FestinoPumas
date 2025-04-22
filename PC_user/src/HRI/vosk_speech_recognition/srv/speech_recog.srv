@@ -1,4 +1,4 @@
-bool is_speecg_recog_enabled
+bool is_speech_recog_enabled
 ---
 bool success
 string text_recog

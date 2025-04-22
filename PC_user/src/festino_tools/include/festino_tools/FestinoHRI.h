@@ -7,10 +7,13 @@
 #include "std_msgs/Empty.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/String.h"
-#include "hri_msgs/RecognizedSpeech.h"
-#include "hri_msgs/SphinxSetFile.h"
-#include "hri_msgs/SphinxSetSearch.h"
+//#include "hri_msgs/RecognizedSpeech.h"
+//#include "hri_msgs/SphinxSetFile.h"
+//#include "hri_msgs/SphinxSetSearch.h"
 //#include "sound_play/RequestSound.h"
+
+#include "vosk_speech_recognition/speech_recog.h"
+
 #include "geometry_msgs/PointStamped.h"
 
 //#include "boost/date_time/posix_time/posix_time.hpp"
@@ -46,7 +49,7 @@ private:
     static std::vector<float> _lastSprConfidences;
     static bool newSprRecognizedReceived;
 
-
+    static ros::ServiceClient cltVoskRecog;
     //static ros::Subscriber subRecognized;
     
 
@@ -72,26 +75,28 @@ public:
     static void enableHumanFollower(bool enable);
     static void stopHumanFollower();
 
-    //Pocket Sphinx
-    static void loadGrammarSpeechRecognized(std::string id, std::string grammar);
-    static void enableSpeechRecognized(bool enable);
-    static void enableGrammarSpeechRecognized(std::string id, float recognitionTime);
-    static bool waitForSpeechRecognized(std::string& recognizedSentence, int timeOut_ms);
-    static bool waitForSpeechHypothesis(std::vector<std::string>& sentences, std::vector<float>& confidences, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string expectedSentence, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3,
-                                        std::string& recog, int timeOut_ms);
-    static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3, std::string option4,
-                                        std::string& recog, int timeOut_ms);
+    //Pocket Sphinx -- Vosk
+    //static void loadGrammarSpeechRecognized(std::string id, std::string grammar);
+    //static void enableSpeechRecognized(bool enable);
+    //static void enableGrammarSpeechRecognized(std::string id, float recognitionTime);
+    //static bool waitForSpeechRecognized(std::string& recognizedSentence, int timeOut_ms);
+    //static bool waitForSpeechHypothesis(std::vector<std::string>& sentences, std::vector<float>& confidences, int timeOut_ms);
+    //static bool waitForSpecificSentence(std::string expectedSentence, int timeOut_ms);
+    //static bool waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms);
+    //static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3,
+    //                                    std::string& recog, int timeOut_ms);
+    //static bool waitForSpecificSentence(std::string option1, std::string option2, std::string option3, std::string option4,
+    //                                    std::string& recog, int timeOut_ms);
     static bool waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms);
-    static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
+    //static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
     static std::string lastRecogSpeech();
-    static void clean_lastRecogSpeech();
+    //static void clean_lastRecogSpeech();
 
-private:
+
+
+//private:
     //Speech recog and synthesis
-    static void callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg);
+    //static void callbackSprHypothesis(const hri_msgs::RecognizedSpeech::ConstPtr& msg);
     
     
 };
