@@ -11,6 +11,7 @@ from known_locations_tf_server.srv import *
 import pandas as pd
 from geometry_msgs.msg import TransformStamped
 from copy import deepcopy
+import os
 global path 
 def write_tf(pose, q, child_frame , parent_frame='map'):
     t= TransformStamped()
@@ -47,10 +48,16 @@ def read_tf(t):
     
     return pose, quat
 
-def read_yaml(known_locations_file = '/known_locations.yaml'):
+def read_yaml(known_locations_file='known_locations.yaml'):
+    rospack = rospkg.RosPack()
+    pkg_path = rospack.get_path('config_files')
+    config_dir = os.path.join(pkg_path)
+    file_path = os.path.join(config_dir, known_locations_file)
     
-    file_path = '/home/joshua/FestinoPumas/PC_user/src/Navigation/config_files' + known_locations_file
-
+    # Verificar que el archivo existe
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"El archivo {file_path} no existe")
+    
     with open(file_path, 'r') as file:
         content = yaml.safe_load(file)
     return content
