@@ -102,6 +102,7 @@
   <exec_depend>tf</exec_depend>
   <exec_depend>tf_conversions</exec_depend>
   <exec_depend>message_generation</exec_depend>
+  <depend>vosk_speech_recognition</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

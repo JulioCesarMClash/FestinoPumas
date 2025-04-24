@@ -25,10 +25,10 @@ bool FestinoKnowledge::setNodeHandle(ros::NodeHandle* nh)
     subLocationPose = nh->subscribe("/known_location/goal", 1, &FestinoKnowledge::callbackLocPose);
 
     //Known_location
-    cltLocSrv = nh->serviceClient<act_pln::Locate_server>("/knowledge/known_locations_parser_server");
+    cltLocSrv = nh->serviceClient<known_locations_parser::Locate_server>("/knowledge/known_locations_parser_server");
 
     //Set_location
-    cltSetLocSrv = nh->serviceClient<act_pln::Set_location_server>("/knowledge/known_location_add");
+    cltSetLocSrv = nh->serviceClient<known_locations_tf_server::Locations_server>("/knowledge/known_location_add");
 
     
     return true;
@@ -67,7 +67,7 @@ std::vector<float> FestinoKnowledge::CoordenatesLoc()
 
 void FestinoKnowledge::SetLocation(std::string location)
 {
-	act_pln::Set_location_server srv;
+	known_locations_tf_server::Locations_server srv;
 	srv.request.location_name.data = location;
 
 	if (cltSetLocSrv.call(srv))
@@ -85,7 +85,7 @@ void FestinoKnowledge::SetLocation(std::string location)
 
 std::vector<float> FestinoKnowledge::CoordenatesLocSrv(std::string location)
 {
-	act_pln::Locate_server srv;
+	known_locations_parser::Locate_server srv;
 	srv.request.location_name.data = location;
 	double roll, pitch, yaw;
 

@@ -17,6 +17,7 @@ generate_messages(
   std_msgs
 )
 
-#catkin_package(
-#  CATKIN_DEPENDS message_runtime rospy std_msgs
-#)
+catkin_package(
+
+  CATKIN_DEPENDS rospy std_msgs message_runtime  # Dependencias de ROS
+)

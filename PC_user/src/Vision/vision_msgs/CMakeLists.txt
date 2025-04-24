@@ -36,6 +36,8 @@ add_service_files(
   RecognizeObjects.srv
   RecognizeObject.srv
   TrainObject.srv
+  FaceTrainSrv.srv
+  FaceRecogSrv.srv
 )
 
 ## Generate actions in the 'action' folder
