@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   message_generation
+  visualization_msgs
   cv_bridge
 )
 
@@ -34,13 +35,19 @@ include_directories(
 )
 
 catkin_package(
-  CATKIN_DEPENDS message_runtime std_msgs roscpp rospy
+  CATKIN_DEPENDS
+  message_runtime
+  std_msgs
+  roscpp
+  rospy
+  visualization_msgs
+  sensor_msgs
 )
 
 # Python nodes
 catkin_install_python(PROGRAMS
   scripts/yolo_pose_2d_node.py
-  scripts/markers.py
+  #scripts/markers.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -52,3 +59,7 @@ target_link_libraries(pose_2d_to_3d_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}
 add_executable(pointing_detector_node src/pointing_detector_node.cpp)
 add_dependencies(pointing_detector_node ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(pointing_detector_node ${catkin_LIBRARIES})
+
+add_executable(markers src/markers.cpp)
+add_dependencies(markers ${PROJECT_NAME}_generate_messages_cpp)
+target_link_libraries(markers ${catkin_LIBRARIES})

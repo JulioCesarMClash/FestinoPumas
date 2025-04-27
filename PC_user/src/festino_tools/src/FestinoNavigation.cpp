@@ -8,15 +8,21 @@ bool FestinoNavigation::_stop;
 //Subscribers for stop signals
 ros::Subscriber FestinoNavigation::subStop;
 ros::Subscriber FestinoNavigation::subNavigationStop;
+
 //Subscribers for checking goal-pose-reached signal
 ros::Subscriber FestinoNavigation::subNavigationStatus;
 ros::Subscriber FestinoNavigation::subSimpleMoveStatus;
+
 //Publishers and subscribers for operating the simple_move node
 ros::Publisher FestinoNavigation::pubSimpleMoveDist;
 ros::Publisher FestinoNavigation::pubSimpleMoveDistAngle;
 ros::Publisher FestinoNavigation::pubSimpleMoveLateral;
 ros::ServiceClient FestinoNavigation::cltMoveBase;
 ros::ServiceClient FestinoNavigation::cltAlingWithLine;
+
+//Subscriber for laser scan
+ros::Subscriber FestinoNavigation::subLaserScan;
+sensor_msgs::LaserScan FestinoNavigation::_laserScan;
 
 //Publishers and subscribers for mvn_pln
 ros::Publisher FestinoNavigation::pubMvnPlnGetCloseLoc;
@@ -41,6 +47,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     subNavigationStop      = nh->subscribe("/navigation/stop"         , 10, &FestinoNavigation::callbackNavigationStop);
     subNavigationStatus    = nh->subscribe("/navigation/status"       , 10, &FestinoNavigation::callbackNavigationStatus);
     subSimpleMoveStatus    = nh->subscribe("/simple_move/goal_reached", 10, &FestinoNavigation::callbackSimpleMoveStatus);
+    subLaserScan           = nh->subscribe("/scan"                    , 10, &FestinoNavigation::callbackLaserScan);
     pubSimpleMoveDist      = nh->advertise<std_msgs::Float32          >("/simple_move/goal_dist", 10);
     pubSimpleMoveDistAngle = nh->advertise<std_msgs::Float32MultiArray>("/simple_move/goal_dist_angle", 10);
     pubSimpleMoveLateral   = nh->advertise<std_msgs::Float32          >("/simple_move/goal_dist_lateral", 10);
@@ -54,17 +61,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     tf_listener = new tf::TransformListener();
     is_node_set = true;
     _stop = false;
-    
-    /*if (actionMoveBase == nullptr) {
-        actionMoveBase = new actionlib::SimpleActionClient<move_base::move_baseAction>("move_base", true);
-        std::cout << "FestinoNavigation.->Waiting for action server..." << std::endl;
-        if (!actionMoveBase->waitForServer(ros::Duration(5.0))) {
-            std::cerr << "FestinoNavigation.->Action server not available after 5 seconds" << std::endl;
-            return false;
-        }
-    }*/
-    
-    
+
     _navigation_status.status  = actionlib_msgs::GoalStatus::PENDING;
     _simple_move_status.status = actionlib_msgs::GoalStatus::PENDING;
     return true;
@@ -319,6 +316,45 @@ void FestinoNavigation::stopNavigation()
     pubNavigationStop.publish(msg);
 }
 
+bool FestinoNavigation::waitForDoor()
+{
+    int range=0,range_i=0,range_f=0,range_c=0,cont_laser=0;
+    float laser_l=0;
+    
+    range = FestinoNavigation::_laserScan.ranges.size();
+    
+    //std::cout<<_laserScan.ranges.size()<<std::endl;
+    
+    range_c=range/2;
+    range_i=range_c-(range/10);
+    range_f=range_c+(range/10);
+    //std::cout<<"Range Size: "<< range << "\n ";
+    //std::cout<<"Range Central: "<< range_c << "\n ";
+    //std::cout<<"Range Initial: "<< range_i << "\n ";
+    //std::cout<<"Range Final: "<< range_f << "\n ";
+
+    cont_laser=0;
+    laser_l=0;
+    for(int i = range_c - (range/10); i < range_c+(range/10); i++)
+    {
+        if(FestinoNavigation::_laserScan.ranges[i] > 0 && FestinoNavigation::_laserScan.ranges[i] < 4)
+        { 
+            laser_l = laser_l + FestinoNavigation::_laserScan.ranges[i]; 
+            cont_laser++;
+        }
+    }
+    //std::cout<<"Laser promedio: "<< laser_l/cont_laser << std::endl;    
+    if(laser_l/cont_laser > 0.50)
+    {
+        std::cout<<"FestinoNavigation.-> door open"<<std::endl;
+        return true;
+    }
+    else
+    {
+        std::cout<<"FestinoNavigation.-> door closed"<<std::endl;
+        return false;
+    }
+}
 
 //Callbacks for subscribers
 void FestinoNavigation::callbackStop(const std_msgs::Empty::ConstPtr& msg)
@@ -339,4 +375,9 @@ void FestinoNavigation::callbackSimpleMoveStatus(const actionlib_msgs::GoalStatu
 void FestinoNavigation::callbackNavigationStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg)
 {
     FestinoNavigation::_navigation_status = *msg;
+}
+
+void FestinoNavigation::callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
+{
+    FestinoNavigation::_laserScan = *msg;
 }

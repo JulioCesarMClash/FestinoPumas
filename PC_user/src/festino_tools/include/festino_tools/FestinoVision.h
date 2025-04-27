@@ -13,36 +13,40 @@
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "geometry_msgs/PoseStamped.h"
-
+#include <img_proc/ReadQRCode.h>
 
 class FestinoVision
 {
 private:
+    
+    static ros::NodeHandle* nh;
     static bool is_node_set;
     
-    //Open Pose  
+    //Pose Estimation
     static ros::Subscriber subPointingHand;
-    static bool _pointing_hand;
+    static std::string _pointing_hand;
 
     //Face Recognition
     static std::vector<std::string> _nameRecog;
     static ros::ServiceClient cltFindPersons;
     static ros::ServiceClient cltTrainPersons;
-    static ros::ServiceClient cltArucoTf;
-
 
     //Aruco detector
+    static ros::ServiceClient cltArucoTf;
     static std::vector<std::string> _nameArUcoDet;
     static std::vector<geometry_msgs::PoseStamped> _posArUcoDet;
 
+    //QR detector
+    static ros::ServiceClient cltQRSrv;
 
 public:
     
-    static bool setNodeHandle(ros::NodeHandle* nh);
+    static bool setNodeHandle(ros::NodeHandle* _nh);
 
-    //Open Pose
-    static void callbackPointingHand(const std_msgs::Bool::ConstPtr& msg);
-    static bool PointingHand();
+    //Pose Estimation
+    static void callbackPointingHand(const std_msgs::String::ConstPtr& msg);
+    static std::string PointingHand();
+    static void enablePoseEstimation(bool flag);
 
     //Face Recognition
     static std::vector<std::string> enableRecogFacesName(bool flag);
@@ -50,6 +54,9 @@ public:
 
     //Aruco detector
     static void enableArucoDet(bool flag);
+    
+    //QR detector
+    static std::string enableQRDetect(bool enabled);
 
 
 

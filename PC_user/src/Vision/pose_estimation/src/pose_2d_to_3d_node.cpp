@@ -14,17 +14,17 @@ class Pose2Dto3D
     public:
         Pose2Dto3D()
         {
-            ros::NodeHandle nh;
-            pose_sub_ = nh.subscribe("/pose_2d", 10, &Pose2Dto3D::poseCallback, this);
+            pose_sub_ = nh.subscribe("/vision/pose_2d", 10, &Pose2Dto3D::poseCallback, this);
             depth_sub_ = nh.subscribe("/camera/depth/image_raw", 10, &Pose2Dto3D::depthCallback, this);
             info_sub_ = nh.subscribe("/camera/depth/camera_info", 10, &Pose2Dto3D::infoCallback, this);
             
-            pose_pub_ = nh.advertise<pose_estimation::PersonPose3D>("/pose_3d", 10);
+            pose_pub_ = nh.advertise<pose_estimation::PersonPose3D>("/vision/pose_3d", 10);
             
             std::cout <<"Keypoint 2D to 3D node --- Soft by Joshua M" << std::endl;
         }
 
     private:
+        ros::NodeHandle nh;
         ros::Subscriber pose_sub_, depth_sub_, info_sub_;
         ros::Publisher pose_pub_;
         cv::Mat camera_matrix_;
@@ -62,6 +62,11 @@ class Pose2Dto3D
             {
                 return;
             }
+
+            bool enabled = true;
+            nh.getParam("/pose_2d_to_3d_enabled", enabled);
+            if (!enabled)
+                 return;
 
             pose_estimation::PersonPose3D person_3d;
             person_3d.id = msg->id;

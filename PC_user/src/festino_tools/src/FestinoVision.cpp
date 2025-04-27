@@ -2,46 +2,72 @@
 
 bool FestinoVision::is_node_set = false;
 
-//Open Pose
+//Pose Estimation
 ros::Subscriber FestinoVision::subPointingHand;
-bool FestinoVision::_pointing_hand;
+std::string FestinoVision::_pointing_hand;
 
 //Face Recog
 ros::ServiceClient FestinoVision::cltFindPersons;
 ros::ServiceClient FestinoVision::cltTrainPersons;
-ros::ServiceClient FestinoVision::cltArucoTf;
-
 std::vector<std::string> FestinoVision::_nameRecog(5);
 
+//Aruco Detect
+ros::ServiceClient FestinoVision::cltArucoTf;
+
+//QR Detect
+ros::ServiceClient FestinoVision::cltQRSrv;
+
+ros::NodeHandle* FestinoVision::nh = nullptr;
 
 //Aquí se configuran los nodos, el tipo de mensaje, buffer, el topico, etc.
-bool FestinoVision::setNodeHandle(ros::NodeHandle* nh)
+bool FestinoVision::setNodeHandle(ros::NodeHandle* _nh)
 {
+    nh = _nh;
+
     if(FestinoVision::is_node_set)
         return true;
     if(nh == 0)
         return false;
     std::cout << "FestinoVision.->Setting ros node..." << std::endl;
 
-    //Open Pose
-    subPointingHand = nh->subscribe("/vision/pointing_hand/status", 1, &FestinoVision::callbackPointingHand);
+    //Pose Estimation
+    subPointingHand =   nh -> subscribe("/vision/pointing_direction", 1, &FestinoVision::callbackPointingHand);
 
     //face_recog
-    cltFindPersons = nh->serviceClient<vision_msgs::FaceRecogSrv>("/vision/recognize_face/names");
-    cltTrainPersons = nh->serviceClient<vision_msgs::FaceTrainSrv>("/vision/training_face/name");
-    cltArucoTf = nh->serviceClient<img_proc::Tag_with_tf>("/vision/find_tag");
+    cltFindPersons  =   nh -> serviceClient<vision_msgs::FaceRecogSrv>("/vision/recognize_face/names");
+    cltTrainPersons =   nh -> serviceClient<vision_msgs::FaceTrainSrv>("/vision/training_face/name");
+    
+    //Aruco Detect
+    cltArucoTf      =   nh -> serviceClient<img_proc::Tag_with_tf>("/vision/find_tag");
+
+    //QR Detect
+    cltQRSrv        =   nh -> serviceClient<img_proc::ReadQRCode>("/vision/read_qr_code");
+
+    //Pose Estimation controls
+    nh  ->  setParam("/pose_2d_enabled", true);
+    nh  ->  setParam("/pose_3d_enabled", true);
+    nh  ->  setParam("/pointing_enabled", true);
     return true;
 }
 
 
-bool FestinoVision::PointingHand()
+std::string FestinoVision::PointingHand()
 {
     return _pointing_hand;
 }
 
-void FestinoVision::callbackPointingHand(const std_msgs::Bool::ConstPtr& msg)
+void FestinoVision::callbackPointingHand(const std_msgs::String::ConstPtr& msg)
 {
     _pointing_hand = msg -> data; 
+}
+
+void FestinoVision::enablePoseEstimation(bool enabled)
+{
+    nh -> setParam("/pose_2d_enabled", enabled);
+    nh -> setParam("/pose_3d_enabled", enabled);
+    nh -> setParam("/pointing_enabled", enabled);
+
+    std::cout << "Pose estimation system is: " << (enabled ? "activate" : "desactivado") << std::endl;
 }
 
 
@@ -94,4 +120,16 @@ void FestinoVision::enableArucoDet(bool flag)
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
+}
+
+std::string FestinoVision::enableQRDetect(bool enabled)
+{
+    std::cout<< "FestinoVision.-> Detect QR Mark" << std::endl;
+    img_proc::ReadQRCode srv;
+    srv.request.enabled = enabled;
+    if(cltQRSrv.call(srv))
+    {
+        std::cout << "Success: " << srv.response.success << std:: endl;
+    }
+    return srv.response.qr_data;
 }

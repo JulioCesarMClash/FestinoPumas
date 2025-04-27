@@ -20,7 +20,7 @@ class YoloPoseNode:
         self.bridge = CvBridge()
         self.model = YOLO("yolov8n-pose.pt")  
         self.sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
-        self.pub = rospy.Publisher("pose_2d", PersonPose2D, queue_size=10)
+        self.pub = rospy.Publisher("/vision/pose_2d", PersonPose2D, queue_size=10)
 
         rospy.loginfo("YOLO Node 2D --- Soft by Joshua M")
 
@@ -48,6 +48,10 @@ class YoloPoseNode:
         return person_msg
 
     def process_image(self, cv_image):
+        enabled = rospy.get_param('/pose_2d_enabled', True)
+        if not enabled:
+            return
+        
         results = self.model(cv_image)[0]
         
         for result in results:

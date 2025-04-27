@@ -70,12 +70,17 @@ class VoskSpeechRecognizer:
         rospy.loginfo("Listening...")
         while not rospy.is_shutdown():
             data = self.stream.read(4096, exception_on_overflow=False)
-            
+
             if self.recognizer.AcceptWaveform(data):
                 result = json.loads(self.recognizer.Result())
                 if 'text' in result and result['text']:
-                    rospy.loginfo(f"Recognized: {result['text']}")
-                    return result['text']
+                    confs = [word['conf'] for word in result.get('result', [])]
+                    if confs and min(confs) > 0.8: 
+                        rospy.loginfo(f"Recognized (high confidence): {result['text']}")
+                        return result['text']
+                    else:
+                        rospy.loginfo(f"Low confidence, ignoring result: {result['text']}")
+
     
     def shutdown(self):
         rospy.loginfo("Closing speech recognition...")
