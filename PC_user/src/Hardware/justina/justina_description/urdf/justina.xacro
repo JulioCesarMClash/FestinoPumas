@@ -4,7 +4,7 @@
   <xacro:include filename="$(find justina_description)/urdf/materials.xacro"/>
   <xacro:include filename="$(find robotino_description)/urdf/jestino_base.urdf.xacro"/>
   <xacro:include filename="$(find justina_description)/urdf/justina_torso.xacro"/>
-  <!--xacro:include filename="$(find justina_description)/urdf/justina_left_arm.xacro"/-->
+  <xacro:include filename="$(find justina_description)/urdf/justina_left_arm.xacro"/>
   <!--xacro:include filename="$(find justina_description)/urdf/justina_right_arm.xacro"/-->
   <xacro:include filename="$(find justina_description)/urdf/justina_head.xacro"/>
   
