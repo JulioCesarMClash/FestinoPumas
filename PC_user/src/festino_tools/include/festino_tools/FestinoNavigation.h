@@ -14,6 +14,7 @@
 #include <simple_move/MoveBase.h>
 #include <simple_move/LaserScanAling.h>
 #include <actionlib/client/simple_action_client.h>
+#include <sensor_msgs/LaserScan.h>
 //#include <move_base/move_baseAction.h>
 
 class FestinoNavigation
@@ -46,6 +47,10 @@ private:
     static actionlib_msgs::GoalStatus  _simple_move_status;    
     static bool _stop;
 
+    //Variables for LaserScan
+    static ros::Subscriber subLaserScan;
+    static sensor_msgs::LaserScan _laserScan;
+
 public:
     //
     //The startSomething functions, only publish the goal pose or path and return inmediately after starting movement
@@ -76,11 +81,14 @@ public:
     static bool getClose(std::string location, int timeOut_ms);
     static void stopNavigation();
 
+    static bool waitForDoor();
+
     //Callbacks for subscribers
     static void callbackStop(const std_msgs::Empty::ConstPtr& msg);
     static void callbackNavigationStop(const std_msgs::Empty::ConstPtr& msg);
     static void callbackSimpleMoveStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg);
     static void callbackNavigationStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg);
+    static void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg);
 
     static void move_base(double x, double y, double theta, double time_out);
     static void alingWithLine(bool enable);

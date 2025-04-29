@@ -5,8 +5,6 @@ project(img_proc)
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
@@ -15,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   ros_numpy
   sensor_msgs
-
   image_transport
   cv_bridge
   tf2_ros
@@ -23,29 +20,31 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Find OpenCV
 find_package(OpenCV REQUIRED)
+
+## Find Eigen3
 find_package(Eigen3 REQUIRED)
 
+## Find ZBar using pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(ZBAR REQUIRED zbar)
+
 ## Declare ROS messages, services and actions ##
-## Generate messages in the 'msg' folder
 add_message_files(
- FILES
- MPS_Detector.msg
+  FILES
+  MPS_Detector.msg
 )
 
-## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  #Find_tag_Srv.srv
-  FaceRecogSrv.srv
-  FaceTrainSrv.srv
- Tag_with_tf.srv
+  Tag_with_tf.srv
+  ReadQRCode.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
- DEPENDENCIES
- std_msgs
- geometry_msgs
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
 )
 
 ## Declare catkin specific configuration ##
@@ -60,13 +59,15 @@ catkin_package(
 ## Specify additional locations of header files
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS} # Include OpenCV headers
+  ${OpenCV_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIR}
+  ${ZBAR_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable
 add_executable(aruco_tf src/aruco_tf.cpp)
 add_executable(aruco_tf_srv src/aruco_tf_srv.cpp)
+add_executable(qr_srv src/qr_srv.cpp)
 
 ## Link libraries to the executable
 target_link_libraries(aruco_tf
@@ -79,9 +80,17 @@ target_link_libraries(aruco_tf_srv
   ${OpenCV_LIBS} # Link OpenCV libraries
 )
 
+target_link_libraries(qr_srv
+  ${catkin_LIBRARIES}
+  ${OpenCV_LIBS}
+  ${ZBAR_LIBRARIES} # Link ZBar libraries
+)
+
 ## Add dependencies for generated messages and services
-add_dependencies(aruco_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(aruco_tf     ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(aruco_tf_srv ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(qr_srv       ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############

@@ -27,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   actionlib_msgs
+  vosk_speech_recognition REQUIRED
 )
 
 ## System dependencies are found with CMake's conventions
@@ -134,6 +135,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${vosk_speech_recognition_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library

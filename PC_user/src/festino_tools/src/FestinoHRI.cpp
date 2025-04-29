@@ -15,7 +15,7 @@ ros::Publisher FestinoHRI::pubHumanFollowerEnable;
 ros::Publisher FestinoHRI::pubHumanFollowerStop;
 
 //Pocket Sphinx
-ros::Subscriber FestinoHRI::subSprHypothesis;
+/*ros::Subscriber FestinoHRI::subSprHypothesis;
 ros::Publisher FestinoHRI::pubLoadGrammarPocketSphinx;
 ros::Publisher FestinoHRI::pubEnableSpeechPocketSphinx;
 ros::Publisher FestinoHRI::pubEnableGrammarPocketSphinx;
@@ -25,7 +25,10 @@ ros::Publisher FestinoHRI::pubEnableGrammarPocketSphinx;
 std::string FestinoHRI::_lastRecoSpeech = "";
 std::vector<std::string> FestinoHRI::_lastSprHypothesis;
 std::vector<float> FestinoHRI::_lastSprConfidences;
-bool FestinoHRI::newSprRecognizedReceived = false;
+bool FestinoHRI::newSprRecognizedReceived = false;*/
+
+//Variables for vosk
+ros::ServiceClient FestinoHRI::cltVoskRecog;
 
 //
 //The startSomething functions return inmediately after starting the requested action
@@ -45,18 +48,19 @@ bool FestinoHRI::setNodeHandle(ros::NodeHandle* nh)
     pubSpeaker = nh->advertise<std_msgs::String>("/speak", 1000, latch = true);
 
     //Leg Finder
-    pubLegsFinderEnable = nh->advertise<std_msgs::Bool>("/hri/leg_finder/enable", 1);
-    subLegsFinderFound = nh->subscribe("/hri/leg_finder/legs_found", 1, &callbackLegsFound);
+    pubLegsFinderEnable     = nh->advertise<std_msgs::Bool> ("/hri/leg_finder/enable", 1);
+    subLegsFinderFound      = nh->subscribe                 ("/hri/leg_finder/legs_found", 1, &callbackLegsFound);
 
     //Human Follower
-    pubHumanFollowerEnable = nh->advertise<std_msgs::Bool>("/hri/human_following/start_follow", 1);
-    pubHumanFollowerStop = nh->advertise<std_msgs::Empty>("/hri/human_following/stop", 1);
-    
+    pubHumanFollowerEnable  = nh->advertise<std_msgs::Bool>     ("/hri/human_following/start_follow", 1);
+    pubHumanFollowerStop    = nh->advertise<std_msgs::Empty>    ("/hri/human_following/stop", 1);
+    cltVoskRecog            = nh->serviceClient<vosk_speech_recognition::speech_recog>  ("/hri/speech_recognition");
+    /*
     //Pocketo Sphinxo
     subSprHypothesis = nh->subscribe("/recognizedSpeech", 1, &FestinoHRI::callbackSprHypothesis);
     pubLoadGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetFile>("/pocketsphinx/set_jsgf", 1);
     pubEnableSpeechPocketSphinx = nh->advertise<std_msgs::Bool>("/pocketsphinx/mic", 1);
-    pubEnableGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetSearch>("/pocketsphinx/set_search", 1);
+    pubEnableGrammarPocketSphinx = nh->advertise<hri_msgs::SphinxSetSearch>("/pocketsphinx/set_search", 1);*/
     return true;
 }
 
@@ -136,7 +140,7 @@ void FestinoHRI::stopHumanFollower(){
 
 //Pocket sphinx
 
-
+/*
 //Load jsgf file
 void FestinoHRI::loadGrammarSpeechRecognized(std::string id, std::string grammar){
     hri_msgs::SphinxSetFile msg;
@@ -234,9 +238,9 @@ bool FestinoHRI::waitForSpecificSentence(std::string expectedSentence, int timeO
         if(expectedSentence.compare(sentences[i]) == 0)
             return true;
     return false;
-}
+}*/
 
-bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms)
+/*bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option2, std::string& recog, int timeOut_ms)
 {
     std::vector<std::string> sentences;
     std::vector<float> confidences;
@@ -282,9 +286,9 @@ bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option
             return true;
         }
     return false;
-}
+}*/
 
-bool FestinoHRI::waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms)
+/*bool FestinoHRI::waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms)
 {
     std::vector<std::string> sentences;
     std::vector<float> confidences;
@@ -298,9 +302,9 @@ bool FestinoHRI::waitForSpecificSentence(std::vector<std::string>& options, std:
                 return true;
             }
     return false;
-}
+}*/
 
-bool FestinoHRI::waitForUserConfirmation(bool& confirmation, int timeOut_ms)
+/*bool FestinoHRI::waitForUserConfirmation(bool& confirmation, int timeOut_ms)
 {
     std::vector<std::string> sentences;
     std::vector<float> confidences;
@@ -321,15 +325,25 @@ bool FestinoHRI::waitForUserConfirmation(bool& confirmation, int timeOut_ms)
         }
     }
     return false;
-}
+}*/
 
 std::string FestinoHRI::lastRecogSpeech()
 {
-    return _lastRecoSpeech;
+    std::cout<< "FestinoHRI.-> Last Recog Speech" << std::endl;
+    vosk_speech_recognition::speech_recog srv;
+    srv.request.is_speech_recog_enabled = true;
+    
+    if(cltVoskRecog.call(srv))
+    {
+        std::cout << "FestinoHRI.-> Last Recog: " << srv.response.text_recog << std:: endl;
+    }
+    return srv.response.text_recog;
 }
 
-void FestinoHRI::clean_lastRecogSpeech()
+/*void FestinoHRI::clean_lastRecogSpeech()
 {
     _lastRecoSpeech = "";
-}
+}*/
+
+
 
