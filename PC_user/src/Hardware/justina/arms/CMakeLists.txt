@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   dynamixel_sdk
   message_generation
+  moveit_msgs
   )
 
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -49,12 +50,15 @@ include_directories(
 
 add_executable(servo_test src/servo_test.cpp)
 add_executable(arm_node src/arm_node.cpp)
+add_executable(bridge src/bridge.cpp)
 #add_executable(arm_torque_node src/arm_torque_node.cpp)
 #add_executable(left_arm_real_simul_node src/left_arm_real_simul.cpp)
 #add_executable(right_arm_real_simul_node src/right_arm_real_simul.cpp)
 
 add_dependencies(servo_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(arm_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #add_dependencies(arm_torque_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #add_dependencies(left_arm_real_simul_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -64,6 +68,9 @@ target_link_libraries(servo_test
 	${catkin_LIBRARIES}
 )
 target_link_libraries(arm_node
+	${catkin_LIBRARIES}
+)
+target_link_libraries(bridge
 	${catkin_LIBRARIES}
 )
 #target_link_libraries(arm_torque_node

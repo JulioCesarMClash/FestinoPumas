@@ -1,0 +1,14 @@
+controller_list:
+  - name: left_arm_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
+    default: true
+    joints:
+      - la_1_joint
+      - la_2_joint
+      - la_3_joint
+      - la_4_joint
+      - la_5_joint
+      - la_6_joint
+      - la_7_joint
+      - la_grip_center_joint
