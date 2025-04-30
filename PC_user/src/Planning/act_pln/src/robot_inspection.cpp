@@ -86,16 +86,16 @@ int main(int argc, char** argv)
                 FestinoHRI::say("I can see that the door is open, I am going to inspection point",3);
                 sleep(3);
                 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("inspection_point");
-                std::cout <<"Coordenates of inspection_point:"<<std::endl;
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("Test-start");
+                std::cout <<"Coordenates of Test-start:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
-                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
                     std::cout << "Cannot move to inspection point" << std::endl; 
 
                 FestinoHRI::say("I have arrived to inspection point",1);    
                 sleep(2);
-                FestinoHRI::say("Please, tell me continue to the exit",3);
+                FestinoHRI::say("Please, tell me continue to the door",3);
                 sleep(2);
 
                 state=SM_WAIT_FOR_COMMAND;
@@ -122,11 +122,12 @@ int main(int argc, char** argv)
                 FestinoHRI::say("I am going to the exit point",3);
                 sleep(0.5);
 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("exit");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("Test");
                 std::cout <<"Coordenates of exit:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 180000))
+                // if(!FestinoNavigation::getClose(-3.0, 4.0, goal_vec[2], 180000))
                 {
                     FestinoHRI::say("Cannot move to exit point",3);
                     state = SM_NAVIGATE_TO_EXIT;
