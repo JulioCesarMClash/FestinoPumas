@@ -17,24 +17,26 @@ public:
             ROS_WARN("Trayectoria vacía. Ignorando.");
             return;
         }
-
-        // Extraer la primera trayectoria (puede haber múltiples en DisplayTrajectory)
+    
         const auto& joint_trajectory = msg->trajectory[0].joint_trajectory;
-        
-        // Depuración: Imprimir joints y posiciones
-        ROS_INFO("=== Mensaje recibido ===");
-        for (size_t i = 0; i < joint_trajectory.joint_names.size(); ++i) {
-            ROS_INFO("Joint %s: %f", 
-                    joint_trajectory.joint_names[i].c_str(), 
-                    joint_trajectory.points[0].positions[i]);
-        }
+        ROS_INFO("=== Trayectoria recibida (%lu puntos) ===", joint_trajectory.points.size());
+    
+        ros::Time start_time = ros::Time::now();
+        ros::Duration prev_time(0.0);
+    
+        ros::Rate loop_rate(60);  // 100 Hz, o ajusta según lo que soporte tu hardware
 
-        // Publicar al hardware
-        std_msgs::Float64MultiArray array_msg;
-        array_msg.data = joint_trajectory.points[0].positions;
-        hardware_pub_.publish(array_msg);
-        ROS_INFO("Enviado a %s", hardware_pub_.getTopic().c_str());
+for (const auto& point : joint_trajectory.points) {
+    std_msgs::Float64MultiArray array_msg;
+    array_msg.data = point.positions;
+    hardware_pub_.publish(array_msg);
+    loop_rate.sleep();
+}
+
+        ROS_INFO("Ejecutada trayectoria completa.");
     }
+    
+    
 
 private:
     ros::Publisher hardware_pub_;
