@@ -6,7 +6,6 @@
 	<include file="$(find vosk_speech_recognition)/launch/vosk_recog.launch" />
 	<node name="manipulator_control" pkg="manipulator_control" type="perfil_velocidades.py"/>
 	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
-	<node name="act_pln" pkg="act_pln" type="robot_inspection"/>
 	<node name="known_location_parser" pkg="known_locations_parser" type='known_location_server.py'/>
 	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 </launch>

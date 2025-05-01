@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 import rospy
 from sensor_msgs.msg import JointState
 
@@ -27,3 +27,5 @@ if __name__ == '__main__':
         stop_robot()
     except rospy.ROSInterruptException:
         pass
+
+        
