@@ -6,6 +6,7 @@
 #include "festino_tools/FestinoNavigation.h"
 #include "festino_tools/FestinoKnowledge.h"
 
+// Verificar festino tools antes de ELIMINAR
 #include "std_msgs/Float32MultiArray.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/Float64MultiArray.h"
