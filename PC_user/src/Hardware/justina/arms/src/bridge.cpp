@@ -24,7 +24,7 @@ public:
         ros::Time start_time = ros::Time::now();
         ros::Duration prev_time(0.0);
     
-        ros::Rate loop_rate(60);  // 100 Hz, o ajusta según lo que soporte tu hardware
+        ros::Rate loop_rate(40);  // 100 Hz, o ajusta según lo que soporte tu hardware
 
 for (const auto& point : joint_trajectory.points) {
     std_msgs::Float64MultiArray array_msg;
