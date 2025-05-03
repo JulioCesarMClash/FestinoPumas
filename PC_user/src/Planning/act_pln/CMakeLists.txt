@@ -222,3 +222,7 @@ target_link_libraries(test_mvbase ${catkin_LIBRARIES})
 add_executable(robot_inspection src/robot_inspection.cpp)
 add_dependencies(robot_inspection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(robot_inspection ${catkin_LIBRARIES})
+
+add_executable(help_me_carry src/help_me_carry.cpp)
+add_dependencies(help_me_carry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(help_me_carry ${catkin_LIBRARIES})

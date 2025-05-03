@@ -19,7 +19,7 @@ bool FestinoKnowledge::setNodeHandle(ros::NodeHandle* nh)
     if(nh == 0)
         return false;
     std::cout << "FestinoKnowledge.->Setting ros node..." << std::endl;
-    
+
     //Leg Finder
     pubLocationParser = nh->advertise<std_msgs::String>("/goal_location", 1000);
     subLocationPose = nh->subscribe("/known_location/goal", 1, &FestinoKnowledge::callbackLocPose);
@@ -30,7 +30,7 @@ bool FestinoKnowledge::setNodeHandle(ros::NodeHandle* nh)
     //Set_location
     cltSetLocSrv = nh->serviceClient<known_locations_tf_server::Locations_server>("/knowledge/known_location_add");
 
-    
+
     return true;
 }
 
@@ -45,7 +45,7 @@ void FestinoKnowledge::GoToLocation(std::string location)
 
 
 void FestinoKnowledge::callbackLocPose(const geometry_msgs::PoseStamped::ConstPtr& msg)
-{	
+{
 	//position
 	_position[0] = msg->pose.position.x;
 	_position[1] = msg->pose.position.y;
@@ -137,6 +137,6 @@ std::vector<float> FestinoKnowledge::CoordenatesLocSrv(std::string location)
 		ROS_ERROR("Failed to call service");
 	}
 
-	
+
 	return _location;
 }

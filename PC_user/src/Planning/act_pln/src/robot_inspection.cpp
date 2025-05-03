@@ -58,7 +58,7 @@ int main(int argc, char** argv)
         {
             case SM_INIT:
                 std::cout << "State machine: SM_INIT" << std::endl;
-                
+
                 FestinoHRI::say("I am ready for robot inspection",3);
                 state = SM_NAVIGATE_TO_INSPECTION;
                 break;

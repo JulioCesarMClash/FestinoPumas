@@ -8,3 +8,4 @@
 	<node name="known_location_parser" pkg="known_locations_parser" type='known_location_server.py'/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 </launch>
+
