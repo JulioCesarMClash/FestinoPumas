@@ -1,0 +1,7 @@
+path: /home/joshua/FestinoPumas/PC_user/yolo_json/YOLODataset
+train: images/train
+val: images/val
+test:
+
+names:
+    0: Banana

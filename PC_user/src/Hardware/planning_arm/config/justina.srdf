@@ -26,6 +26,47 @@
     </group>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="Gripper" parent_link="left_arm_grip_center" group="Gripper"/>
+    
+    <group_state name="pre_grasp" group="left_arm">
+    <joint name="la_1_joint" value="1.49048" />
+    <joint name="la_2_joint" value="-0.09937" />
+    <joint name="la_3_joint" value="-2.29555" />
+    <joint name="la_4_joint" value="1.29746" />
+    <joint name="la_5_joint" value="1.57371" />
+    <joint name="la_6_joint" value="-0.86531" />
+    <joint name="la_7_joint" value="-0.26323" />
+    </group_state>
+
+    <group_state name="pointing_beverage" group="left_arm">
+    <joint name="la_1_joint" value="0.39627" />
+    <joint name="la_2_joint" value="-0.03367" />
+    <joint name="la_3_joint" value="-0.92629" />
+    <joint name="la_4_joint" value="1.22533" />
+    <joint name="la_5_joint" value="1.75159" />
+    <joint name="la_6_joint" value="0.61524" />
+    <joint name="la_7_joint" value="1.70075" />
+</group_state>
+
+    <group_state name="hold" group="left_arm">
+    <joint name="la_1_joint" value="0.3962727666592039" />
+    <joint name="la_2_joint" value="-0.033758132557505746" />
+    <joint name="la_3_joint" value="-0.9262431803623773" />
+    <joint name="la_4_joint" value="1.2252717984308674" />
+    <joint name="la_5_joint" value="1.7515097346226312" />
+    <joint name="la_6_joint" value="0.6153258816627879" />
+    <joint name="la_7_joint" value="1.7006552185360808" />
+</group_state>
+
+    <group_state name="pointing_chair" group="left_arm">
+    <joint name="la_1_joint" value="0.6306836583118577" />
+    <joint name="la_2_joint" value="0.5006970205677134" />
+    <joint name="la_3_joint" value="-0.953486906781913" />
+    <joint name="la_4_joint" value="1.3987089971682825" />
+    <joint name="la_5_joint" value="-0.7936687429918822" />
+    <joint name="la_6_joint" value="1.1563836755518349" />
+    <joint name="la_7_joint" value="-1.7695870790087709" />
+</group_state>
+    
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="camera_link" reason="Never"/>
     <disable_collisions link1="base_link" link2="head_link1" reason="Never"/>
