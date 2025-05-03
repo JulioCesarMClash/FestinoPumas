@@ -21,6 +21,7 @@
 #include "festino_tools/FestinoHRI.h"
 #include "festino_tools/FestinoVision.h"
 #include "festino_tools/FestinoNavigation.h"
+#include "festino_tools/FestinoHardware.h"
 
 //Digital readings
 #include "robotino_msgs/DigitalReadings.h"
@@ -76,8 +77,7 @@ geometry_msgs::PoseStamped tf_human_coordinates;
 
 SMState state = SM_INIT;
 
-//std::string grammarCommandsID = "helpMeCarryCommands";
-//std::string grammarNamesID = "helpMeCarryNames";
+std::string test("help_me_carry");
 
 actionlib_msgs::GoalStatus simple_move_goal_status;
 
@@ -145,6 +145,7 @@ int main(int argc, char** argv){
     FestinoVision::setNodeHandle(&n);
     FestinoNavigation::setNodeHandle(&n);
 	FestinoKnowledge::setNodeHandle(&n);
+    FestinoHardware::setNodeHandle(&n);
 
     ros::Publisher pub_digital = n.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
     ros::Subscriber sub_human_bool = n.subscribe("human_detector_bool", 1000, humanBoolCallback);
@@ -154,15 +155,13 @@ int main(int argc, char** argv){
 
     ros::Rate loop(30);
 
-    //Speaker
+    // Interacion variables
     std::string voice;
-
-    //Listening
     std::string recogSpeech;
+    std::string chosenDirection;
+    std::vector<std::string> pointingDirections;
 
-    //Open Pose variable
-    //True - Left
-    //False - Right
+    //Open Pose variables
     bool pointing_hand;
     bool human_detector_bool;
 
@@ -174,8 +173,8 @@ int main(int argc, char** argv){
     //This delay is necessary
     FestinoHRI::say(" ",3);
 
-    //TF related stuff 
-	tf_human_coordinates.header.frame_id = "/map";
+    //TF related stuff
+    tf_human_coordinates.header.frame_id = "/map";
     tf_human_coordinates.pose.position.x = 0.0;
     tf_human_coordinates.pose.position.y = 0.0;
     tf_human_coordinates.pose.position.z = 0.0;
@@ -184,10 +183,9 @@ int main(int argc, char** argv){
     tf_human_coordinates.pose.orientation.z = 0.0;
     tf_human_coordinates.pose.orientation.w = 0.0;
 
-    //Dict with coords pose, 
+    //Dict with coords pose,
     std::map<int, std::tuple<float, float, float>> poses; // Curioso el float solito
     float currentX, currentY, currentTheta;
-    
     float goalX, goalY, goalTheta;
     std::vector<float> goal_vec(3);
 
@@ -214,7 +212,7 @@ int main(int argc, char** argv){
 
 	    	case SM_FIND_BAG:
 	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;
-				
+
                 voice = "Say, Justina yes, once you are pointing at the bag";
 				FestinoHRI::say(voice, 5);
 
@@ -227,8 +225,13 @@ int main(int argc, char** argv){
 
 	    	case SM_CONF_POINTING_HAND:
 	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
-	    		
-	    		if (FestinoVision::PointingHand() == "1"){
+	    	
+                for(int i = 0; i < 11; ) 
+
+	    		if (chosenDirection == "left"){
+
+                    // Move head to the left
+                    FestinoHardware::setHeadOrientation(-0.5, -0.5);
 
     				voice = "Are you pointing at the left bag? Answer with, Justina yes, or, Justina no";
     				FestinoHRI::say(voice, 8);
@@ -251,7 +254,10 @@ int main(int argc, char** argv){
     				}
 	    		}
 
-	    	    else{
+	    	    else if (chosenDirection == "right"){
+
+                    // Move head to the right
+                    FestinoHardware::setHeadOrientation(0.5, -0.5);
 
     				voice = "Are you pointing at the right bag? Answer with, Justina yes, or, Justina no";
     				FestinoHRI::say(voice, 8);
@@ -273,6 +279,13 @@ int main(int argc, char** argv){
     				
                     }
 	    		}
+
+                else if (chosenDirection == "none"){
+                    
+                    // Move head to the right
+                    FestinoHardware::setHeadOrientation(0.5, -0.5);
+                
+                }
 
 	    		break;
 

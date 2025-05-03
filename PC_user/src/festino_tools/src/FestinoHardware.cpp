@@ -2,8 +2,8 @@
 
 bool FestinoHardware::is_node_set = false;
 
-//LED color
 ros::Publisher FestinoHardware::pub_digital;
+ros::Publisher FestinoHardware::pub_head_orientation;
 
 //Aquí se configuran los nodos, el tipo de mensaje, buffer, el topico, etc.
 bool FestinoHardware::setNodeHandle(ros::NodeHandle* nh)
@@ -13,9 +13,20 @@ bool FestinoHardware::setNodeHandle(ros::NodeHandle* nh)
     if(nh == 0)
         return false;
     std::cout << "FestinoHardware.->Setting ros node..." << std::endl;
-    //Speaker
-    ros::Publisher pub_digital = nh->advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
+    
+    FestinoHardware::pub_head_orientation = nh->advertise<std_msgs::Float64MultiArray>("/hardware/head/goal_pose", 1000);
+    FestinoHardware::pub_digital = nh->advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
+    
     return true;
+}
+
+void FestinoHardware::setHeadOrientation(float yaw, float pitch)
+{
+    std_msgs::Float64MultiArray msg;
+    msg.data.resize(2);
+    msg.data[0] = yaw;
+    msg.data[1] = pitch;
+    FestinoHardware::pub_head_orientation.publish(msg);
 }
 
 void FestinoHardware::setColorLed(std::string colorName)
@@ -74,8 +85,5 @@ void FestinoHardware::setColorLed(std::string colorName)
         pub_digital.publish(arr_values);
         ros::Duration(0.5, 0).sleep();
     }
-
-
-
 
 }

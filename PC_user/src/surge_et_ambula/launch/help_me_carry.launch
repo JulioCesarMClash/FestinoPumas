@@ -1,7 +1,7 @@
 <launch>
     <include file="$(find freenect_launch)/launch/freenect.launch" />
     <include file="$(find vosk_speech_recognition)/launch/vosk_recog.launch" >
-        <arg name="grammar" value="$(find vosk_speech_recognition)/grammars/receptionist.json"  />
+        <arg name="grammar" value="$(find vosk_speech_recognition)/grammars/help_me_carry_commands.json"  />
     </include>
 
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />

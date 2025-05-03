@@ -75,7 +75,7 @@ class VoskSpeechRecognizer:
                 result = json.loads(self.recognizer.Result())
                 if 'text' in result and result['text']:
                     confs = [word['conf'] for word in result.get('result', [])]
-                    if confs and min(confs) > 0.8: 
+                    if confs and min(confs) > 0.93: 
                         rospy.loginfo(f"Recognized (high confidence): {result['text']}")
                         return result['text']
                     else:
