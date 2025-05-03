@@ -467,6 +467,10 @@ int main(int argc, char **argv)
                         state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
                     }
                 }
+                else
+                {
+                    state = SM_GUIDE_TO_LOC;
+                }
                 break;
 
             case SM_GUIDE_TO_LOC:
