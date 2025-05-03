@@ -78,6 +78,15 @@ enum STATE
     SM_OFFER_EMPTY_SEAT,
     SM_FINISH_TEST
 };
+
+// Tema
+enum Topic
+{
+    NAME,
+    DRINK,
+    INTEREST
+};
+
 bool flag_door = true;
 sensor_msgs::LaserScan laserScan;
 //Strings aux
@@ -208,6 +217,7 @@ int main(int argc, char **argv)
     std::vector<std::string> tokens;
 
     STATE state = SM_INIT;//SM_SAY_WAIT_FOR_DOOR;
+    Topic topic = NAME;
 
     //FestinoTools
     FestinoHRI::setNodeHandle(&nh);
@@ -224,6 +234,7 @@ int main(int argc, char **argv)
     arr_values.stamp.nsec = 0;
     arr_values.values = {0,0,0,0,0,0};
     FestinoHRI::say(" ",2);
+    std::string recog = " ";
     recogName = true;
 
     while(ros::ok() && !success)
@@ -236,24 +247,23 @@ int main(int argc, char **argv)
                 pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
                 FestinoHRI::say("I'm ready for receptionist test",3);
-                FestinoHRI::enableSpeechRecognized(false);
+                // FestinoHRI::enableSpeechRecognized(false);
                 
                 state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
                 break;
 
             case SM_NAVIGATE_TO_ENTRANCE_DOOR:
                 std::cout << test << ".-> State SM_NAVIGATE_TO_ENTRANCE_DOOR: Navigate to the entrance door." << std::endl;
-                arr_values.values = {0,0,0,0,1,1};
-                pub_digital.publish(arr_values);
-                FestinoHRI::enableSpeechRecognized(false);
+                // arr_values.values = {0,0,0,0,1,1};
+                // pub_digital.publish(arr_values);
+                // FestinoHRI::enableSpeechRecognized(false);
 
                 FestinoHRI::say("I will navigate to the entrance door",4);
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
                 std::cout <<"Coordenates of entrance_door"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
-                        std::cout << "Cannot move to entrace_door" << std::endl;
+                    std::cout << "Cannot move to entrace_door" << std::endl;
 
                 //FestinoNavigation::moveDist(0.2, 300);
                 FestinoHRI::say("I have reached the entrance door", 4);
@@ -280,17 +290,17 @@ int main(int argc, char **argv)
                 arr_values.values = {0,0,0,0,0,1};
                 pub_digital.publish(arr_values);
                 FestinoHRI::say("The door is closed", 3);
-                FestinoNavigation::moveDist(-1.3, 300);
+                // FestinoNavigation::moveDist(-1.3, 300);
                 FestinoHRI::say("Human, can you open the door please", 6);
                 state = SM_WAIT_FOR_OPEN_DOOR;
                 break;   
 
             case SM_WAIT_FOR_OPEN_DOOR:
                 std::cout << test << "SM_WAIT_FOR_DOOR" << std::endl;
-                arr_values.values = {0,0,0,1,0,1};
-                pub_digital.publish(arr_values);
+                // arr_values.values = {0,0,0,1,0,1};
+                // pub_digital.publish(arr_values);
                 state = SM_SAY_OPEN_DOOR;
-                FestinoHRI::enableSpeechRecognized(false);
+                // FestinoHRI::enableSpeechRecognized(false);
 
                 if(flag_door)
                 //if(true)
@@ -310,67 +320,34 @@ int main(int argc, char **argv)
 
             case SM_WAIT_FOR_PERSON_ENTRANCE:
                 std::cout << test << ".-> State SM_WAIT_FOR_PERSON_ENTRANCE: Intro Guest." << std::endl;
-                arr_values.values = {0,0,0,1,0,1};
-                pub_digital.publish(arr_values);
-                FestinoHRI::enableSpeechRecognized(false);
-                if(findPersonAttemps < MAX_FIND_PERSON_COUNT)
+
+                if(findPersonAttemps < MAX_FIND_PERSON_ATTEMPTS)
                 {
-                    findPerson = true;
                     findPersonDetect = FestinoVision::enableRecogFacesName(true);
                     sleep(5);
                     if(findPersonDetect.size() == 1)
                     {
-                        findPerson = true;
-                        //recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                    }
-                    else
-                    {
-                        if(findPersonDetect.size() == 0)
-                        {
-                            FestinoHRI::say("Human, i can't find you",3);
-                            //recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        }
-                        if(findPersonDetect.size() > 1)
-                           FestinoHRI::say("Human, i see more people",3); 
-
-                    }
-
-                    if(findPerson)
-                        findPersonCount++;
-                    
-                    if(findPersonCount > MAX_FIND_PERSON_COUNT)
-                    {
-                        findPersonCount = 0;
                         findPersonAttemps = 0;
-                        findPersonRestart = 0;
-
-                        //recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        recogPersonAux.clear();
                         state = SM_INTRO_GUEST;
                     }
                     else
                     {
-                        if(findPersonRestart > MAX_FIND_PERSON_RESTART)
-                        {
-                            //recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                            recogPersonAux.clear();
-                            findPersonCount = 0;
-                            findPersonRestart = 0;
+                        if(findPersonDetect.size() == 0)
+                            FestinoHRI::say("Human, i can't find you",3);
+                            FestinoHRI::say("Please enter to the house and close the door",6);
                             findPersonAttemps++;
-                            FestinoHRI::say("Hello human, please enter to the house and close the door please",6);
-                        }
-                        else
-                            findPersonRestart++;
+
+                        if(findPersonDetect.size() > 1)
+                            FestinoHRI::say("Human, i see more people",3);
+                            FestinoHRI::say("Please, get inside alone and close the door",6);
+                            findPersonAttemps++;
                     }
                 }
                 else
                 {
-                    findPersonCount = 0;
                     findPersonAttemps = 0;
-                    findPersonRestart = 0;
-                    recogName = true;
-                    //recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                    recogPersonAux.clear();
+                    topic = NAME;
+
                     state = SM_INTRO_GUEST;
                 }
                 break;
@@ -378,35 +355,39 @@ int main(int argc, char **argv)
     		case SM_INTRO_GUEST:
     			std::cout << test << ".-> State SM_INTRO_GUEST: Intro Guest." << std::endl;
                 recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                arr_values.values = {0,0,0,1,0,1};
-                pub_digital.publish(arr_values);
+                // arr_values.values = {0,0,0,1,0,1};
+                // pub_digital.publish(arr_values);
 
                 attemptsSpeechReco = 0;
                 attemptsSpeechInt = 0;
                 lastName = "unknown";
                 lastDrink = "unknown";
 
-                FestinoHRI::enableSpeechRecognized(false);
+                // FestinoHRI::enableSpeechRecognized(false);
 
-                if(recogName)
+                switch(topic)
                 {
-                    FestinoHRI::say("Hello, my name is Festino, please tell me, what is your name?",5);
-                    FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
-                    FestinoHRI::enableSpeechRecognized(true);
-                    arr_values.values = {0,0,0,1,0,0};
-                    pub_digital.publish(arr_values);
-                    sleep(2);
-                    sleep(2);
-                }
-                else
-                {
-                    FestinoHRI::say("Please tell me, i want, and after that, your favorite drink", 5);
-                    FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID,GRAMMAR_POCKET_DRINKS);
-                    FestinoHRI::enableSpeechRecognized(true);
-                    arr_values.values = {0,0,0,1,0,0};
-                    pub_digital.publish(arr_values);
-                    sleep(2);
-                    sleep(2);
+                    case NAME:
+                        FestinoHRI::say("Nice to meet you, my name is Festino",6);
+                        FestinoHRI::say("What is your name?",6);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        FestinoHRI::say(recog,3);
+                        sleep(2);
+                        break;
+
+                    case DRINK:
+                        ss.str("");
+                        ss << names[names.size() - 1] << ", what is your favorite drink?";
+                        FestinoHRI::say(ss.str(), 5);
+                        sleep(2);
+                        break;
+
+                    case INTEREST:
+                        ss.str("");
+                        ss << names[names.size() - 1] << ", what is your favorite topic?";
+                        FestinoHRI::say(ss.str(), 5);
+                        sleep(2);
+                        break;
                 }
                 
                 attemptsConfirmation = 0;
@@ -513,21 +494,21 @@ int main(int argc, char **argv)
 
                 if(attemptsSpeechReco < MAX_ATTEMPTS_SPEECH_RECO)
                 {
-                    FestinoHRI::enableSpeechRecognized(false);
+                    // FestinoHRI::enableSpeechRecognized(false);
                     if(recogName)
                     {
                         FestinoHRI::say("Please tell me what is your name", 4);
-                        FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
+                        // FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
                         sleep(2);
                     }
                     else
                     {
                         FestinoHRI::say("Please tell me, i want and after that your favorite drink", 4);
-                        FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
+                        // FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
                         sleep(2);
                     }
                         attemptsSpeechReco++;
-                        FestinoHRI::enableSpeechRecognized(true);
+                        // FestinoHRI::enableSpeechRecognized(true);
                         arr_values.values = {0,0,0,1,0,0};
                         pub_digital.publish(arr_values);
                         sleep(2);
@@ -535,8 +516,8 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    FestinoHRI::enableSpeechRecognized(false);
-                    FestinoHRI::clean_lastRecogSpeech();
+                    // FestinoHRI::enableSpeechRecognized(false);
+                    // FestinoHRI::clean_lastRecogSpeech();
                     arr_values.values = {0,0,0,1,0,0};
                     pub_digital.publish(arr_values);
 
@@ -569,16 +550,16 @@ int main(int argc, char **argv)
                 attemptsSpeechReco = 0;
                 attemptsSpeechInt = 0;
 
-                FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
-                FestinoHRI::enableSpeechRecognized(true);
+                // FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
+                // FestinoHRI::enableSpeechRecognized(true);
                 arr_values.values = {0,0,0,1,0,0};
                 pub_digital.publish(arr_values);
                 sleep(2);
                 sleep(2);
 
-                if (FestinoHRI::waitForSpecificSentence("robot yes",5000))
+                if (lastRecoSpeech == "robot yes" || lastRecoSpeech == "yes")
                 {
-                    FestinoHRI::enableSpeechRecognized(false);
+                    // FestinoHRI::enableSpeechRecognized(false);
                     if(recogName)
                     {
                         names.push_back(lastName);
@@ -607,15 +588,15 @@ int main(int argc, char **argv)
                     if(attemptsConfirmation < MAX_ATTEMPTS_CONFIRMATION)
                     {
                         attemptsConfirmation++;
-                        FestinoHRI::enableSpeechRecognized(false);
+                        // FestinoHRI::enableSpeechRecognized(false);
                         if(recogName)
                         {
                             arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name", 7);
-                            FestinoHRI::clean_lastRecogSpeech();
-                            FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
-                            FestinoHRI::enableSpeechRecognized(true);
+                            // FestinoHRI::clean_lastRecogSpeech();
+                            // FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
+                            // FestinoHRI::enableSpeechRecognized(true);
                             arr_values.values = {0,0,0,1,0,0};
                             pub_digital.publish(arr_values);
                             sleep(2);
@@ -629,10 +610,10 @@ int main(int argc, char **argv)
                             arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             //drinks.erase(names.end() - 1);
-                            FestinoHRI::clean_lastRecogSpeech();
+                            // FestinoHRI::clean_lastRecogSpeech();
                             FestinoHRI::say("Sorry I did not understand you, Please tell me, i want and after that your favorite drink", 8);
-                            FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
-                            FestinoHRI::enableSpeechRecognized(true);
+                            // FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
+                            // FestinoHRI::enableSpeechRecognized(true);
                             arr_values.values = {0,0,0,1,0,0};
                             pub_digital.publish(arr_values);
                             sleep(2);
@@ -642,7 +623,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        FestinoHRI::enableSpeechRecognized(false);
+                        // FestinoHRI::enableSpeechRecognized(false);
                         if(recogName)
                         {
                             arr_values.values = {0,0,0,0,1,0};
@@ -651,7 +632,7 @@ int main(int argc, char **argv)
                             ss2.str("");
                             ss2 << "Sorry, i don't understand you, your name is unknown";
                             FestinoHRI::say(ss2.str(), 6);
-                            //FestinoHRI::enableSpeechRecognized(true);
+                            //// FestinoHRI::enableSpeechRecognized(true);
                             arr_values.values = {0,0,0,0,1,0};
                             pub_digital.publish(arr_values);
                             recogName = false;

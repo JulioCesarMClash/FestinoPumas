@@ -52,7 +52,7 @@ class YoloPoseNode:
         if not enabled:
             return
         
-        results = self.model(cv_image)[0]
+        results = self.model(cv_image, conf=0.5)[0]
         
         for result in results:
             annotated_frame = result.plot()
