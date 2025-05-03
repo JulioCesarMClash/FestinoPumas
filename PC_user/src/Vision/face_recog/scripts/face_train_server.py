@@ -4,6 +4,7 @@ import rospy
 import os
 import numpy as np
 import face_recognition
+from datetime import datetime
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
@@ -101,8 +102,8 @@ class TrainingFaceNode:
             main_face_location = face_locations[0]
             
             # Generar nombre de archivo único
-            # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename_base = f"{req.name.data}"
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename_base = f"{req.name.data}_{timestamp}"
             
             # Guardar imagen con anotaciones
             marked_image = self.current_image.copy()

@@ -64,7 +64,7 @@ class FaceRecognitionNode:
         # Cargar desde archivos .npy
         for filename in os.listdir(self.train_text_path):
             if filename.endswith('.npy'):
-                name = os.path.splitext(filename)[0]  # Extraer nombre base
+                name = os.path.splitext(filename)[0].split('_')[0]  # Extraer nombre base
                 encoding_path = os.path.join(self.train_text_path, filename)
                 
                 try:
