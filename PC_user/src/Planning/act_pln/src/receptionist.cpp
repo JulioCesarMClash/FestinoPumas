@@ -459,28 +459,33 @@ int main(int argc, char **argv)
                     if(FestinoVision::TrainingPerson(names[names.size() - 1]))
                     {
                         // Beverage state
-                        state = SM_GUIDE_TO_LOC;
+                        state = SM_BEVERAGE_LOC;
                     }
                     else
                     {
                         attemptsMemorizing++;
-                        state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
                     }
                 }
                 else
                 {
-                    state = SM_GUIDE_TO_LOC;
+                    state = SM_BEVERAGE_LOC;
                 }
+                break;
+
+            case SM_BEVERAGE_LOC:
+                attemptsMemorizing = 0;
+
+                FestinoHRI::say("Follow me to the beverage area",3);
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("beverage_area");
+                std::cout <<"Coordenates of living_room"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+
+                state = SM_GUIDE_TO_LOC;
                 break;
 
             case SM_GUIDE_TO_LOC:
                 std::cout << test << ".-> State SM_GUIDING_TO_LOC: Guide to loc." << std::endl;
 
-                /**************************************************/
-                /*           Agregar beverage state antes         */
-                /**************************************************/
-
-                attemptsMemorizing = 0;
                 findSeatCount = 0;
                 findSeat = false;
 
