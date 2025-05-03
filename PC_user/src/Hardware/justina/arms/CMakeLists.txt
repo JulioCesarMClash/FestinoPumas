@@ -12,7 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   dynamixel_sdk
   message_generation
   moveit_msgs
+  moveit_ros_planning_interface
   )
+
+  find_package(Eigen3 REQUIRED)
+
 
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -24,9 +28,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-# )
+ add_service_files(
+   FILES
+   MoveArm.srv
+ )
       
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -46,11 +51,15 @@ catkin_package(
 
 include_directories(
 	${catkin_INCLUDE_DIRS}
-	)
+  ${EIGEN3_INCLUDE_DIR}
+
+	)  
 
 add_executable(servo_test src/servo_test.cpp)
 add_executable(arm_node src/arm_node.cpp)
 add_executable(bridge src/bridge.cpp)
+add_executable(move_left_arm_service_node src/move_left_arm_service.cpp)
+
 #add_executable(arm_torque_node src/arm_torque_node.cpp)
 #add_executable(left_arm_real_simul_node src/left_arm_real_simul.cpp)
 #add_executable(right_arm_real_simul_node src/right_arm_real_simul.cpp)
@@ -58,6 +67,8 @@ add_executable(bridge src/bridge.cpp)
 add_dependencies(servo_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(arm_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 add_dependencies(bridge ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(move_left_arm_service_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
 
 #add_dependencies(arm_torque_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -73,6 +84,8 @@ target_link_libraries(arm_node
 target_link_libraries(bridge
 	${catkin_LIBRARIES}
 )
+target_link_libraries(move_left_arm_service_node ${catkin_LIBRARIES})
+
 #target_link_libraries(arm_torque_node
 #	${catkin_LIBRARIES}
 #)

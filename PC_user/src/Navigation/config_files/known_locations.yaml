@@ -6,6 +6,46 @@ Test_1:
 - qy: 0.0
 - qz: 0.938
 - qw: 0.346
+chair_a1:
+- x: -0.402
+- y: 0.082
+- theta: 2.946
+- qx: 0.0
+- qy: 0.0
+- qz: 0.995
+- qw: 0.097
+chair_b1:
+- x: 0.173
+- y: -0.121
+- theta: -0.774
+- qx: 0.0
+- qy: 0.0
+- qz: 0.377
+- qw: -0.925
+end_location:
+- x: -0.061
+- y: -0.679
+- theta: 1.029
+- qx: 0.0
+- qy: 0.0
+- qz: 0.492
+- qw: 0.87
+entrance_door:
+- x: 3.942
+- y: 0.735
+- theta: -0.412
+- qx: 0.0
+- qy: 0.0
+- qz: -0.204
+- qw: 0.978
+host_loc:
+- x: -0.358
+- y: -0.295
+- theta: -2.124
+- qx: 0.0
+- qy: 0.0
+- qz: 0.873
+- qw: -0.486
 inspection_point:
 - x: 0.029
 - y: 0.696
@@ -14,6 +54,14 @@ inspection_point:
 - qy: 0.0
 - qz: 0.942
 - qw: 0.334
+living_room:
+- x: 0.065
+- y: 0.472
+- theta: -2.142
+- qx: 0.0
+- qy: 0.0
+- qz: 0.877
+- qw: -0.479
 station-test:
 - x: 0.321
 - y: -0.125

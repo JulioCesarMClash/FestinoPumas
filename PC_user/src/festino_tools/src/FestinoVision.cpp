@@ -98,7 +98,7 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
    
 }
 
-void FestinoVision::TrainingPerson(std::string person)
+bool FestinoVision::TrainingPerson(std::string person)
 {
     std::cout << "FestinoVision.->Train person: " << person << std::endl;
     vision_msgs::FaceTrainSrv srv;
@@ -108,6 +108,11 @@ void FestinoVision::TrainingPerson(std::string person)
     {
         std::cout << "Success " << srv.response.success << std::endl;
         std::cout << srv.response.message << std::endl;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
 

@@ -50,7 +50,7 @@ public:
 
     //Face Recognition
     static std::vector<std::string> enableRecogFacesName(bool flag);
-    static void TrainingPerson(std::string person);
+    static bool TrainingPerson(std::string person);
 
     //Aruco detector
     static void enableArucoDet(bool flag);
