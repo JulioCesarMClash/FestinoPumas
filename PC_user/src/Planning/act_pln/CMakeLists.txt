@@ -222,3 +222,7 @@ target_link_libraries(test_mvbase ${catkin_LIBRARIES})
 add_executable(robot_inspection src/robot_inspection.cpp)
 add_dependencies(robot_inspection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(robot_inspection ${catkin_LIBRARIES})
+
+add_executable(receptionist src/receptionist.cpp)
+add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(receptionist ${catkin_LIBRARIES})

@@ -87,7 +87,7 @@ int main(int argc, char** argv)
                 FestinoHRI::say("I can see that the door is open, I am going to inspection point",3);
                 sleep(3);
                 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("inspection_point");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
                 std::cout <<"Coordenates of inspection_point:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
                 FestinoHRI::say("I am going to the exit point",3);
                 sleep(0.5);
 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("exit");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("inspection_point");
                 std::cout <<"Coordenates of exit:"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                

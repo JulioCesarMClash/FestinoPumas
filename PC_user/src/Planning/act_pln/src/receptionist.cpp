@@ -22,6 +22,7 @@
 #define EXPECTED_GUESTS 2
 #define MAX_FIND_PERSON_RESTART 0
 #define MAX_FIND_PERSON_ATTEMPTS 1
+#define MAX_ATTEMPTS_MEMORIZING 3
 #define MAX_ATTEMPTS_SPEECH_RECO 3
 #define MAX_ATTEMPTS_CONFIRMATION 2
 #define MAX_FIND_SEAT_COUNT 4
@@ -129,25 +130,33 @@ std::stringstream ss2;
 
 sensor_msgs::LaserScan laserScan;
 
-ros::NodeHandle nh;
-
-names.push_back("john");
-drinks.push_back("coke");
-interests.push_back("sports")
-
-SMState state = SM_INIT;
-Topic topic = NAME;
-
 // Variables de inicio
 std::string test("receptionist");
 std::vector<float> goal_vec(3);
 
-// Configuración del nodo de ROS
-void ros_init(void);
-
 int main(int argc, char **argv)
 {
-    ros_init()
+
+    Topic topic = NAME;
+    SMState state = SM_INIT;
+
+    // ROS init
+    std::cout << "INITIALIZING ACT_PLN BY PAREJITASOFT Inc..." << std::endl; //cout
+    ros::init(argc, argv, "receptionist_test");
+    ros::NodeHandle nh;
+    ros::Rate rate(10);
+
+    //FestinoTools
+    FestinoHRI::setNodeHandle(&nh);
+    FestinoNavigation::setNodeHandle(&nh);
+    FestinoVision::setNodeHandle(&nh);
+    FestinoKnowledge::setNodeHandle(&nh);
+    ros::Rate loop(10);
+
+    names.push_back(hostName);
+    drinks.push_back(hostDrink);
+    interests.push_back(hostInterest);
+
     FestinoHRI::say(" ",2);
 
     while(ros::ok() && !success)
@@ -343,7 +352,7 @@ int main(int argc, char **argv)
                             ss2.str("");
                             ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
-                            topic = INTEREST
+                            topic = INTEREST;
                             state = SM_INTRO_GUEST;
                             break;
 
@@ -445,15 +454,18 @@ int main(int argc, char **argv)
             case SM_WAITING_FOR_MEMORIZING_OPERATOR:
                 std::cout << test << ".-> State SM_WAITING_FOR_MEMORIZING_OPERATOR: Waiting for Memorizing operator." << std::endl;
                 
-                if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                if(attemptsMemorizing < MAX_ATTEMPTS_MEMORIZING)
                 {
-                    // Beverage state
-                    state = SM_GUIDE_TO_LOC;
-                }
-                else
-                {
-                    attemptsMemorizing++;
-                    state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
+                    if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                    {
+                        // Beverage state
+                        state = SM_GUIDE_TO_LOC;
+                    }
+                    else
+                    {
+                        attemptsMemorizing++;
+                        state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
+                    }
                 }
                 break;
 
@@ -667,7 +679,7 @@ int main(int argc, char **argv)
                         {
                             recogPersonAux = FestinoVision::enableRecogFacesName(false);
                             FestinoHRI::say("John, I'm going to find you in another site", 5);
-                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b");
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -679,7 +691,7 @@ int main(int argc, char **argv)
                 else
                 {
                     FestinoHRI::say("John, I'm going to find you in another site", 5);
-                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b");
+                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
                     std::cout <<"Coordenates of John"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -816,7 +828,7 @@ int main(int argc, char **argv)
                 ss << names[names.size() - 1] << " he is John and his favorite drink is " << hostDrink << std::endl;
                 FestinoHRI::say(ss.str(), 5);
                 sleep(2);ss.str("");
-                ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interets[interests.size() - 1] << std::endl;
+                ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interests[interests.size() - 1] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
                 findPersonCount = 0;
                 findPersonAttemps = 0;
@@ -833,7 +845,7 @@ int main(int argc, char **argv)
             case SM_FINISH_TEST:
                 std::cout << test << ".-> State SM_FINISH: Finish the test." << std::endl;
                 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("gpsr");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("end_location");
                 std::cout <<"Coordenates of finish test"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -854,20 +866,4 @@ int main(int argc, char **argv)
     	ros::spinOnce();
     }
     return 1;
-}
-
-void ros_init(void)
-{
-    // ROS init
-    std::cout << "INITIALIZING ACT_PLN BY PAREJITASOFT Inc..." << std::endl; //cout
-    ros::init(argc, argv, "receptionist_test");
-    ros::Rate rate(10);
-
-    //FestinoTools
-    FestinoHRI::setNodeHandle(&nh);
-    FestinoNavigation::setNodeHandle(&nh);
-    FestinoVision::setNodeHandle(&nh);
-    FestinoKnowledge::setNodeHandle(&nh);
-
-    ros::Rate loop(10);
 }
