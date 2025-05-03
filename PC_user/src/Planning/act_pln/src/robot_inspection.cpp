@@ -33,6 +33,7 @@ SMState state = SM_INIT;
 std::vector<float> goal_vec(3);
 std::string location = "nuevito";
 std::string recog = " ";
+std::string test("robot_inspection");
 bool flag_door = true;
 
 
@@ -104,7 +105,7 @@ int main(int argc, char** argv)
 
             case SM_WAIT_FOR_COMMAND:                
                 std::cout << "State machine: SM_WAIT_FOR_COMMAND" << std::endl;
-                recog = FestinoHRI::lastRecogSpeech();
+                recog = FestinoHRI::lastRecogSpeech("test.json");
                 if(recog != "continue")
                 {
                     std::cout << "Listen: " << recog << std::endl;

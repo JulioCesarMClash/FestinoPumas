@@ -89,7 +89,7 @@ public:
     //                                    std::string& recog, int timeOut_ms);
     static bool waitForSpecificSentence(std::vector<std::string>& options, std::string& recognized, int timeOut_ms);
     //static bool waitForUserConfirmation(bool& confirmation, int timeOut_ms);
-    static std::string lastRecogSpeech();
+    static std::string lastRecogSpeech(std::string grammar);
     //static void clean_lastRecogSpeech();
 
 

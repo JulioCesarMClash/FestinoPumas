@@ -27,11 +27,6 @@
 #define MAX_ATTEMPTS_CONFIRMATION 2
 #define MAX_FIND_SEAT_COUNT 4
 
-#define GRAMMAR_POCKET_COMMANDS "grammars/receptionist_commands.jsgf"
-#define GRAMMAR_POCKET_DRINKS "grammars/receptionist_drinks.jsgf"
-#define GRAMMAR_POCKET_NAMES "grammars/receptionist_names.jsgf"
-#define GRAMMAR_POCKET_INTERESTS "grammars/receptionist_interests.jsgf"
-
 // Estados
 enum SMState
 {
@@ -118,6 +113,9 @@ std::string grammarInterestsID = "receptionistInterests";
 std::string hostName = "John";
 std::string hostDrink = "Coke";
 std::string hostInterest = "Football";
+std::string names_grammar = "receptionist_names.json";
+std::string drinks_grammar = "receptionist_drinks.json";
+std::string interests_grammar = "receptionist_interests.json";
 
 //Strings aux
 std::string lastRecoSpeech;
@@ -296,13 +294,11 @@ int main(int argc, char **argv)
     		case SM_WAIT_FOR_PRESENTATION:
     			std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the names." << std::endl;
 
-                lastRecoSpeech = FestinoHRI::lastRecogSpeech();
-
-                std::cout << "frase :"<<lastRecoSpeech<<std::endl;
-
                 switch(topic)
                 {
                     case NAME:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(names_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         names.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << names[names.size()-1];
@@ -312,6 +308,8 @@ int main(int argc, char **argv)
                         break;
 
                     case DRINK:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(drinks_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         drinks.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << drinks[drinks.size()-1];
@@ -321,6 +319,8 @@ int main(int argc, char **argv)
                         break;
 
                     case INTEREST:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(interests_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         interests.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << interests[interests.size()-1];
@@ -335,13 +335,13 @@ int main(int argc, char **argv)
                 std::cout << test << ".-> State SM_PRESENTATION_CONFIRM. Wait for robot yes or robot no" << std::endl;
 
                 lastRecoSpeech = "";
-                lastRecoSpeech = FestinoHRI::lastRecogSpeech();
 
                 if (lastRecoSpeech == "justina yes" || lastRecoSpeech == "robot yes" || lastRecoSpeech == "yes")
                 {
                     switch(topic)
                     {
                         case NAME:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(names_grammar);
                             ss2.str("");
                             ss2 << "Ok, your name is " << names[names.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -350,6 +350,7 @@ int main(int argc, char **argv)
                             break;
 
                         case DRINK:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(drinks_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -358,6 +359,7 @@ int main(int argc, char **argv)
                             break;
 
                         case INTEREST:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(interests_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite topic is " << interests[interests.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
