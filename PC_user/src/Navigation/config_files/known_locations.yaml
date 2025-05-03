@@ -78,3 +78,19 @@ station-test:
 - qy: 0.0
 - qz: 0.689
 - qw: 0.724
+storing_shelf:
+- x: -3.19
+- y: 4.387
+- theta: 1.044
+- qx: 0.0
+- qy: 0.0
+- qz: 0.498
+- qw: 0.866
+storing_table:
+- x: -3.436
+- y: 2.513
+- theta: -0.528
+- qx: 0.0
+- qy: 0.0
+- qz: -0.26
+- qw: 0.965

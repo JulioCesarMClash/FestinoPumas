@@ -26,6 +26,16 @@
     </group>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="Gripper" parent_link="left_arm_grip_center" group="Gripper"/>
+
+    <group_state name="default" group="left_arm">
+    <joint name="la_1_joint" value="0.0" />
+    <joint name="la_2_joint" value="0.0" />
+    <joint name="la_3_joint" value="0.0" />
+    <joint name="la_4_joint" value="0.0" />
+    <joint name="la_5_joint" value="0.0" />
+    <joint name="la_6_joint" value="0.0" />
+    <joint name="la_7_joint" value="0.0" />
+    </group_state>
     
     <group_state name="pre_grasp" group="left_arm">
     <joint name="la_1_joint" value="1.49048" />

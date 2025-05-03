@@ -126,6 +126,8 @@ int main(int argc, char **argv)
                         break;
                 
                 case SM_FINISH_TEST:
+                        std::cout << "SM_FINISH_TEST --> I finish the test: wuuuuu :)" << std::endl;
+                        
                         break;
         }
     }
