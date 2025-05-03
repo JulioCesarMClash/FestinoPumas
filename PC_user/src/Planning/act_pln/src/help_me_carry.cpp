@@ -201,6 +201,9 @@ int main(int argc, char** argv){
 	    switch(state){
 			case SM_INIT:
 	    		std::cout << "State machine: SM_INIT" << std::endl;
+	    		
+	    		// Move head to the origin
+                FestinoHardware::setHeadOrientation(0.0, 0.0);
 
 	            voice = "My name is Justina, I am ready for the help me carry test";
 	            FestinoHRI::say(voice, 5);
@@ -230,6 +233,8 @@ int main(int argc, char** argv){
 
 	    	case SM_CONF_POINTING_HAND:{
 	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
+	    		
+	    		FestinoVision::enablePoseEstimation(true);
 	    	
 		        for (int i = 0; i < 10; ++i) {
 		        
@@ -267,18 +272,16 @@ int main(int argc, char** argv){
                     // Move head to the left
                     FestinoHardware::setHeadOrientation(-0.5, -0.5);
 
-    				voice = "Are you pointing at the left bag? Answer with, Justina yes, or, Justina no";
+    				voice = "Are you pointing at the bag on your left? Answer with, Justina yes, or, Justina no";
     				FestinoHRI::say(voice, 8);
     
                     recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
-    					FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
-
                         // Extender el brazo izquierdo
 		    			
-                        voice = "Please hang the left bag on my left arm";
+                        voice = "Please hang the bag on my left arm";
 		            	FestinoHRI::say(voice, 10);
 		            	
                         FestinoHRI::enableLegFinder(true);
@@ -293,18 +296,16 @@ int main(int argc, char** argv){
                     // Move head to the right
                     FestinoHardware::setHeadOrientation(0.5, -0.5);
 
-    				voice = "Are you pointing at the right bag? Answer with, Justina yes, or, Justina no";
+    				voice = "Are you pointing at the bag on your right? Answer with, Justina yes, or, Justina no";
     				FestinoHRI::say(voice, 8);
 
                     recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
-    				
-    					FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
 
                         // Extender el brazo izquierdo
 
-		    			voice = "Please hang the right bag on my left arm";
+		    			voice = "Please hang the bag on my left arm";
                         FestinoHRI::say(voice, 10);
 
 		            	FestinoHRI::enableLegFinder(true);
@@ -342,7 +343,9 @@ int main(int argc, char** argv){
 	    	}
 
 	    	case SM_WAIT_FOR_BAG:
-	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;	
+	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;
+	    		
+	    		FestinoVision::enablePoseEstimation(false);
 
 	    		voice = "Tell me, Justina yes, once the bag was securely placed in my arm";
 				FestinoHRI::say(voice, 8);
