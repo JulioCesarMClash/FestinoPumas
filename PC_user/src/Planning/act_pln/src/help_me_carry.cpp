@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <vector>
+#include <map>
 #include <string>
 #include <tuple>
 
@@ -227,35 +228,39 @@ int main(int argc, char** argv){
 	    		
 	    		break;
 
-	    	case SM_CONF_POINTING_HAND:
+	    	case SM_CONF_POINTING_HAND:{
 	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
 	    	
-		        for(int i = 0; i < 10; ++i){
+		        for (int i = 0; i < 10; ++i) {
 		        
-		            pointingDirections.push_back(FestinoVision::PointingHand());
-		            
-		        }
+					std::string dir = FestinoVision::PointingHand();
+					pointingDirections.push_back(dir);
+					std::cout << "PointingHand iteration " << i << ": " << dir << std::endl;
+					
+				}
 		        
 		        std::map<std::string, int> countMap;
-			for (const std::string& dir : pointingDirections) {
+				for (const std::string& dir : pointingDirections) {
 			
-			    countMap[dir]++;
+			    	countMap[dir]++;
 			
-			}
+				}
 			
-			int maxCount = 0;
-			for (const auto& pair : countMap) {
-			
-			    if (pair.second > maxCount) {
-			    
-				maxCount = pair.second;
-				chosenDirection = pair.first;
+				int maxCount = 0;
+				for (const auto& pair : countMap) {
 				
-			    }
+			    	if (pair.second > maxCount) {
+			    	
+					maxCount = pair.second;
+					chosenDirection = pair.first;
+				
+			    	}
 			    
-			}
+				}
 			
-			pointingDirections.clear();
+				std::cout << "Chosen direction: " << chosenDirection << std::endl;
+			
+				pointingDirections.clear();
 
 	    		if (chosenDirection == "left"){
 
@@ -315,13 +320,26 @@ int main(int argc, char** argv){
                     FestinoHardware::setHeadOrientation(0.0, 0.0);
 
                     voice = "I could not identify where you were pointing at";
-    				FestinoHRI::say(voice, i);
+    				FestinoHRI::say(voice, 4);
+
+                    state = SM_FIND_BAG;
+
+                }
+                
+                else{
+                    
+                    // Move head to the origin
+                    FestinoHardware::setHeadOrientation(0.0, 0.0);
+
+                    voice = "I could not identify where you were pointing at";
+    				FestinoHRI::say(voice, 4);
 
                     state = SM_FIND_BAG;
 
                 }
 
 	    		break;
+	    	}
 
 	    	case SM_WAIT_FOR_BAG:
 	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;	
