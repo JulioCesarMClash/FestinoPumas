@@ -87,7 +87,6 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
         //std::cout << "lleno" <<std::endl;
         return _nameRecog;
     }
-
     else
     {
         std::vector<std::string> vector_vacio;
