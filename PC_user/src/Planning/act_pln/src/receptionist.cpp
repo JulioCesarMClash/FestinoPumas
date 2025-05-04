@@ -48,6 +48,7 @@ enum SMState
     SM_INTRODUCING,
     SM_FIND_EMPTY_SEAT,
     SM_OFFER_EMPTY_SEAT,
+    SM_INTRO_GUEST_TO_GUEST,
     SM_FINISH_TEST
 };
 
@@ -227,10 +228,15 @@ int main(int argc, char **argv)
                         
                         if(numGuests != 0)
                         {
+                            // Si ya conoce a la persona, la pasa a la zona de bebidas
                             if(findPersonDetect[0] == names[0] || findPersonDetect[0] == names[1])
                                 state = SM_BEVERAGE_LOC;
                             else
                                 state = SM_INTRO_GUEST;
+                        }
+                        else
+                        {
+                            state = SM_INTRO_GUEST;
                         }
                     }
                     else
@@ -488,7 +494,7 @@ int main(int argc, char **argv)
 
                 ss.str("");
                 ss << names[names.size() - 1] << " feel free to take your " << drinks[drinks.size() - 1];
-                FestinoHRI::say(ss,4);
+                FestinoHRI::say(ss.str(),4);
 
                 // Señalar hacia la mesa de bebidas
 
@@ -654,6 +660,7 @@ int main(int argc, char **argv)
                 ss.str("");
                 ss << names[names.size() - 1] << ", could you sit here, please?";
                 FestinoHRI::say(ss.str(), 6); 
+                FestinoKnowledge::SetLocation("guest_loc_"+std::to_string(numGuests-1));
                 state = SM_NAVIGATE_TO_RECO_LOC;
                 break;
 
@@ -857,6 +864,11 @@ int main(int argc, char **argv)
                 //---Mover para presentar // Usar lo mismo para ofrecer silla---
                 //**************************************************************
 
+                findPersonCount = 0;
+                findPersonAttemps = 0;
+                findPersonRestart = 0;
+                topic = NAME;
+
                 ss.str("");
                 ss << names[0] <<", " << names[names.size() - 1] << " is your visitor, " << names[names.size() - 1] <<  " likes " << drinks[drinks.size() - 1];
 
@@ -870,21 +882,49 @@ int main(int argc, char **argv)
                     std::cout << "Cannot move to gestLocation" << std::endl;
                 
                 ss.str("");
-                ss << names[names.size() - 1] << ", he is " << names[0] << ", his favorite drink is " << drinks[0] << " and he likes " << interest[0] << std::endl;
+                ss << names[names.size() - 1] << ", he is " << names[0] << ", his favorite drink is " << drinks[0] << " and he likes " << interests[0] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
                 sleep(2);ss.str("");
                 ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interests[interests.size() - 1] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
-                findPersonCount = 0;
-                findPersonAttemps = 0;
-                findPersonRestart = 0;
-                topic = NAME;
+
+                if(numGuests == 1)
+                    state = SM_INTRO_GUEST_TO_GUEST;
+                    break;
                 
                 if(++numGuests < EXPECTED_GUESTS)
                     state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
                 else
                     state = SM_FINISH_TEST;
 
+                break;
+
+            case SM_INTRO_GUEST_TO_GUEST:
+                std::cout << test << ".-> State SM_INTRO_GUEST_TO_GUEST" << std::endl;
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("guest_loc_"+std::to_string(numGuests-1));
+                std::cout <<"Coordenates of guestLocation"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to guestLocation" << std::endl;
+                
+                ss.str("");
+                ss << names[names.size() - 2] << ", the new guest is " << names[names.size()-1] << ", his favorite drink is " << drinks[names.size()-1] << " and he likes " << interests[names.size()-1] << std::endl;
+                FestinoHRI::say(ss.str(), 8);
+                sleep(2);ss.str("");
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("guest_loc_"+std::to_string(numGuests));
+                std::cout <<"Coordenates of guestLocation"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to guestLocation" << std::endl;
+
+                ss << names[names.size()-1] << " let me introduce you " << names[names.size()-2] << ", his favorite drink is " << drinks[drinks.size()-2] << "and he likes " << interests[interests.size()-2] << std::endl;
+                FestinoHRI::say(ss.str(), 8);
+
+                state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
                 break;
 
             case SM_FINISH_TEST:
