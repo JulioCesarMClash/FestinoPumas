@@ -163,6 +163,7 @@ int main(int argc, char** argv){
     // Interacion variables
     std::string voice;
     std::string recogSpeech;
+    std::string left_arm_pose;
     std::string chosenDirection;
     std::vector<std::string> pointingDirections;
 
@@ -203,7 +204,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;
 	    		
 	    		// Move head to the origin
-                FestinoHardware::setHeadOrientation(0.0, 0.0);
+                FestinoHardware::setHeadOrientation(0.0, -0.3);
 
 	            voice = "My name is Justina, I am ready for the help me carry test";
 	            FestinoHRI::say(voice, 5);
@@ -280,6 +281,8 @@ int main(int argc, char** argv){
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
                         // Extender el brazo izquierdo
+                        left_arm_pose = "pre_grasp";
+			    		FestinoHardware::setArmPose(left_arm_pose);
 		    			
                         voice = "Please hang the bag on my left arm";
 		            	FestinoHRI::say(voice, 10);
@@ -304,6 +307,8 @@ int main(int argc, char** argv){
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
                         // Extender el brazo izquierdo
+                        left_arm_pose = "pre_grasp";
+			    		FestinoHardware::setArmPose(left_arm_pose);
 
 		    			voice = "Please hang the bag on my left arm";
                         FestinoHRI::say(voice, 10);
@@ -318,7 +323,7 @@ int main(int argc, char** argv){
                 else if (chosenDirection == "none"){
                     
                     // Move head to the origin
-                    FestinoHardware::setHeadOrientation(0.0, 0.0);
+                    FestinoHardware::setHeadOrientation(0.0, -0.3);
 
                     voice = "I could not identify where you were pointing at";
     				FestinoHRI::say(voice, 4);
@@ -330,7 +335,7 @@ int main(int argc, char** argv){
                 else{
                     
                     // Move head to the origin
-                    FestinoHardware::setHeadOrientation(0.0, 0.0);
+                    FestinoHardware::setHeadOrientation(0.0, -0.3);
 
                     voice = "I could not identify where you were pointing at";
     				FestinoHRI::say(voice, 4);
@@ -514,6 +519,8 @@ int main(int argc, char** argv){
                 FestinoHRI::enableHumanFollower(false);
 
 			    // Dejar de extender el brazo
+			    left_arm_pose = "default";
+			    FestinoHardware::setArmPose(0,0,0,0,0,0);
 
 		        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 				
