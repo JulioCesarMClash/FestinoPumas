@@ -214,7 +214,7 @@ int main(int argc, char **argv)
     
     std::vector<std::string> tokens;
 
-    STATE state = SM_MEMORIZING_OPERATOR;//SM_SAY_WAIT_FOR_DOOR;
+    STATE state = SM_INIT;//SM_SAY_WAIT_FOR_DOOR;
     Topic topic = NAME;
 
     //FestinoTools
@@ -252,8 +252,6 @@ int main(int argc, char **argv)
 
             case SM_NAVIGATE_TO_ENTRANCE_DOOR:
                 std::cout << test << ".-> State SM_NAVIGATE_TO_ENTRANCE_DOOR: Navigate to the entrance door." << std::endl;
-                // arr_values.values = {0,0,0,0,1,1};
-                // pub_digital.publish(arr_values);
                 // FestinoHRI::enableSpeechRecognized(false);
 
                 FestinoHRI::say("I will navigate to the entrance door",4);
@@ -263,7 +261,6 @@ int main(int argc, char **argv)
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
                     std::cout << "Cannot move to entrace_door" << std::endl;
 
-                //FestinoNavigation::moveDist(0.2, 300);
                 FestinoHRI::say("I have reached the entrance door", 4);
 
                 if(flag_door)
@@ -327,6 +324,14 @@ int main(int argc, char **argv)
                     {
                         findPersonAttemps = 0;
                         state = SM_INTRO_GUEST;
+                        if(findPersonDetect[0] != "unknown")
+                        {
+                            topic = DRINK;
+                        }
+                        else
+                        {
+                            topic = NAME;
+                        }
                     }
                     else
                     {
@@ -343,9 +348,6 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    findPersonAttemps = 0;
-                    topic = NAME;
-
                     state = SM_INTRO_GUEST;
                 }
                 break;

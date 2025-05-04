@@ -131,5 +131,24 @@
 	   file="$(find rgbd_launch)/launch/kinect_frames.launch">
     <arg name="camera" value="$(arg camera)" />
   </include>
+    
+    <node name="speaker" pkg="robotino_talk" type="speaker.py"/>
+    <node name="known_location_parser" pkg="known_locations_parser" type='known_location_server.py'/>   
+    <node name="face_train_server" pkg="face_recog" type="face_train_server.py"/>
+
+  <arg name="language" default="en-us" />
+    <arg name="model_path" default="$(find vosk_speech_recognition)/models/vosk-model-small-$(arg language)-0.15" />
+    <arg name="sample_rate" default="16000" />
+    <arg name="speech_service" default="/hri/speech_recognition" />
+    <arg name="grammar" default="$(find vosk_speech_recognition)/grammars/receptionist.json"/>
+
+    <node pkg="vosk_speech_recognition" type="speech_recognizer.py" name="vosk_speech_recognizer" output="screen">
+        <param name="language" type="string" value="$(arg language)" />
+        <param name="model_path" type="string" value="$(arg model_path)" />
+        <param name="sample_rate" type="int" value="$(arg sample_rate)" />
+        <param name="speech_service" type="string" value="$(arg speech_service)" />
+        <param name="grammar" type="string" value="$(arg grammar)" />
+    </node>
+
 
 </launch>
