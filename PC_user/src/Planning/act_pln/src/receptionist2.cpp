@@ -28,7 +28,7 @@
 
 #define GRAMMAR_POCKET_COMMANDS "grammars/receptionist_commands.jsgf"
 #define GRAMMAR_POCKET_DRINKS "grammars/receptionist_drinks.jsgf"
-#define GRAMMAR_POCKET_NAMES "grammars/receptionist_names.jsgf"
+#define GRAMMAR_POCKET_NAMES "grammars/receptionist_names.json"
 #define GRAMMAR_POCKET_INTERESTS "grammars/receptionist_interests.jsgf"
 
 // Estados
@@ -123,6 +123,7 @@ std::string guestLocation;
 std::string param;
 std::string lastName;
 std::string lastDrink;
+std::string Name = " ";
 
 std::stringstream ss;
 std::stringstream ss2;

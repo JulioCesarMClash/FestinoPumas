@@ -46,9 +46,6 @@
 #define TIMEOUT_MEMORIZING 3000
 
 
-#define GRAMMAR_POCKET_COMMANDS "grammars/receptionist_commands.jsgf"
-#define GRAMMAR_POCKET_DRINKS "grammars/order_drinks.jsgf"
-#define GRAMMAR_POCKET_NAMES "grammars/people_names.jsgf"
     
 //States for the state machine
 enum STATE
@@ -186,6 +183,7 @@ int main(int argc, char **argv)
     std::vector<std::string> findPersonDetect;
     std::vector<std::string> names;
     std::vector<std::string> drinks;
+    std::vector<std::string> topics;
     std::string grammarCommandsID = "receptionisCommands";
     std::string grammarDrinksID = "receptionistDrinks";
     std::string grammarNamesID = "receptionistNames";
@@ -216,7 +214,7 @@ int main(int argc, char **argv)
     
     std::vector<std::string> tokens;
 
-    STATE state = SM_INIT;//SM_SAY_WAIT_FOR_DOOR;
+    STATE state = SM_MEMORIZING_OPERATOR;//SM_SAY_WAIT_FOR_DOOR;
     Topic topic = NAME;
 
     //FestinoTools
@@ -287,8 +285,8 @@ int main(int argc, char **argv)
 
             case SM_SAY_OPEN_DOOR:
                 std::cout << test << ".-> State SM_SAY_OPEN_DOOR: Saying open the door." << std::endl;
-                arr_values.values = {0,0,0,0,0,1};
-                pub_digital.publish(arr_values);
+                // arr_values.values = {0,0,0,0,0,1};
+                // pub_digital.publish(arr_values);
                 FestinoHRI::say("The door is closed", 3);
                 // FestinoNavigation::moveDist(-1.3, 300);
                 FestinoHRI::say("Human, can you open the door please", 6);
@@ -371,177 +369,122 @@ int main(int argc, char **argv)
                         FestinoHRI::say("Nice to meet you, my name is Festino",6);
                         FestinoHRI::say("What is your name?",6);
                         recog = FestinoHRI::lastRecogSpeech();
-                        FestinoHRI::say(recog,3);
+                        while(recog != "jamie" && recog != "morgan" &&  recog != "michael" &&  recog != "jordan" &&  recog != "sergio" &&  recog != "daniel")
+                        {
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name?", 8);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = NAME;
+                        }
+                        names.push_back(recog);
+                        // FestinoHRI::say(recog,3);
+                        topic = DRINK;
                         sleep(2);
                         break;
 
                     case DRINK:
                         ss.str("");
-                        ss << names[names.size() - 1] << ", what is your favorite drink?";
+                        ss << "Hi "<<names[names.size() - 1] << ", what is your favorite drink?";
                         FestinoHRI::say(ss.str(), 5);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        while(recog != "coke" && recog != "soda" && recog != "iced tea" && recog != "water" && recog != "milk" && recog != "juice")
+                        {
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your drink?", 7);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = DRINK;
+                        }
+                        drinks.push_back(recog);
                         sleep(2);
+                        topic = INTEREST;
+                        // state = SM_INTRO_GUEST;
                         break;
 
                     case INTEREST:
                         ss.str("");
                         ss << names[names.size() - 1] << ", what is your favorite topic?";
                         FestinoHRI::say(ss.str(), 5);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        while(recog != "sports" && recog != "music" && recog != "movies" && recog != "reading")
+                        {
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your topic?", 7);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = INTEREST;
+                        }
+                        topics.push_back(recog);
                         sleep(2);
+                        state = SM_PRESENTATION_CONFIRM;
                         break;
                 }
                 
                 attemptsConfirmation = 0;
                 attemptsWaitConfirmation = 0;
 
-                state = SM_WAIT_FOR_PRESENTATION;                
+                // state = SM_WAIT_FOR_PRESENTATION;                
                 break;
     				
     		case SM_WAIT_FOR_PRESENTATION:
-    			std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the names." << std::endl;
-                arr_values.values = {0,0,0,0,1,0};
-                pub_digital.publish(arr_values);
-
-                tokens.clear();
-                lastRecoSpeech = FestinoHRI::lastRecogSpeech();
-
-                std::cout << "frase :"<<lastRecoSpeech<<std::endl;
-                if(recogName && lastRecoSpeech != "")
+    			std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the dates." << std::endl;
+                switch(topic)
                 {
-                    if(lastRecoSpeech != "robot yes" && lastRecoSpeech != "robot no")
-                    {
-                        if(param.compare(" ") != 0 || param.compare("") != 0)
+                    case NAME:
+                        FestinoHRI::say("What is your name?",6);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        while(recog != "jamie" && recog != "morgan" &&  recog != "michael" &&  recog != "jordan" &&  recog != "sergio" &&  recog != "daniel")
                         {
-                            ss.str("");
-                            ss2.str("");
-                            ss << "Ok, your name is ";
-                            boost::algorithm::split(tokens,lastRecoSpeech, boost::algorithm::is_any_of(" "));
-                            ss2.str("");
-                            for(int i = 0; i < tokens.size(); i++)
-                            {
-                                std::cout<<"token ["<<i<<"]: "<<tokens[i]<<std::endl;
-                                if(i < tokens.size() -1)
-                                    ss2 << " ";
-                            }
-                            if(tokens[0].compare("i'm") != 0)
-                            {
-                                if(tokens[2].compare("is") == 0)
-                                {
-                                    ss << tokens[3];
-                                    lastName = tokens[3];
-                                }
-                                else
-                                {
-                                    ss << tokens[2];
-                                    lastName = tokens[2];
-                                }
-                            }
-                            else
-                            {
-                                ss << tokens[1];
-                                lastName = tokens[1];
-                            }
-                                //names.push_back(ss2.str());
-                            ss << ", tell me robot yes or robot no";
-                                
-                            FestinoHRI::say(ss.str(), 6);
-                            state = SM_PRESENTATION_CONFIRM;
-                            break;
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name?", 8);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = NAME;
                         }
-                    }
-                }
-                else
-                {
-                    if(lastRecoSpeech != "")
-                    {
-                        boost::algorithm::split(tokens,lastRecoSpeech, boost::algorithm::is_any_of(" "));
-                        if(tokens[0].compare("i") == 0)
+                        names.push_back(recog);
+                        // FestinoHRI::say(recog,3);
+                        topic = DRINK;
+                        sleep(2);
+                        break;
+
+                    case DRINK:
+                        ss.str("");
+                        ss << "Hi "<<names[names.size() - 1] << ", what is your favorite drink?";
+                        FestinoHRI::say(ss.str(), 5);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        while(recog != "coke" && recog != "soda" && recog != "iced tea" && recog != "water" && recog != "milk" && recog != "juice")
                         {
-                            if(param.compare(" ") != 0 || param.compare("") != 0)
-                            {
-                                ss.str("");
-                                ss2.str("");
-                                ss << "Ok, your favorite drink is ";
-                                boost::algorithm::split(tokens,lastRecoSpeech, boost::algorithm::is_any_of(" "));
-                                ss2.str("");
-                                    for(int i = 0; i < tokens.size(); i++)
-                                {
-                                    std::cout<<"token ["<<i<<"]: "<<tokens[i]<<std::endl;
-                                    if(i < tokens.size() -1)
-                                        ss2 << " ";
-                                }
-                                
-                                if(tokens[2].compare("orange") == 0)
-                                {
-                                        ss << tokens[2]<<" "<<tokens[3];
-                                        lastDrink = "orange juice";
-                                }
-                                else
-                                {
-                                    ss << tokens[2];
-                                    lastDrink = tokens[2];
-                                }
-
-                                //names.push_backack(ss2.str());
-                                ss << ", tell me robot yes or robot no";
-                                
-                                FestinoHRI::say(ss.str(), 6);
-                                state = SM_PRESENTATION_CONFIRM;
-                            }
-                            break;
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your drink?", 7);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = DRINK;
                         }
-                    }
-                }
+                        drinks.push_back(recog);
+                        sleep(2);
+                        topic = INTEREST;
+                        // state = SM_INTRO_GUEST;
+                        break;
 
-                if(attemptsSpeechReco < MAX_ATTEMPTS_SPEECH_RECO)
-                {
-                    // FestinoHRI::enableSpeechRecognized(false);
-                    if(recogName)
-                    {
-                        FestinoHRI::say("Please tell me what is your name", 4);
-                        // FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
+                    case INTEREST:
+                        ss.str("");
+                        ss << names[names.size() - 1] << ", what is your favorite topic?";
+                        FestinoHRI::say(ss.str(), 5);
+                        recog = FestinoHRI::lastRecogSpeech();
+                        while(recog != "sports" && recog != "music" && recog != "movies" && recog != "reading")
+                        {
+                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your topic?", 7);
+                            recog = FestinoHRI::lastRecogSpeech();
+                            std::cout << "Escuche->" << recog << std::endl;
+                            sleep(2);
+                            topic = INTEREST;
+                        }
+                        topics.push_back(recog);
                         sleep(2);
-                    }
-                    else
-                    {
-                        FestinoHRI::say("Please tell me, i want and after that your favorite drink", 4);
-                        // FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
-                        sleep(2);
-                    }
-                        attemptsSpeechReco++;
-                        // FestinoHRI::enableSpeechRecognized(true);
-                        arr_values.values = {0,0,0,1,0,0};
-                        pub_digital.publish(arr_values);
-                        sleep(2);
-                        sleep(2);
-                }
-                else
-                {
-                    // FestinoHRI::enableSpeechRecognized(false);
-                    // FestinoHRI::clean_lastRecogSpeech();
-                    arr_values.values = {0,0,0,1,0,0};
-                    pub_digital.publish(arr_values);
-
-                    attemptsSpeechReco = 0;
-                    attemptsSpeechInt = 0;
-                    if(recogName)
-                    {
-                        ss2.str("");
-                        ss2 << "Sorry I did not understand you, you are an unknown person ";
-                        FestinoHRI::say(ss2.str(), 7);
-                        names.push_back("unknown");
-                        recogName = false;
-                        //FestinoHRI::enableSpeechRecognized(true);
-                        state = SM_INTRO_GUEST;
-                    }
-                    else
-                    {
-                        ss2.str("");
-                        //if(lastDrink.compare("unknown") == 0)
-                        ss2 << "Sorry I did not understand you, your drink by default is waterr";
-                        FestinoHRI::say(ss2.str(), 7);
-                        drinks.push_back("unknown");
-                        state = SM_MEMORIZING_OPERATOR;
-                    }
+                        state = SM_PRESENTATION_CONFIRM;
+                        FestinoHRI::say("Please confirm your details.", 5);
+                        break;
                 }
                 break;
 
@@ -552,140 +495,49 @@ int main(int argc, char **argv)
 
                 // FestinoHRI::loadGrammarSpeechRecognized(grammarCommandsID,GRAMMAR_POCKET_COMMANDS);
                 // FestinoHRI::enableSpeechRecognized(true);
-                arr_values.values = {0,0,0,1,0,0};
-                pub_digital.publish(arr_values);
+                // arr_values.values = {0,0,0,1,0,0};
+                // pub_digital.publish(arr_values);
+                // sleep(2);
+                // sleep(2);
+                
+                recog = FestinoHRI::lastRecogSpeech();
                 sleep(2);
-                sleep(2);
-
-                if (lastRecoSpeech == "robot yes" || lastRecoSpeech == "yes")
+                if (recog == "robot yes" || recog == "yes")
                 {
-                    // FestinoHRI::enableSpeechRecognized(false);
-                    if(recogName)
-                    {
-                        names.push_back(lastName);
-                        ss2.str("");
-                        ss2 << "Ok, your name is " << names[names.size() - 1];
-                        arr_values.values = {0,0,0,0,1,0};
-                        pub_digital.publish(arr_values);
-                        FestinoHRI::say(ss2.str(), 6);
-                        recogName = false;
-                        state = SM_INTRO_GUEST;
-                    }
-                    else
-                    {
-                        drinks.push_back(lastDrink);
-                        ss2.str("");
-                        ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
-                        arr_values.values = {0,0,0,0,1,0};
-                        pub_digital.publish(arr_values);
-                        FestinoHRI::say(ss2.str(), 6);
-                        attemptsMemorizing = 0;
-                        state = SM_MEMORIZING_OPERATOR;
-                    }
+                    ss2.str("");
+                    ss2 << "Ok, your name is " << names[names.size() - 1] << "your favorite drink is " << drinks[drinks.size() - 1] << "and favorite topic is "<< topics[topics.size() - 1];
+                    // arr_values.values = {0,0,0,0,1,0};
+                    // pub_digital.publish(arr_values);
+                    FestinoHRI::say(ss2.str(), 12);
+                    // recogName = false;
+                    state = SM_MEMORIZING_OPERATOR;
                 }
-                else
+                else if (recog == "robot no" || recog == "no")
                 {
-                    if(attemptsConfirmation < MAX_ATTEMPTS_CONFIRMATION)
-                    {
-                        attemptsConfirmation++;
-                        // FestinoHRI::enableSpeechRecognized(false);
-                        if(recogName)
-                        {
-                            arr_values.values = {0,0,0,0,1,0};
-                            pub_digital.publish(arr_values);
-                            FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name", 7);
-                            // FestinoHRI::clean_lastRecogSpeech();
-                            // FestinoHRI::loadGrammarSpeechRecognized(grammarNamesID, GRAMMAR_POCKET_NAMES);
-                            // FestinoHRI::enableSpeechRecognized(true);
-                            arr_values.values = {0,0,0,1,0,0};
-                            pub_digital.publish(arr_values);
-                            sleep(2);
-                            sleep(2);
-                            lastRecoSpeech = "";
-                                
-                            //lastRecoSpeech = FestinoHRI::lastRecogSpeech();
-                        }
-                        else
-                        {
-                            arr_values.values = {0,0,0,0,1,0};
-                            pub_digital.publish(arr_values);
-                            //drinks.erase(names.end() - 1);
-                            // FestinoHRI::clean_lastRecogSpeech();
-                            FestinoHRI::say("Sorry I did not understand you, Please tell me, i want and after that your favorite drink", 8);
-                            // FestinoHRI::loadGrammarSpeechRecognized(grammarDrinksID, GRAMMAR_POCKET_DRINKS);
-                            // FestinoHRI::enableSpeechRecognized(true);
-                            arr_values.values = {0,0,0,1,0,0};
-                            pub_digital.publish(arr_values);
-                            sleep(2);
-                            sleep(2);
-                        }
-                        state = SM_WAIT_FOR_PRESENTATION;
-                    }
-                    else
-                    {
-                        // FestinoHRI::enableSpeechRecognized(false);
-                        if(recogName)
-                        {
-                            arr_values.values = {0,0,0,0,1,0};
-                            pub_digital.publish(arr_values);
-                            names.push_back("unknown");
-                            ss2.str("");
-                            ss2 << "Sorry, i don't understand you, your name is unknown";
-                            FestinoHRI::say(ss2.str(), 6);
-                            //// FestinoHRI::enableSpeechRecognized(true);
-                            arr_values.values = {0,0,0,0,1,0};
-                            pub_digital.publish(arr_values);
-                            recogName = false;
-                            state = SM_INTRO_GUEST;
-                        }
-                        else
-                        {
-                            drinks.push_back("water");
-                            ss2.str("");
-                            ss2 << "Sorry, i don't understand you, your drink by default is water";
-                            arr_values.values = {0,0,0,0,1,0};
-                            pub_digital.publish(arr_values);
-                            FestinoHRI::say(ss2.str(), 6);
-                            attemptsMemorizing = 0;
-                            state = SM_MEMORIZING_OPERATOR;
-                        }
-                    }
+                    state = SM_WAIT_FOR_PRESENTATION;                  
+                }
+                else{
+                    FestinoHRI::say("Sorry I don't understand you, please speak again.",6);
                 }
                 break;
 
             case SM_MEMORIZING_OPERATOR:
                 std::cout << test << ".-> State SM_MEMORIZING_OPERATOR: Memorizing operator." << std::endl;
-                arr_values.values = {0,0,0,1,0,1};
-                pub_digital.publish(arr_values);
-                if(attemptsMemorizing < MAX_ATTEMPTS_MEMORIZING)
-                {
-                    FestinoHRI::say("Human, please not move, and look at me. I'm memorizing your face", 6);
-                    boost::this_thread::sleep(boost::posix_time::milliseconds(3000));
-                    state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
-                }
-                else
-                {
-                    memorizingOperators.push_back(false);
-                    state = SM_GUIDE_TO_LOC;
-                }   
+                FestinoHRI::say("Human, please not move, and look at me. I'm memorizing your face", 6);                    
+                state = SM_WAITING_FOR_MEMORIZING_OPERATOR;                  
                 break;
 
             case SM_WAITING_FOR_MEMORIZING_OPERATOR:
-                std::cout << test << ".-> State SM_WAITING_FOR_MEMORIZING_OPERATOR: Waiting for Memorizing operator." << std::endl;
-                arr_values.values = {0,0,0,1,0,1};
-                pub_digital.publish(arr_values);
-                state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
-                
-                FestinoVision::TrainingPerson(names[names.size() - 1]);
-                state = SM_GUIDE_TO_LOC;
-                
-                attemptsMemorizing++;
+                std::cout << test << ".-> State SM_WAITING_FOR_MEMORIZING_OPERATOR: Waiting for Memorizing operator." << std::endl;                
+                if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                {
+                    state = SM_GUIDE_TO_LOC;
+                    attemptsMemorizing++;
+                }
                 break;
 
             case SM_GUIDE_TO_LOC:
                 std::cout << test << ".-> State SM_GUIDING_TO_LOC: Guide to loc." << std::endl;
-                arr_values.values = {0,0,0,0,1,1};
-                pub_digital.publish(arr_values);
                 FestinoHRI::say("Follow me to the living room",3);
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv("living_room");
                 std::cout <<"Coordenates of living_room"<<std::endl;

@@ -129,7 +129,7 @@ class FaceRecognitionNode:
                 name = "Unknown"
                 confidence = 1.0 - face_distances[best_match_index]
                 
-                if matches[best_match_index] and confidence > 0.5:  # Umbral de confianza
+                if matches[best_match_index] and confidence > 0.3:  # Umbral de confianza
                     name = f"{self.known_face_names[best_match_index]} ({confidence:.2f})"
                 
                 face_names.append(name)
