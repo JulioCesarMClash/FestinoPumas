@@ -206,6 +206,10 @@ int main(int argc, char** argv){
 	    		// Move head to the origin
                 FestinoHardware::setHeadOrientation(0.0, -0.3);
 
+                // Dejar de extender el brazo
+			    left_arm_pose = "default";
+			    FestinoHardware::setArmPose(0.0,0.0,0.0,0.0,0.0,0.0);
+
 	            voice = "My name is Justina, I am ready for the help me carry test";
 	            FestinoHRI::say(voice, 5);
 
@@ -350,8 +354,6 @@ int main(int argc, char** argv){
 	    	case SM_WAIT_FOR_BAG:
 	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;
 	    		
-	    		FestinoVision::enablePoseEstimation(false);
-
 	    		voice = "Tell me, Justina yes, once the bag was securely placed in my arm";
 				FestinoHRI::say(voice, 8);
 
@@ -359,12 +361,11 @@ int main(int argc, char** argv){
 
 	    		if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
-	    			//Save the point or coord of point
+                    // Move head to the origin
+                    FestinoHardware::setHeadOrientation(0.0, -0.3);
 
-	                if(pointing_hand)
-						FestinoNavigation::moveDistAngle(0.0, 0.2853, 10000);
-					else
-						FestinoNavigation::moveDistAngle(0.0, -0.2853, 10000);
+	    			//Save the point or coord of point
+                    
 
 					state = SM_FIND_PERSON;
 
@@ -372,10 +373,14 @@ int main(int argc, char** argv){
 
 	    		break;
 
-	    	case SM_FIND_PERSON:
-				std::cout << "State machine: SM_FIND_PERSON" << std::endl;	
+	    	case SM_FIND_PERSON:{
+				std::cout << "State machine: SM_FIND_PERSON" << std::endl;
+
+                FestinoHRI::enableLegFinder(true);
+                bool legs_found = FestinoHRI::frontalLegsFound();
+	    		std::cout << "Legs found: " << legs_found << std::endl;    
 				
-    			if(!FestinoHRI::frontalLegsFound()){
+    			if(legs_found == false){
 
 	    			std::cout << "Not found legs" << std::endl;
 
@@ -385,8 +390,8 @@ int main(int argc, char** argv){
 	    			FestinoHRI::enableHumanFollower(false);
 
 	    		}
-
-    			else{
+    			else if(legs_found == true)
+    			{
 
     				human_detector_bool = HumanDetector();
 
@@ -421,6 +426,7 @@ int main(int argc, char** argv){
 	    		}
 
 	    		break;
+	    	}
 
 	    	case SM_FOLLOW_OPERATOR:
 	    	    std::cout << "State machine: SM_FOLLOW_OPERATOR" << std::endl;	
@@ -492,9 +498,12 @@ int main(int argc, char** argv){
 				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 								
 					std::cout << "Here is the car" << std::endl;
-					FestinoHRI::enableLegFinder(false);
+					
+                    FestinoHRI::enableLegFinder(false);
 					FestinoHRI::enableHumanFollower(false);
-					state = SM_LEAVE_BAG;
+				    FestinoVision::enablePoseEstimation(false);
+                    
+                    state = SM_LEAVE_BAG;
 
 				}
 
@@ -516,11 +525,12 @@ int main(int argc, char** argv){
                 voice = "Tell me, Justina yes, once you have the bag";
 				FestinoHRI::say(voice, 5);
 
+                FestinoHRI::enableLegFinder(true);   
                 FestinoHRI::enableHumanFollower(false);
 
 			    // Dejar de extender el brazo
 			    left_arm_pose = "default";
-			    FestinoHardware::setArmPose(0,0,0,0,0,0);
+			    FestinoHardware::setArmPose(0.0,0.0,0.0,0.0,0.0,0.0);
 
 		        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 				

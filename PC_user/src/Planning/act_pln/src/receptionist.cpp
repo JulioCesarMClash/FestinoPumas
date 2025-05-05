@@ -101,13 +101,10 @@ std::vector<std::string> names;
 std::vector<std::string> drinks;
 std::vector<std::string> interests;
 std::vector<std::string> tokens;
-std::string grammarCommandsID = "receptionistCommands";
-std::string grammarDrinksID = "receptionistDrinks";
-std::string grammarNamesID = "receptionistNames";
-std::string grammarInterestsID = "receptionistInterests";
-std::string hostName = "John";
-std::string hostDrink = "Coke";
-std::string hostInterest = "Football";
+std::string hostName = "john";
+std::string hostDrink = "coke";
+std::string hostInterest = "sports";
+std::string commands_grammar = "receptionist_commands.json";
 std::string names_grammar = "receptionist_names.json";
 std::string drinks_grammar = "receptionist_drinks.json";
 std::string interests_grammar = "receptionist_interests.json";
@@ -160,6 +157,10 @@ int main(int argc, char **argv)
     		case SM_INIT:
     			std::cout << test << ".-> State SM_INIT: Init the test." << std::endl;
                 ros::Duration(0.5, 0).sleep();
+
+                // Move head to the left
+                FestinoHardware::setHeadOrientation(0.0, 0.0);
+
                 FestinoHRI::say("I'm ready for receptionist test",3);
                 
                 state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
@@ -339,13 +340,13 @@ int main(int argc, char **argv)
                 std::cout << test << ".-> State SM_PRESENTATION_CONFIRM. Wait for robot yes or robot no" << std::endl;
 
                 lastRecoSpeech = "";
+                lastRecoSpeech = FestinoHRI::lastRecogSpeech(commands_grammar);
 
                 if (lastRecoSpeech == "justina yes" || lastRecoSpeech == "robot yes" || lastRecoSpeech == "yes")
                 {
                     switch(topic)
                     {
                         case NAME:
-                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(names_grammar);
                             ss2.str("");
                             ss2 << "Ok, your name is " << names[names.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -354,7 +355,6 @@ int main(int argc, char **argv)
                             break;
 
                         case DRINK:
-                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(drinks_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -363,7 +363,6 @@ int main(int argc, char **argv)
                             break;
 
                         case INTEREST:
-                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(interests_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite topic is " << interests[interests.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -496,7 +495,9 @@ int main(int argc, char **argv)
                 ss << names[names.size() - 1] << " feel free to take your " << drinks[drinks.size() - 1];
                 FestinoHRI::say(ss.str(),4);
 
-                // Señalar hacia la mesa de bebidas
+                // Señalar hacia la mesa de bebidas Cambiar pose
+                left_arm_pose = "pre_grasp"; 
+                FestinoHardware::setArmPose(left_arm_pose);
 
                 sleep(5);
 
@@ -659,6 +660,9 @@ int main(int argc, char **argv)
                 
                 ss.str("");
                 ss << names[names.size() - 1] << ", could you sit here, please?";
+                // Cambiar pose
+                left_arm_pose = "pre_grasp"; 
+                FestinoHardware::setArmPose(left_arm_pose);
                 FestinoHRI::say(ss.str(), 6); 
                 FestinoKnowledge::SetLocation("guest_loc_"+std::to_string(numGuests-1));
                 state = SM_NAVIGATE_TO_RECO_LOC;
@@ -869,10 +873,6 @@ int main(int argc, char **argv)
                 findPersonRestart = 0;
                 topic = NAME;
 
-                ss.str("");
-                ss << names[0] <<", " << names[names.size() - 1] << " is your visitor, " << names[names.size() - 1] <<  " likes " << drinks[drinks.size() - 1];
-
-
                 FestinoHRI::say(ss.str(), 5);
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv(guestLocation);
                 std::cout <<"Coordenates of guestLocation"<<std::endl;
@@ -885,17 +885,26 @@ int main(int argc, char **argv)
                 ss << names[names.size() - 1] << ", he is " << names[0] << ", his favorite drink is " << drinks[0] << " and he likes " << interests[0] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
                 sleep(2);ss.str("");
-                ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interests[interests.size() - 1] << std::endl;
+                ss << names[0] << " the new guest is " << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << " and he likes " << interests[interests.size() - 1] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
 
                 if(numGuests == 1)
+                {
+                    std::cout << test << ".-> Guest_to_guest" << std::endl;
                     state = SM_INTRO_GUEST_TO_GUEST;
                     break;
-                
+                }
+
                 if(++numGuests < EXPECTED_GUESTS)
+                {
+                    std::cout << test << ".-> Entrance door" << std::endl;
                     state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
+                }
                 else
+                {
+                    std::cout << test << ".-> Finish test" << std::endl;
                     state = SM_FINISH_TEST;
+                }
 
                 break;
 
@@ -924,7 +933,7 @@ int main(int argc, char **argv)
                 ss << names[names.size()-1] << " let me introduce you " << names[names.size()-2] << ", his favorite drink is " << drinks[drinks.size()-2] << "and he likes " << interests[interests.size()-2] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
 
-                state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
+                state = SM_FINISH_TEST;
                 break;
 
             case SM_FINISH_TEST:
