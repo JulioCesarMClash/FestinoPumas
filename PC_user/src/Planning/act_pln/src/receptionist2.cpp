@@ -1,9 +1,3 @@
-/***********************************
-*                                  *
-*   Cambiar fácil nombre del host  *
-*                                  *
-***********************************/
-
 // Librerías generales
 #include <iostream>
 #include <stdlib.h>
@@ -22,14 +16,10 @@
 #define EXPECTED_GUESTS 2
 #define MAX_FIND_PERSON_RESTART 0
 #define MAX_FIND_PERSON_ATTEMPTS 1
+#define MAX_ATTEMPTS_MEMORIZING 3
 #define MAX_ATTEMPTS_SPEECH_RECO 3
-#define MAX_ATTEMPTS_CONFIRMATION 2
+#define MAX_ATTEMPTS_CONFIRMATION 1
 #define MAX_FIND_SEAT_COUNT 4
-
-#define GRAMMAR_POCKET_COMMANDS "grammars/receptionist_commands.jsgf"
-#define GRAMMAR_POCKET_DRINKS "grammars/receptionist_drinks.jsgf"
-#define GRAMMAR_POCKET_NAMES "grammars/receptionist_names.json"
-#define GRAMMAR_POCKET_INTERESTS "grammars/receptionist_interests.jsgf"
 
 // Estados
 enum SMState
@@ -48,6 +38,7 @@ enum SMState
     SM_PRESENTATION_CONFIRM,
     SM_MEMORIZING_OPERATOR,
     SM_WAITING_FOR_MEMORIZING_OPERATOR,
+    SM_BEVERAGE_LOC,
     SM_GUIDE_TO_LOC,
     SM_FIND_TO_HOST_LOCATE,
     SM_FIND_TO_HOST_CHAIR_B,
@@ -57,6 +48,7 @@ enum SMState
     SM_INTRODUCING,
     SM_FIND_EMPTY_SEAT,
     SM_OFFER_EMPTY_SEAT,
+    SM_INTRO_GUEST_TO_GUEST,
     SM_FINISH_TEST
 };
 
@@ -116,6 +108,9 @@ std::string grammarInterestsID = "receptionistInterests";
 std::string hostName = "John";
 std::string hostDrink = "Coke";
 std::string hostInterest = "Football";
+std::string names_grammar = "receptionist_names.json";
+std::string drinks_grammar = "receptionist_drinks.json";
+std::string interests_grammar = "receptionist_interests.json";
 
 //Strings aux
 std::string lastRecoSpeech;
@@ -123,32 +118,39 @@ std::string guestLocation;
 std::string param;
 std::string lastName;
 std::string lastDrink;
-std::string Name = " ";
 
 std::stringstream ss;
 std::stringstream ss2;
 
 sensor_msgs::LaserScan laserScan;
 
-ros::NodeHandle nh;
-
-names.push_back("john");
-drinks.push_back("coke");
-interests.push_back("sports")
-
-SMState state = SM_INIT;
-Topic topic = NAME;
-
 // Variables de inicio
 std::string test("receptionist");
 std::vector<float> goal_vec(3);
 
-// Configuración del nodo de ROS
-void ros_init(void);
-
 int main(int argc, char **argv)
 {
-    ros_init()
+
+    Topic topic = NAME;
+    SMState state = SM_INIT;
+
+    // ROS init
+    std::cout << "INITIALIZING ACT_PLN BY PAREJITASOFT Inc..." << std::endl; //cout
+    ros::init(argc, argv, "receptionist_test");
+    ros::NodeHandle nh;
+    ros::Rate rate(10);
+
+    //FestinoTools
+    FestinoHRI::setNodeHandle(&nh);
+    FestinoNavigation::setNodeHandle(&nh);
+    FestinoVision::setNodeHandle(&nh);
+    FestinoKnowledge::setNodeHandle(&nh);
+    ros::Rate loop(10);
+
+    names.push_back(hostName);
+    drinks.push_back(hostDrink);
+    interests.push_back(hostInterest);
+
     FestinoHRI::say(" ",2);
 
     while(ros::ok() && !success)
@@ -192,7 +194,7 @@ int main(int argc, char **argv)
             case SM_SAY_OPEN_DOOR:
                 std::cout << test << ".-> State SM_SAY_OPEN_DOOR: Saying open the door." << std::endl;
                 FestinoHRI::say("Welcome, the door is closed", 3);
-                FestinoNavigation::moveDist(-1.3, 300);
+                FestinoNavigation::moveDist(-1, 300);
                 FestinoHRI::say("Could you help me opening the door, please?", 6); // ¿que el robot abra la puerta?
                 state = SM_WAIT_FOR_OPEN_DOOR;
                 break;   
@@ -223,17 +225,29 @@ int main(int argc, char **argv)
                     if(findPersonDetect.size() == 1)
                     {
                         findPersonAttemps = 0;
-                        state = SM_INTRO_GUEST;
+                        
+                        if(numGuests != 0)
+                        {
+                            // Si ya conoce a la persona, la pasa a la zona de bebidas
+                            if(findPersonDetect[0] == names[0] || findPersonDetect[0] == names[1])
+                                state = SM_BEVERAGE_LOC;
+                            else
+                                state = SM_INTRO_GUEST;
+                        }
+                        else
+                        {
+                            state = SM_INTRO_GUEST;
+                        }
                     }
                     else
                     {
                         if(findPersonDetect.size() == 0)
-                            FestinoHRI::say("Human, i can't find you",3);
+                            FestinoHRI::say("Excuse me, i can't find you",3);
                             FestinoHRI::say("Please enter to the house and close the door",6);
                             findPersonAttemps++;
 
                         if(findPersonDetect.size() > 1)
-                            FestinoHRI::say("Human, i see more people",3);
+                            FestinoHRI::say("Excuse me, i see more people",3);
                             FestinoHRI::say("Please, get inside alone and close the door",6);
                             findPersonAttemps++;
                     }
@@ -287,37 +301,36 @@ int main(int argc, char **argv)
             case SM_WAIT_FOR_PRESENTATION:
                 std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the names." << std::endl;
 
-                lastRecoSpeech = FestinoHRI::lastRecogSpeech();
-
-                std::cout << "frase :"<<lastRecoSpeech<<std::endl;
-
                 switch(topic)
                 {
                     case NAME:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(names_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         names.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << names[names.size()-1];
                         FestinoHRI::say(ss.str(), 4);
                         state = SM_PRESENTATION_CONFIRM;
-                        sleep(2);
                         break;
 
                     case DRINK:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(drinks_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         drinks.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << drinks[drinks.size()-1];
                         FestinoHRI::say(ss.str(), 4);
                         state = SM_PRESENTATION_CONFIRM;
-                        sleep(2);
                         break;
 
                     case INTEREST:
+                        lastRecoSpeech = FestinoHRI::lastRecogSpeech(interests_grammar);
+                        std::cout << "frase :"<<lastRecoSpeech<<std::endl;
                         interests.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << interests[interests.size()-1];
                         FestinoHRI::say(ss.str(), 4);
                         state = SM_PRESENTATION_CONFIRM;
-                        sleep(2);
                         break;
                 }
                 break;
@@ -326,13 +339,13 @@ int main(int argc, char **argv)
                 std::cout << test << ".-> State SM_PRESENTATION_CONFIRM. Wait for robot yes or robot no" << std::endl;
 
                 lastRecoSpeech = "";
-                lastRecoSpeech = FestinoHRI::lastRecogSpeech();
 
                 if (lastRecoSpeech == "justina yes" || lastRecoSpeech == "robot yes" || lastRecoSpeech == "yes")
                 {
                     switch(topic)
                     {
                         case NAME:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(names_grammar);
                             ss2.str("");
                             ss2 << "Ok, your name is " << names[names.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -341,14 +354,16 @@ int main(int argc, char **argv)
                             break;
 
                         case DRINK:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(drinks_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
-                            topic = INTEREST
+                            topic = INTEREST;
                             state = SM_INTRO_GUEST;
                             break;
 
                         case INTEREST:
+                            lastRecoSpeech = FestinoHRI::lastRecogSpeech(interests_grammar);
                             ss2.str("");
                             ss2 << "Ok, your favorite topic is " << interests[interests.size() - 1];
                             FestinoHRI::say(ss2.str(), 6);
@@ -446,26 +461,51 @@ int main(int argc, char **argv)
             case SM_WAITING_FOR_MEMORIZING_OPERATOR:
                 std::cout << test << ".-> State SM_WAITING_FOR_MEMORIZING_OPERATOR: Waiting for Memorizing operator." << std::endl;
                 
-                if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                if(attemptsMemorizing < MAX_ATTEMPTS_MEMORIZING)
                 {
-                    // Beverage state
-                    state = SM_GUIDE_TO_LOC;
+                    if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                    {
+                        // Beverage state
+                        state = SM_BEVERAGE_LOC;
+                    }
+                    else
+                    {
+                        attemptsMemorizing++;
+                    }
                 }
                 else
                 {
-                    attemptsMemorizing++;
-                    state = SM_WAITING_FOR_MEMORIZING_OPERATOR;
+                    state = SM_BEVERAGE_LOC;
                 }
+                break;
+
+            case SM_BEVERAGE_LOC:
+                std::cout << test << ".-> State SM_BEVERAGE_LOC: Guests taking their drink." << std::endl;
+
+                attemptsMemorizing = 0;
+
+                FestinoHRI::say("Please, follow me to the beverage area",4);
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("beverage_area");
+                std::cout <<"Coordenates of beverage_area"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to beverage_area" << std::endl;
+
+                ss.str("");
+                ss << names[names.size() - 1] << " feel free to take your " << drinks[drinks.size() - 1];
+                FestinoHRI::say(ss.str(),4);
+
+                // Señalar hacia la mesa de bebidas
+
+                sleep(5);
+
+                state = SM_GUIDE_TO_LOC;
                 break;
 
             case SM_GUIDE_TO_LOC:
                 std::cout << test << ".-> State SM_GUIDING_TO_LOC: Guide to loc." << std::endl;
 
-                /**************************************************/
-                /*           Agregar beverage state antes         */
-                /**************************************************/
-
-                attemptsMemorizing = 0;
                 findSeatCount = 0;
                 findSeat = false;
 
@@ -620,6 +660,7 @@ int main(int argc, char **argv)
                 ss.str("");
                 ss << names[names.size() - 1] << ", could you sit here, please?";
                 FestinoHRI::say(ss.str(), 6); 
+                FestinoKnowledge::SetLocation("guest_loc_"+std::to_string(numGuests-1));
                 state = SM_NAVIGATE_TO_RECO_LOC;
                 break;
 
@@ -648,7 +689,9 @@ int main(int argc, char **argv)
                     if(recogPersonAux[0] == "john")
                     {
                         recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        FestinoHRI::say("John, I found you", 3);
+                        ss.str("");
+                        ss << names[0] << ", I found you";
+                        FestinoHRI::say(ss.str(), 3);
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -658,7 +701,9 @@ int main(int argc, char **argv)
                     {
                         if(recogPersonAux.size() > 1 && recogPersonAux[1] == "john"){
                             recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                            FestinoHRI::say("John, I found you", 3);
+                            ss.str("");
+                            ss << names[0] << ", I found you";
+                            FestinoHRI::say(ss.str(), 3);
                             findPersonCount = 0;
                             findPersonAttemps = 0;
                             findPersonRestart = 0;
@@ -667,8 +712,10 @@ int main(int argc, char **argv)
                         else
                         {
                             recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                            FestinoHRI::say("John, I'm going to find you in another site", 5);
-                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b");
+                            ss.str("");
+                            ss << names[0] << ", I'm going to find you in another site";
+                            FestinoHRI::say(ss.str(), 3);
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -679,8 +726,10 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    FestinoHRI::say("John, I'm going to find you in another site", 5);
-                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b");
+                    ss.str("");
+                    ss << names[0] << ", I'm going to find you in another site";
+                    FestinoHRI::say(ss.str(), 3);
+                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
                     std::cout <<"Coordenates of John"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -702,7 +751,9 @@ int main(int argc, char **argv)
                     if(recogPersonAux[0] == "john")
                     {
                         recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        FestinoHRI::say("John, I found you", 3);
+                        ss.str("");
+                        ss << names[0] << ", I found you";
+                        FestinoHRI::say(ss.str(), 3);
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -711,7 +762,9 @@ int main(int argc, char **argv)
                     else
                     {
                         recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        FestinoHRI::say("John, I'm going to find you in another site", 5);
+                        ss.str("");
+                        ss << names[0] << ", I'm going to find you in another site";
+                        FestinoHRI::say(ss.str(), 3);
                         goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_a1");
                         std::cout <<"Coordenates of John"<<std::endl;
                         std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -723,7 +776,9 @@ int main(int argc, char **argv)
                 }
                 else
                 {
-                    FestinoHRI::say("John, I'm going to find you in another site", 5);
+                    ss.str("");
+                    ss << names[0] << ", I'm going to find you in another site";
+                    FestinoHRI::say(ss.str(), 3);
                     goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_a1");
                     std::cout <<"Coordenates of John"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -743,7 +798,9 @@ int main(int argc, char **argv)
                     if(recogPersonAux[0] == "john")
                     {
                         recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                        FestinoHRI::say("John, I found you", 3);
+                        ss.str("");
+                        ss << names[0] << ", I found you";
+                        FestinoHRI::say(ss.str(), 3);
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -757,7 +814,9 @@ int main(int argc, char **argv)
                             findPersonAttemps = 0;
                             findPersonRestart = 0;
                             state = SM_INTRODUCING;
-                            FestinoHRI::say("John I did not find you, I will navigate to your chair",3);
+                            ss.str("");
+                            ss << names[0] << ", I did not find you, I will navigate to your chair";
+                            FestinoHRI::say(ss.str(), 5);
                             goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -766,7 +825,9 @@ int main(int argc, char **argv)
                         }
                         else
                         {
-                            FestinoHRI::say("John, I'm going to find you again",3);
+                            ss.str("");
+                            ss << names[0] << ", I'm going to find you again";
+                            FestinoHRI::say(ss.str(), 5);
                             goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -785,7 +846,9 @@ int main(int argc, char **argv)
                     findPersonAttemps = 0;
                     findPersonRestart = 0;
                     state = SM_INTRODUCING;
-                    FestinoHRI::say("John I did not find you, I wll navigate to your chair",3);
+                    ss.str("");
+                    ss << names[0] << ", I did not find you, I will navigate to your chair";
+                    FestinoHRI::say(ss.str(), 5);
                     goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
                     std::cout <<"Coordenates of John"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -801,8 +864,13 @@ int main(int argc, char **argv)
                 //---Mover para presentar // Usar lo mismo para ofrecer silla---
                 //**************************************************************
 
+                findPersonCount = 0;
+                findPersonAttemps = 0;
+                findPersonRestart = 0;
+                topic = NAME;
+
                 ss.str("");
-                ss << "John, " << names[names.size() - 1] << " is your visitor, " << names[names.size() - 1] <<  " likes " << drinks[drinks.size() - 1];
+                ss << names[0] <<", " << names[names.size() - 1] << " is your visitor, " << names[names.size() - 1] <<  " likes " << drinks[drinks.size() - 1];
 
 
                 FestinoHRI::say(ss.str(), 5);
@@ -814,15 +882,15 @@ int main(int argc, char **argv)
                     std::cout << "Cannot move to gestLocation" << std::endl;
                 
                 ss.str("");
-                ss << names[names.size() - 1] << " he is John and his favorite drink is " << hostDrink << std::endl;
-                FestinoHRI::say(ss.str(), 5);
-                sleep(2);ss.str("");
-                ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interets[interests.size() - 1] << std::endl;
+                ss << names[names.size() - 1] << ", he is " << names[0] << ", his favorite drink is " << drinks[0] << " and he likes " << interests[0] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
-                findPersonCount = 0;
-                findPersonAttemps = 0;
-                findPersonRestart = 0;
-                topic = NAME;
+                sleep(2);ss.str("");
+                ss << names[0] << " the new guest is" << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << "and he likes " << interests[interests.size() - 1] << std::endl;
+                FestinoHRI::say(ss.str(), 8);
+
+                if(numGuests == 1)
+                    state = SM_INTRO_GUEST_TO_GUEST;
+                    break;
                 
                 if(++numGuests < EXPECTED_GUESTS)
                     state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
@@ -831,10 +899,38 @@ int main(int argc, char **argv)
 
                 break;
 
+            case SM_INTRO_GUEST_TO_GUEST:
+                std::cout << test << ".-> State SM_INTRO_GUEST_TO_GUEST" << std::endl;
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("guest_loc_"+std::to_string(numGuests-1));
+                std::cout <<"Coordenates of guestLocation"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to guestLocation" << std::endl;
+                
+                ss.str("");
+                ss << names[names.size() - 2] << ", the new guest is " << names[names.size()-1] << ", his favorite drink is " << drinks[names.size()-1] << " and he likes " << interests[names.size()-1] << std::endl;
+                FestinoHRI::say(ss.str(), 8);
+                sleep(2);ss.str("");
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("guest_loc_"+std::to_string(numGuests));
+                std::cout <<"Coordenates of guestLocation"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to guestLocation" << std::endl;
+
+                ss << names[names.size()-1] << " let me introduce you " << names[names.size()-2] << ", his favorite drink is " << drinks[drinks.size()-2] << "and he likes " << interests[interests.size()-2] << std::endl;
+                FestinoHRI::say(ss.str(), 8);
+
+                state = SM_NAVIGATE_TO_ENTRANCE_DOOR;
+                break;
+
             case SM_FINISH_TEST:
                 std::cout << test << ".-> State SM_FINISH: Finish the test." << std::endl;
                 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("gpsr");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("end_location");
                 std::cout <<"Coordenates of finish test"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -844,7 +940,7 @@ int main(int argc, char **argv)
                 FestinoHRI::say("I have finished the test", 6);
                 success = true;
                 
-                for(int i = 0; i < names.size(); i++ )
+                for(int i = 0; i < names.size(); ++i)
                     std::cout << test << names[i] << std::endl;
 
                 break;  
@@ -855,20 +951,4 @@ int main(int argc, char **argv)
         ros::spinOnce();
     }
     return 1;
-}
-
-void ros_init(void)
-{
-    // ROS init
-    std::cout << "INITIALIZING ACT_PLN BY PAREJITASOFT Inc..." << std::endl; //cout
-    ros::init(argc, argv, "receptionist_test");
-    ros::Rate rate(10);
-
-    //FestinoTools
-    FestinoHRI::setNodeHandle(&nh);
-    FestinoNavigation::setNodeHandle(&nh);
-    FestinoVision::setNodeHandle(&nh);
-    FestinoKnowledge::setNodeHandle(&nh);
-
-    ros::Rate loop(10);
 }

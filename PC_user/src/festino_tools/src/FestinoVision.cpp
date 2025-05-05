@@ -73,7 +73,7 @@ void FestinoVision::enablePoseEstimation(bool enabled)
 
 std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
 {
-    std::cout << "FestinoVision.->Recong person: " << flag << std::endl;
+    std::cout << "FestinoVision.->Recong person: ";
     vision_msgs::FaceRecogSrv srv;
     srv.request.is_face_recognition_enabled = flag;
 
@@ -82,7 +82,7 @@ std::vector<std::string> FestinoVision::enableRecogFacesName(bool flag)
         for (int i = 0; i < srv.response.names.size(); i++)
         {
             //std::cout << "entre_3" <<std::endl;
-            std::cout << srv.response.names[i] << " ";
+            std::cout << srv.response.names[i] << " " << std::endl;
         }
         _nameRecog = srv.response.names;
         //std::cout << "lleno" <<std::endl;

@@ -46,7 +46,7 @@ entrance_door:
 - qy: 0.0
 - qz: -0.286
 - qw: 0.958
-living_room:
+drinks_table:
 - x: -2.981
 - y: 3.01
 - theta: -0.581
@@ -62,7 +62,23 @@ host_loc:
 - qy: 0.0
 - qz: -0.286
 - qw: 0.958
-chair_b1:
+chair_1:
+- x: -2.981
+- y: 3.01
+- theta: -0.581
+- qx: 0.0
+- qy: 0.0
+- qz: -0.286
+- qw: 0.958
+chair_2:
+- x: -2.981
+- y: 3.01
+- theta: -0.581
+- qx: 0.0
+- qy: 0.0
+- qz: -0.286
+- qw: 0.958
+chair_2:
 - x: -2.981
 - y: 3.01
 - theta: -0.581
