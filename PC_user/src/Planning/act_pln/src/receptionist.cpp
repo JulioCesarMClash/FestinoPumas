@@ -101,61 +101,90 @@ std::string auxNames;
 std::string test("receptionist");
 std::vector<float> goal_vec(3);
 
+// Variables globales
+geometry_msgs::Point last_centroid;
+bool new_centroid = false;
+const double CENTER_THRESHOLD = 10.0; // Umbral en píxeles para considerar centrado
+const int IMAGE_CENTER_X = 320;      // Centro horizontal de la imagen (ajustar según resolución)
+const int IMAGE_CENTER_Y = 240;      // Centro vertical de la imagen (ajustar según resolución)
+
+// Callback para actualizar el centroide
+void centroidCallback(const geometry_msgs::Point::ConstPtr& msg)
+{
+    last_centroid = *msg;
+    new_centroid = true;
+    ROS_DEBUG("Centroide actualizado: x=%.2f, y=%.2f", msg->x, msg->y);
+}
+
+// Función para verificar si está centrado
+bool isCenteredX()
+{
+    if(!new_centroid) return false;
+    
+    float error = last_centroid.x - IMAGE_CENTER_X;
+    return (fabs(error) < CENTER_THRESHOLD);
+}
+
+// Función para mover la cámara (simulada)
+void moveCamera(double dx, double dy)
+{
+    ROS_INFO("Moviendo camara: dx=%.2f, dy=%.2f", dx, dy);
+    FestinoNavigation::move_base(0,0,dx*0.02,0.3);
+    // Aquí iría el código real para mover la cámara
+    // Ejemplo: publicar a un topic de control de PTZ
+}
+
+// Función principal de centrado
+void centerCamera()
+{
+    ros::NodeHandle nh;
+    ros::Subscriber sub = nh.subscribe("/vision/person_centroid", 1, centroidCallback);
+    ros::Rate rate(10); // 10 Hz
+
+    ROS_INFO("Iniciando rutina de centrado de cámara...");
+
+    while (ros::ok())
+    {
+        ros::spinOnce(); // Procesar callbacks
+
+        if (new_centroid)
+        {
+            if (isCenteredX())
+            {
+                ROS_INFO("¡Persona centrada en la imagen!");
+                break; // Salir del ciclo cuando esté centrado
+            }
+            else
+            {
+                // Calcular movimiento necesario
+                double dx = IMAGE_CENTER_X - last_centroid.x;
+                double dy = IMAGE_CENTER_Y - last_centroid.y;
+                
+                // Mover la cámara (proporcional al error)
+                moveCamera(dx * 0.1, dy * 0.1); // Factor de ganancia 0.1
+            }
+            
+            new_centroid = false; // Resetear flag
+        }
+        else
+        {
+            ROS_WARN_THROTTLE(5, "Esperando datos del centroide...");
+        }
+
+        rate.sleep();
+    }
+}
+
 bool emptyString(const char *str) {
     return (str == NULL || str[0] == '\0');
 }
 
-typedef struct {
-    char key[MAX_KEY_LENGTH];
-    char value[MAX_VALUE_LENGTH];
-} DictionaryItem;
-
-typedef struct {
-    DictionaryItem items[MAX_KEYS];
-    int count;
-} Dictionary;
-
-// Inicializar el diccionario
-void init_dict(Dictionary *dict) {
-    dict->count = 0;
-}
-
-// Añadir un elemento al diccionario
-void dict_add(Dictionary *dict, const char *key, const char *value) {
-    if (dict->count >= MAX_KEYS) {
-        printf("Error: Diccionario lleno\n");
-        return;
-    }
-    
-    strncpy(dict->items[dict->count].key, key, MAX_KEY_LENGTH);
-    strncpy(dict->items[dict->count].value, value, MAX_VALUE_LENGTH);
-    dict->count++;
-}
-
-// Obtener un valor por su clave
-const char *dict_get(Dictionary *dict, const char *key) {
-    for (int i = 0; i < dict->count; i++) {
-        if (strcmp(dict->items[i].key, key) == 0) {
-            return dict->items[i].value;
-        }
-    }
-    return NULL; // No encontrado
-}
-
-// Mostrar todo el diccionario
-void dict_print(Dictionary *dict) {
-    printf("Diccionario:\n");
-    for (int i = 0; i < dict->count; i++) {
-        printf("  %s: %s\n", dict->items[i].key, dict->items[i].value);
-    }
-}
-
-const char *voiceRecognition(const char *words[])
+std::string voiceRecognition(const char *words[])
 {    
     std::string recog = " ";
     char *token;
     char buffer[256];
-    const char *wordFound = "";
+    std::string wordFound = "";
     recog = FestinoHRI::lastRecogSpeech();
     sleep(2);
     strcpy(buffer, recog.c_str());
@@ -228,8 +257,7 @@ int main(int argc, char **argv)
     bool findPerson = false;
     bool findSeat = false;
     bool recogName = false;
-    bool completeTrainig = false;
-    
+    bool completeTrainig = false;    
     
     std::vector<bool> memorizingOperators;
     std::vector<std::string> recogPersonAux;
@@ -254,7 +282,7 @@ int main(int argc, char **argv)
     char *token;
     char buffer[256];
     bool first = true;
-    const char *wordFound = "";
+    std::string wordFound = "";
     const char *nombres[] = {"jamie","morgan","michael","jordan","alex","daniel","sergio",NULL};
     const char *bebidas[] = {"coke","soda","tea","water","milk","juice",NULL};
     const char *gustos[] = {"sports","music","movies","reading",NULL};
@@ -278,16 +306,16 @@ int main(int argc, char **argv)
     drinks.push_back("coke");    
     topics.push_back("sports");
 
-    Dictionary dict;
-    init_dict(&dict);
+    // Dictionary dict;
+    // init_dict(&dict);
     
     // Añadir elementos
-    dict_add(&dict, "name", "john");
-    dict_add(&dict, "drink", "coke");
-    dict_add(&dict, "topic", "sports");
+    // dict_add(&dict, "name", "john");
+    // dict_add(&dict, "drink", "coke");
+    // dict_add(&dict, "topic", "sports");
     
     // Mostrar diccionario
-    dict_print(&dict);
+    // dict_print(&dict);
 
     std::stringstream ss;
     std::stringstream ss2;
@@ -318,8 +346,9 @@ int main(int argc, char **argv)
     FestinoKnowledge::setNodeHandle(&nh);
     robotino_msgs::DigitalReadings arr_values;
     ros::Subscriber subLaserScan = nh.subscribe("/scan", 1, callbackLaserScan);
-
+    ros::Subscriber subCentrodio = nh.subscribe("/vision/pose_3d", 1, callbackLaserScan);
     ros::Publisher pub_digital = nh.advertise<robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
+    // ros::Subscriber sub = nh.subscribe("/vision/person_centroid", 10, centroidCallback);
     ros::Rate loop(10);
     
     arr_values.stamp.sec = 0;
@@ -335,8 +364,8 @@ int main(int argc, char **argv)
     	{
     		case SM_INIT:
     			std::cout << test << ".-> State SM_INIT: Init the test." << std::endl;
-                arr_values.values = {0,0,0,1,1,1};
-                pub_digital.publish(arr_values);
+                // arr_values.values = {0,0,0,1,1,1};
+                // pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
                 FestinoHRI::say("I'm ready for receptionist test",3);
                 // FestinoHRI::enableSpeechRecognized(false);
@@ -357,6 +386,10 @@ int main(int argc, char **argv)
 
                 FestinoHRI::say("I have reached the entrance door", 4);
 
+
+                // std::cout << last_centroid << std::endl;
+                centerCamera(); 
+                
                 if(flag_door)
                 //if(true)
                 {
@@ -366,7 +399,7 @@ int main(int argc, char **argv)
                     findPersonAttemps = 0;
                     findPersonRestart = 0;
                     attemptsCheckDoor = 0;
-                    FestinoNavigation::moveDist(-1.3, 300);
+                    // FestinoNavigation::moveDist(-1.3, 300);
                 }
                 else
                 {
@@ -418,7 +451,7 @@ int main(int argc, char **argv)
                     {
                         findPersonAttemps = 0;
                         state = SM_INTRO_GUEST;
-                        if(findPersonDetect[0] != "unknown")
+                        if(findPersonDetect[0] != "unknown" && findPersonDetect[0] !="no_database")
                         {
                             topic = DRINK;
                             strcpy(buffer, findPersonDetect[0].c_str());
@@ -465,14 +498,14 @@ int main(int argc, char **argv)
                         FestinoHRI::say("Nice to meet you, my name is Festino",6);
                         FestinoHRI::say("What is your name?",6);
                         wordFound = voiceRecognition(nombres);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name?", 8);
                             wordFound = voiceRecognition(nombres);
                             topic = NAME;
                         }
-                        // names\.push_back(wordFound);
-                        dict_add(&dict, "name", wordFound);
+                        names.push_back(wordFound);
+                        // dict_add(&dict, "name", wordFound);
                         // topic = DRINK;
                         state = SM_MEMORIZING_OPERATOR;
                         sleep(2);
@@ -480,17 +513,17 @@ int main(int argc, char **argv)
 
                     case DRINK:
                         ss.str("");
-                        ss << "Excuse me "<< dict_get(&dict, "name") << ", what is your favorite drink?";
+                        ss << "Excuse me "<< names[names.size() - 1] << ", what is your favorite drink?";
                         FestinoHRI::say(ss.str(), 5);
                         wordFound = voiceRecognition(bebidas);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your drink?", 7);
                             wordFound = voiceRecognition(bebidas);
                             topic = DRINK;
                         }
-                        // drinks.push_back(wordFound);
-                        dict_add(&dict, "drink", wordFound);
+                        drinks.push_back(wordFound);
+                        // dict_add(&dict, "drink", wordFound);
                         sleep(2);
                         topic = INTEREST;
                         // state = SM_INTRO_GUEST;
@@ -501,14 +534,14 @@ int main(int argc, char **argv)
                         ss << names[names.size() - 1] << ", what is your favorite topic?";
                         FestinoHRI::say(ss.str(), 5);
                         wordFound = voiceRecognition(gustos);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your topic?", 7);
                             wordFound = voiceRecognition(gustos);
                             topic = DRINK;
                         }
-                        // topics.push_back(wordFound);
-                        dict_add(&dict, "topic", wordFound);
+                        topics.push_back(wordFound);
+                        // dict_add(&dict, "topic", wordFound);
                         sleep(2);
                         state = SM_PRESENTATION_CONFIRM;
                         break;
@@ -527,31 +560,31 @@ int main(int argc, char **argv)
                     case NAME:
                         FestinoHRI::say("What is your name?",6);
                         wordFound = voiceRecognition(nombres);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your name?", 8);
                             wordFound = voiceRecognition(nombres);
                             topic = NAME;
                         }
-                        // names.push_back(wordFound);
-                        dict_add(&dict, "name", wordFound);
+                        names.push_back(wordFound);
+                        // dict_add(&dict, "name", wordFound);
                         topic = DRINK;
                         sleep(2);
                         break;
 
                     case DRINK:
                         ss.str("");
-                        ss << "Hi "<< dict_get(&dict, "name") << ", what is your favorite drink?";
+                        ss << "Hi "<< names[names.size() - 1] << ", what is your favorite drink?";
                         FestinoHRI::say(ss.str(), 5);
                         wordFound = voiceRecognition(bebidas);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your drink?", 7);
                             wordFound = voiceRecognition(bebidas);
                             topic = DRINK;
                         }
-                        // drinks.push_back(wordFound);
-                        dict_add(&dict, "drink", wordFound);
+                        drinks.push_back(wordFound);
+                        // dict_add(&dict, "drink", wordFound);
                         sleep(2);
                         topic = INTEREST;
                         // state = SM_INTRO_GUEST;
@@ -562,14 +595,14 @@ int main(int argc, char **argv)
                         ss << names[names.size() - 1] << ", what is your favorite topic?";
                         FestinoHRI::say(ss.str(), 5);
                         wordFound = voiceRecognition(gustos);
-                        while(emptyString(wordFound))
+                        while(wordFound.empty())
                         {
                             FestinoHRI::say("Sorry I did not understand you, Please tell me what is your topic?", 7);
                             wordFound = voiceRecognition(gustos);
                             topic = DRINK;
                         }
-                        // topics.push_back(wordFound);
-                        dict_add(&dict, "topic", wordFound);
+                        topics.push_back(wordFound);
+                        // dict_add(&dict, "topic", wordFound);
                         sleep(2);
                         state = SM_PRESENTATION_CONFIRM;
                         break;
@@ -584,7 +617,7 @@ int main(int argc, char **argv)
                 if(first)
                 {                    
                     ss2.str("");
-                    ss2 << "Your name is " << dict_get(&dict, "name") << " your favorite drink is " << dict_get(&dict, "drink") << " and favorite topic is "<< dict_get(&dict, "topic");
+                    ss2 << "Your name is " << names[names.size() - 1] << " your favorite drink is " << drinks[drinks.size() - 1] << " and favorite topic is "<< topics[topics.size() - 1];
                     FestinoHRI::say(ss2.str(), 10);
                     FestinoHRI::say("Please confirm your details whit yes or no.",7);
                     first = false;

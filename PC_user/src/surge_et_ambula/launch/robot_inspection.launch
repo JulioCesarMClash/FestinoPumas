@@ -2,7 +2,7 @@
 	
 	<!--<include file="$(find pocketsphinx)/launch/pocketsphinx.launch"> </include>-->
 	<!--<include file="$(find config_files)/launch/navigation.launch"> </include>-->
-	<!--<include file="$(find freenect_launch)/launch/freenect.launch"> </include>-->	
+	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>
 	<!--<include file="$(find vosk_speech_recognition)/launch/vosk_recog.launch" />-->
 
 	<arg name="language" default="en-us" />
@@ -19,7 +19,11 @@
         <param name="grammar" type="string" value="$(arg grammar)" />
     </node>
 
+    <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
 
+    <node pkg="pose_estimation" type="yolo_pose_2d_node.py" name="pose_2d_node" output="screen" />
+    <node pkg="pose_estimation" type="pose_2d_to_3d_node" name="pose_2d_to_3d_node" output="screen" />
+    <node pkg="pose_estimation" type="pointing_detector_node" name="pointing_detector_node" output="screen" /> 
 
 	<node name="manipulator_control" pkg="manipulator_control" type="perfil_velocidades.py"/>
 	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>

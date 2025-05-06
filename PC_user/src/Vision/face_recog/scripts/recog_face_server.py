@@ -174,7 +174,8 @@ class DeepFaceRecognitionNode:
                 # Determinar si es una coincidencia válida
                 if best_confidence >= self.confidence_threshold:
                     name = self.known_face_names[best_match]
-                    face_names.append(f"{name} ({best_confidence:.2f})")
+                    face_names.append(f"{name}")
+                    rospy.loginfo(f"{name} ({best_confidence:.2f})");
                 else:
                     face_names.append("unknown")
             

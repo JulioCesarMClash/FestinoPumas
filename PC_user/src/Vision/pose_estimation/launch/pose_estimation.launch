@@ -1,7 +1,5 @@
 <launch>
     <node pkg="pose_estimation" type="yolo_pose_2d_node.py" name="pose_2d_node" output="screen" />
     <node pkg="pose_estimation" type="pose_2d_to_3d_node" name="pose_2d_to_3d_node" output="screen" />
-    <node pkg="pose_estimation" type="pointing_detector_node" name="pointing_detector_node" output="screen" />    
-    <node name="face_train_server" pkg="face_recog" type="face_train_server.py"/>
-    <node name="recog_face_server" pkg="face_recog" type="recog_face_server.py"/>
+    <node pkg="pose_estimation" type="pointing_detector_node" name="pointing_detector_node" output="screen" />  
 </launch>

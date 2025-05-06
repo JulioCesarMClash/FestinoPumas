@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 import rospy
+import logging
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
 from ultralytics import YOLO
+from geometry_msgs.msg import Point  # Nuevo mensaje para el centroide
 
 from pose_estimation.msg import PersonPose2D, Keypoint2D
+
+logging.getLogger('ultralytics').setLevel(logging.WARNING)
 
 KEYPOINT_NAMES = [
     "nose", "eye_left", "eye_right", "ear_left", "ear_right",
@@ -18,9 +22,10 @@ class YoloPoseNode:
     def __init__(self):
         rospy.init_node("yolo_pose_2d_node")
         self.bridge = CvBridge()
-        self.model = YOLO("yolov8n-pose.pt")  
+        self.model = YOLO("yolov8n-pose.pt",verbose=False)  
         self.sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_callback)
         self.pub = rospy.Publisher("/vision/pose_2d", PersonPose2D, queue_size=10)
+        self.centroid_pub = rospy.Publisher("/vision/person_centroid", Point, queue_size=10)
 
         rospy.loginfo("YOLO Node 2D --- Soft by Joshua M")
 
@@ -52,18 +57,43 @@ class YoloPoseNode:
         if not enabled:
             return
         
-        results = self.model(cv_image, conf=0.5)[0]
+        results = self.model(cv_image, conf=0.6)[0]
         
+        # Visualización
         for result in results:
             annotated_frame = result.plot()
             cv2.imshow("YOLOv8 Pose Estimation", annotated_frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 rospy.signal_shutdown("Closed by user")
 
-        for person_id, keypoints in enumerate(results.keypoints.data.cpu().numpy()):
-            person_msg = self.create_person_message(person_id, keypoints)
+        # Obtener todos los bounding boxes y keypoints
+        all_boxes = results.boxes.data.cpu().numpy()
+        all_keypoints = results.keypoints.data.cpu().numpy()
+        
+        if len(all_boxes) > 0:
+            # Encontrar la persona con el bounding box más grande
+            areas = (all_boxes[:, 2] - all_boxes[:, 0]) * (all_boxes[:, 3] - all_boxes[:, 1])
+            selected_idx = areas.argmax()
+            
+            # Obtener el bounding box y keypoints seleccionados
+            selected_box = all_boxes[selected_idx]
+            selected_keypoints = all_keypoints[selected_idx]
+            
+            # Publicar pose de la persona seleccionada
+            person_msg = self.create_person_message(selected_idx, selected_keypoints)
             self.pub.publish(person_msg)
-            rospy.loginfo(f"Publish pose 2D for: {person_id}")
+            
+            # Calcular y publicar centroide
+            centroid_x = (selected_box[0] + selected_box[2]) / 2
+            centroid_y = (selected_box[1] + selected_box[3]) / 2
+            
+            centroid_msg = Point()
+            centroid_msg.x = float(centroid_x)
+            centroid_msg.y = float(centroid_y)
+            centroid_msg.z = 0.0
+            
+            self.centroid_pub.publish(centroid_msg)
+            # rospy.loginfo(f"Published centroid for largest person - x: {centroid_x:.1f}, y: {centroid_y:.1f}")
 
 if __name__ == "__main__":
     try:
