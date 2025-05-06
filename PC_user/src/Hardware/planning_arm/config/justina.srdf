@@ -26,16 +26,6 @@
     </group>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="Gripper" parent_link="left_arm_grip_center" group="Gripper"/>
-
-    <group_state name="default" group="left_arm">
-    <joint name="la_1_joint" value="0.0" />
-    <joint name="la_2_joint" value="0.0" />
-    <joint name="la_3_joint" value="0.0" />
-    <joint name="la_4_joint" value="0.0" />
-    <joint name="la_5_joint" value="0.0" />
-    <joint name="la_6_joint" value="0.0" />
-    <joint name="la_7_joint" value="0.0" />
-    </group_state>
     
     <group_state name="pre_grasp" group="left_arm">
     <joint name="la_1_joint" value="1.49048" />
@@ -76,6 +66,16 @@
     <joint name="la_6_joint" value="1.1563836755518349" />
     <joint name="la_7_joint" value="-1.7695870790087709" />
 </group_state>
+
+     <group_state name="default" group="left_arm">
+    <joint name="la_1_joint" value="0.033" />
+    <joint name="la_2_joint" value="0.0007" />
+    <joint name="la_3_joint" value="0.0007" />
+    <joint name="la_4_joint" value="-0.029" />
+    <joint name="la_5_joint" value="-0.007" />
+    <joint name="la_6_joint" value="0.057" />
+    <joint name="la_7_joint" value="0.049" />
+    </group_state>
     
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="camera_link" reason="Never"/>
