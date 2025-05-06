@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+#include <geometry_msgs/Point.h>  // Para publicar el centroide
 #include <pose_estimation/PersonPose3D.h>
 #include <pose_estimation/Keypoint3D.h>
 #include <unordered_map>
@@ -11,7 +12,8 @@ public:
     PointingDetector()
     {
         sub_ = nh.subscribe("/vision/pose_3d", 10, &PointingDetector::poseCallback, this);
-        pub_ = nh.advertise<std_msgs::String>("/vision/pointing_direction", 10);
+        pub_direction_ = nh.advertise<std_msgs::String>("/vision/pointing_direction", 10);
+        pub_centroid_ = nh.advertise<geometry_msgs::Point>("/vision/body_centroid", 10);  // Nuevo publisher
         dist_threshold_ = 0.15;
         ROS_INFO("[pointing_detector_node] Init node.");
     }
@@ -19,14 +21,15 @@ public:
 private:
     ros::NodeHandle nh;
     ros::Subscriber sub_;
-    ros::Publisher pub_;
+    ros::Publisher pub_direction_;
+    ros::Publisher pub_centroid_;  // Nuevo publisher para el centroide
     double dist_threshold_;
 
     void poseCallback(const pose_estimation::PersonPose3D::ConstPtr& msg)
     {
         std_msgs::String out_msg;
         out_msg.data = detectPointing(msg);
-        pub_.publish(out_msg);
+        pub_direction_.publish(out_msg);
     }
 
     std::string detectPointing(const pose_estimation::PersonPose3D::ConstPtr& person_pose)
@@ -34,7 +37,8 @@ private:
         bool enabled = true;
         nh.getParam("/pointing_detector_enabled", enabled);
         if (!enabled)
-                 return "none";
+            return "none";
+            
         // Mapear keypoints por nombre
         std::unordered_map<std::string, pose_estimation::Keypoint3D> keypoints;
         for (const auto& kp : person_pose->keypoints)
@@ -42,7 +46,6 @@ private:
             keypoints[kp.name] = kp;
         }
 
-        // Funciones auxiliares
         auto toVec = [](const pose_estimation::Keypoint3D& a, const pose_estimation::Keypoint3D& b) {
             return Eigen::Vector3f(b.x - a.x, b.y - a.y, b.z - a.z);
         };
@@ -70,6 +73,15 @@ private:
 
         try
         {
+            // Calcular el centroide como punto medio entre los hombros
+            geometry_msgs::Point centroid;
+            centroid.x = (keypoints.at("shoulder_left").x + keypoints.at("shoulder_right").x) / 2.0;
+            centroid.y = (keypoints.at("shoulder_left").y + keypoints.at("shoulder_right").y) / 2.0;
+            centroid.z = (keypoints.at("shoulder_left").z + keypoints.at("shoulder_right").z) / 2.0;
+            
+            // Publicar el centroide
+            pub_centroid_.publish(centroid);
+
             bool left = isPointing(keypoints.at("shoulder_left"),
                                    keypoints.at("elbow_left"),
                                    keypoints.at("wrist_left"),

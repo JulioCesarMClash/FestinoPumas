@@ -4,13 +4,14 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include "ros/ros.h"
+#include <ros/ros.h>
 
 // Librerías de festino
-#include "festino_tools/FestinoHRI.h"
-#include "festino_tools/FestinoVision.h"
-#include "festino_tools/FestinoNavigation.h"
-#include "festino_tools/FestinoKnowledge.h"
+#include <festino_tools/FestinoHRI.h>
+#include <festino_tools/FestinoVision.h>
+#include <festino_tools/FestinoNavigation.h>
+#include <festino_tools/FestinoKnowledge.h>
+#include <festino_tools/FestinoHardware.h>
 
 // Parámetros para la prueba
 #define EXPECTED_GUESTS 2
@@ -108,6 +109,7 @@ std::string commands_grammar = "receptionist_commands.json";
 std::string names_grammar = "receptionist_names.json";
 std::string drinks_grammar = "receptionist_drinks.json";
 std::string interests_grammar = "receptionist_interests.json";
+std::string left_arm_pose = "default";
 
 //Strings aux
 std::string lastRecoSpeech;
@@ -142,6 +144,7 @@ int main(int argc, char **argv)
     FestinoNavigation::setNodeHandle(&nh);
     FestinoVision::setNodeHandle(&nh);
     FestinoKnowledge::setNodeHandle(&nh);
+    FestinoHardware::setNodeHandle(&nh);
     ros::Rate loop(10);
 
     names.push_back(hostName);
