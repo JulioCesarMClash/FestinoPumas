@@ -72,6 +72,7 @@ enum SMState {
 bool fail = false;
 bool success = false;
 
+bool legs_found = false;
 bool human_detector = false;
 geometry_msgs::Pose human_coordinates;
 geometry_msgs::PoseStamped tf_human_coordinates;
@@ -208,7 +209,7 @@ int main(int argc, char** argv){
 
                 // Dejar de extender el brazo
 			    left_arm_pose = "default";
-			    FestinoHardware::setArmPose(0.0,0.0,0.0,0.0,0.0,0.0);
+			    FestinoHardware::setArmPose(left_arm_pose);
 
 	            voice = "My name is Justina, I am ready for the help me carry test";
 	            FestinoHRI::say(voice, 5);
@@ -284,9 +285,15 @@ int main(int argc, char** argv){
 
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
+                        // Move head to the origin
+	                    FestinoHardware::setHeadOrientation(0.0, -0.3);
+
                         // Extender el brazo izquierdo
                         left_arm_pose = "pre_grasp";
 			    		FestinoHardware::setArmPose(left_arm_pose);
+
+			    		// Abrir gripper
+			    		FestinoHardware::setGripperPose(0.5);
 		    			
                         voice = "Please hang the bag on my left arm";
 		            	FestinoHRI::say(voice, 10);
@@ -310,9 +317,15 @@ int main(int argc, char** argv){
 
     				if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
+    					// Move head to the origin
+                    	FestinoHardware::setHeadOrientation(0.0, -0.3);
+
                         // Extender el brazo izquierdo
                         left_arm_pose = "pre_grasp";
 			    		FestinoHardware::setArmPose(left_arm_pose);
+
+			    		// Abrir gripper
+			    		FestinoHardware::setGripperPose(0.5);
 
 		    			voice = "Please hang the bag on my left arm";
                         FestinoHRI::say(voice, 10);
@@ -361,8 +374,9 @@ int main(int argc, char** argv){
 
 	    		if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 
-                    // Move head to the origin
-                    FestinoHardware::setHeadOrientation(0.0, -0.3);
+                    // Cerrar gripper
+			    	FestinoHardware::setGripperPose(-0.15);
+
 
 	    			//Save the point or coord of point
                     
@@ -373,16 +387,21 @@ int main(int argc, char** argv){
 
 	    		break;
 
-	    	case SM_FIND_PERSON:{
+	    	case SM_FIND_PERSON:
 				std::cout << "State machine: SM_FIND_PERSON" << std::endl;
 
                 FestinoHRI::enableLegFinder(true);
-                bool legs_found = FestinoHRI::frontalLegsFound();
+                FestinoHRI::enableHumanFollower(true);
+
+                legs_found = FestinoHRI::frontalLegsFound();
 	    		std::cout << "Legs found: " << legs_found << std::endl;    
 				
-    			if(legs_found == false){
+				std::cout << "ABC" << std::endl;
+
+    			if(!legs_found){
 
 	    			std::cout << "Not found legs" << std::endl;
+
 
 	    			voice = "I could not find you, please stand in front of me";
 					FestinoHRI::say(voice, 7);
@@ -390,14 +409,17 @@ int main(int argc, char** argv){
 	    			FestinoHRI::enableHumanFollower(false);
 
 	    		}
-    			else if(legs_found == true)
+    			else if(legs_found)
     			{
 
-    				human_detector_bool = HumanDetector();
+    				//human_detector_bool = HumanDetector();
 
-    				std::cout << human_detector_bool << std::endl;
+    				std::cout << "CBA" << std::endl;
 
-    				if(human_detector_bool){
+    				std::cout << "Human dectector bool: " << human_detector_bool << std::endl;
+
+
+    				if(1){
 
     					voice = "Say, Justina follow me, when you are ready";
 						FestinoHRI::say(voice, 4);
@@ -426,7 +448,7 @@ int main(int argc, char** argv){
 	    		}
 
 	    		break;
-	    	}
+	    	
 
 	    	case SM_FOLLOW_OPERATOR:
 	    	    std::cout << "State machine: SM_FOLLOW_OPERATOR" << std::endl;	
@@ -478,8 +500,12 @@ int main(int argc, char** argv){
 
 			        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 
-			        if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived")
+			        if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
+
                         std::cout << "We arrived" << std::endl;
+
+                        state = SM_WAIT_CONF_CAR;
+			        }
 
 			     }
 
@@ -530,7 +556,7 @@ int main(int argc, char** argv){
 
 			    // Dejar de extender el brazo
 			    left_arm_pose = "default";
-			    FestinoHardware::setArmPose(0.0,0.0,0.0,0.0,0.0,0.0);
+			    FestinoHardware::setArmPose(left_arm_pose);
 
 		        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 				
