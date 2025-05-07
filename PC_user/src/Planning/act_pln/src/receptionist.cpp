@@ -161,8 +161,7 @@ int main(int argc, char **argv)
     			std::cout << test << ".-> State SM_INIT: Init the test." << std::endl;
                 ros::Duration(0.5, 0).sleep();
 
-                // Move head to the left
-                FestinoHardware::setHeadOrientation(0.0, 0.0);
+                FestinoHardware::setHeadOrientation(0.0, 0.1);
 
                 FestinoHRI::say("I'm ready for receptionist test",3);
                 
@@ -176,6 +175,7 @@ int main(int argc, char **argv)
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
                 std::cout <<"Coordenates of entrance_door"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
                     std::cout << "Cannot move to entrace_door" << std::endl;
 
@@ -183,10 +183,9 @@ int main(int argc, char **argv)
 
                 if(FestinoNavigation::waitForDoor())
                 {
-                    // ¿preguntar por el nombre?
                     findPersonAttemps = 0;
                     FestinoHRI::say("Welcome, please get inside the house",6);
-                    FestinoNavigation::moveDist(-1.3, 300);
+                    FestinoNavigation::moveDist(-0.5, 300);
                     state = SM_WAIT_FOR_PERSON_ENTRANCE;
                 }
                 else
@@ -232,7 +231,7 @@ int main(int argc, char **argv)
                         
                         if(numGuests != 0)
                         {
-                            // Si ya conoce a la persona, la pasa a la zona de bebidas
+                            // Si ya conoce a la persona, la saluda y la pasa a la zona de bebidas
                             if(findPersonDetect[0] == names[0] || findPersonDetect[0] == names[1])
                                 state = SM_BEVERAGE_LOC;
                             else
@@ -523,7 +522,7 @@ int main(int argc, char **argv)
 
                 FestinoHRI::say("I'm going to find an empty seat for you, please wait", 5);
 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                 std::cout <<"Coordenates of sofa"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
@@ -557,7 +556,7 @@ int main(int argc, char **argv)
                         {
                             recogPersonAux.clear();
                             recogPersonAux = FestinoVision::enableRecogFacesName(false);
-                            guestLocation = "host_loc";
+                            guestLocation = "sofa";
                             findSeat = true;
                         }
                             
@@ -616,7 +615,7 @@ int main(int argc, char **argv)
                                     recogPersonAux.clear();
                                     recogPersonAux = FestinoVision::enableRecogFacesName(false);
                                     //FestinoHRI::say("I'm going to find a empty seat for you again", 5);
-                                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                                     std::cout <<"Coordenates of sofa"<<std::endl;
                                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                                     
@@ -677,7 +676,7 @@ int main(int argc, char **argv)
                 findPersonAttemps = 0;
                 findPersonRestart = 0;
 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                 std::cout <<"Coordenates of John"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -824,7 +823,7 @@ int main(int argc, char **argv)
                             ss.str("");
                             ss << names[0] << ", I did not find you, I will navigate to your chair";
                             FestinoHRI::say(ss.str(), 5);
-                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
@@ -835,7 +834,7 @@ int main(int argc, char **argv)
                             ss.str("");
                             ss << names[0] << ", I'm going to find you again";
                             FestinoHRI::say(ss.str(), 5);
-                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             
@@ -856,7 +855,7 @@ int main(int argc, char **argv)
                     ss.str("");
                     ss << names[0] << ", I did not find you, I will navigate to your chair";
                     FestinoHRI::say(ss.str(), 5);
-                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("host_loc");
+                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
                     std::cout <<"Coordenates of John"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -877,7 +876,7 @@ int main(int argc, char **argv)
                 topic = NAME;
 
                 FestinoHRI::say(ss.str(), 5);
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv(guestLocation);
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("guestLocation");
                 std::cout <<"Coordenates of guestLocation"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 

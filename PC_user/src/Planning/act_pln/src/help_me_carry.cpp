@@ -228,7 +228,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;
 
                 voice = "Say, Justina yes, once you are pointing at the bag";
-				FestinoHRI::say(voice, 5);
+				FestinoHRI::say(voice, 6);
 
 	    	    recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
@@ -508,7 +508,8 @@ int main(int argc, char** argv){
 
                         std::cout << "We arrived" << std::endl;
 
-                        state = SM_WAIT_CONF_CAR;
+                        stop = true;
+
 			        }
 
 			     }

@@ -4,9 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /TF1/Frames1
       Splitter Ratio: 0.5
-    Tree Height: 730
+    Tree Height: 612
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -70,7 +71,76 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        generic_platform:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        head_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        head_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         laser_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_grip_center:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        left_arm_grip_left:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_grip_right:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link6:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        left_arm_link7:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        neck_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -79,11 +149,25 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        upper_platform_link:
+        shoulders_left_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+          Value: true
+        spine_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        torso_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        tower_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         wheel0_link:
           Alpha: 1
           Show Axes: false
@@ -162,17 +246,59 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        camera_depth_frame:
+          Value: true
+        camera_depth_optical_frame:
+          Value: true
         camera_link:
+          Value: true
+        camera_rgb_frame:
+          Value: true
+        camera_rgb_optical_frame:
+          Value: true
+        generic_platform:
+          Value: true
+        head_link1:
+          Value: true
+        head_link2:
           Value: true
         laser_link:
           Value: false
+        left_arm_grip_center:
+          Value: true
+        left_arm_grip_left:
+          Value: true
+        left_arm_grip_right:
+          Value: true
+        left_arm_link1:
+          Value: true
+        left_arm_link2:
+          Value: true
+        left_arm_link3:
+          Value: true
+        left_arm_link4:
+          Value: true
+        left_arm_link5:
+          Value: true
+        left_arm_link6:
+          Value: true
+        left_arm_link7:
+          Value: true
         map:
+          Value: true
+        neck_link:
           Value: true
         odom:
           Value: false
         platform_link:
           Value: false
-        upper_platform_link:
+        shoulders_left_link:
+          Value: true
+        spine_link:
+          Value: true
+        torso_link:
+          Value: true
+        tower_link:
           Value: true
         wheel0_link:
           Value: true
@@ -194,8 +320,34 @@ Visualization Manager:
                 {}
               platform_link:
                 {}
-              upper_platform_link:
-                camera_link:
+              torso_link:
+                spine_link:
+                  head_link1:
+                    head_link2:
+                      neck_link:
+                        camera_link:
+                          camera_depth_frame:
+                            camera_depth_optical_frame:
+                              {}
+                          camera_rgb_frame:
+                            camera_rgb_optical_frame:
+                              {}
+                  shoulders_left_link:
+                    left_arm_link1:
+                      left_arm_link2:
+                        left_arm_link3:
+                          left_arm_link4:
+                            left_arm_link5:
+                              left_arm_link6:
+                                left_arm_link7:
+                                  left_arm_grip_center:
+                                    {}
+                                  left_arm_grip_left:
+                                    {}
+                                  left_arm_grip_right:
+                                    {}
+              tower_link:
+                generic_platform:
                   {}
               wheel0_link:
                 {}
@@ -285,6 +437,18 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /camera/rgb/image_color
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -313,7 +477,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.323519229888916
+      Distance: 4.434384346008301
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -321,25 +485,27 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.8549337983131409
-        Y: -0.022744501009583473
-        Z: 0.8211163282394409
+        X: 5.926273345947266
+        Y: 0.44954341650009155
+        Z: 1.670329213142395
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4247971177101135
+      Pitch: 1.4997963905334473
       Target Frame: <Fixed Frame>
-      Yaw: 4.563183784484863
+      Yaw: 4.880007266998291
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: true
-  Height: 1043
-  Hide Left Dock: true
+    collapsed: false
+  Height: 1136
+  Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000004000000000000018a0000036cfc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000000fb0000013d00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d0000036c000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f0000036cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d0000036c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000078000000047fc0100000002fb0000000800540069006d0065010000000000000780000003bc00fffffffb0000000800540069006d00650100000000000004500000000000000000000007800000036c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000018a000003c9fc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000000fb0000013d00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000002f6000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000000a0049006d0061006700650100000339000000cd0000001600ffffff000000010000010f0000036cfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d0000036c000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073800000047fc0100000002fb0000000800540069006d0065010000000000000738000003bc00fffffffb0000000800540069006d00650100000000000004500000000000000000000005a8000003c900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -348,6 +514,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1920
-  X: 0
-  Y: 0
+  Width: 1848
+  X: 72
+  Y: 27
