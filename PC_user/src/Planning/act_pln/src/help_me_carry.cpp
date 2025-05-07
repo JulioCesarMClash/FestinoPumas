@@ -391,7 +391,7 @@ int main(int argc, char** argv){
 				std::cout << "State machine: SM_FIND_PERSON" << std::endl;
 
                 FestinoHRI::enableLegFinder(true);
-                FestinoHRI::enableHumanFollower(true);
+                //FestinoHRI::enableHumanFollower(true);
 
                 legs_found = FestinoHRI::frontalLegsFound();
 	    		std::cout << "Legs found: " << legs_found << std::endl;    
@@ -463,11 +463,15 @@ int main(int argc, char** argv){
 
 			    FestinoHRI::enableHumanFollower(true);
 
-			    //Storage the ultimate pose with Map
+				std::cout << "XYZ" << std::endl;
+			    
+				//Storage the ultimate pose with Map
 			    FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
 			    poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
 
-			    // Bucle para capturar las poses
+				std::cout << "ZYX" << std::endl;
+			    
+				// Bucle para capturar las poses
 			    while (!stop) {
 			      
 			        FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
