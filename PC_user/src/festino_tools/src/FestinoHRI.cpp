@@ -327,12 +327,12 @@ bool FestinoHRI::waitForSpecificSentence(std::string option1, std::string option
     return false;
 }*/
 
-std::string FestinoHRI::lastRecogSpeech()
+std::string FestinoHRI::lastRecogSpeech(std::string grammar)
 {
     std::cout<< "FestinoHRI.-> Last Recog Speech" << std::endl;
     vosk_speech_recognition::speech_recog srv;
     srv.request.is_speech_recog_enabled = true;
-    
+    srv.request.grammar = grammar;
     if(cltVoskRecog.call(srv))
     {
         std::cout << "FestinoHRI.-> Last Recog: " << srv.response.text_recog << std:: endl;

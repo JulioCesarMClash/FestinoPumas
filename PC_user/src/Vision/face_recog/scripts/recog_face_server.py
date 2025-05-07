@@ -9,11 +9,13 @@ from deepface import DeepFace
 from datetime import datetime
 import tensorflow as tf
 from pathlib import Path
-
+import logging
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from cv_bridge import CvBridge, CvBridgeError
 from face_recog.srv import *
+
+logging.getLogger('tensorflow').setLevel(logging.WARNING)
 
 class DeepFaceRecognitionNode:
     def __init__(self):

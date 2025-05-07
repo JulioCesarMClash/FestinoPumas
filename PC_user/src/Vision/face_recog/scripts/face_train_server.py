@@ -8,10 +8,12 @@ from datetime import datetime
 import tensorflow as tf
 import cv2
 import json
-
+import logging
 from face_recog.srv import *
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+
+logging.getLogger('tensorflow').setLevel(logging.WARNING)
 
 class DeepFaceTrainingNode:
     def __init__(self):

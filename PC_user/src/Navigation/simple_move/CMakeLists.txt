@@ -14,7 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   actionlib_msgs
-  geometry_msgs  
+  geometry_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -61,6 +62,8 @@ add_service_files(
   FILES
   MoveBase.srv
   LaserScanAling.srv
+  MoveTilt.srv
+  InitTilt.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -109,7 +112,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES simple_move_pkg
-  CATKIN_DEPENDS nav_msgs roscpp rospy std_msgs tf geometry_msgs
+  CATKIN_DEPENDS nav_msgs roscpp rospy std_msgs tf geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -141,6 +144,13 @@ add_executable(simple_move_node src/simple_move_node.cpp)
 add_executable(shortmv_rosnav src/shortmv_rosnav.cpp)
 add_executable(move_base src/move_base.cpp)
 add_executable(aling_with_line src/aling_with_line.cpp)
+
+
+catkin_install_python(PROGRAMS
+  scripts/move_kinect.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -227,3 +237,6 @@ target_link_libraries(aling_with_line
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+include_directories(${catkin_INCLUDE_DIRS} /usr/include/libusb-1.0)
