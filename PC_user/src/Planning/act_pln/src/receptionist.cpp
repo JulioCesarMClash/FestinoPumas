@@ -102,6 +102,7 @@ std::vector<std::string> names;
 std::vector<std::string> drinks;
 std::vector<std::string> interests;
 std::vector<std::string> tokens;
+std::string host_loc = "sofa";
 std::string hostName = "jade";
 std::string hostDrink = "coke";
 std::string hostInterest = "sports";
@@ -469,8 +470,8 @@ int main(int argc, char **argv)
                 
                 if(attemptsMemorizing < MAX_ATTEMPTS_MEMORIZING)
                 {
-                    std::cout << "Memorizing " << names[names.size() - 1] << "..." << std::endl;   
-                    if(FestinoVision::TrainingPerson(names[names.size() - 1]))
+                    std::cout << "Memorizing " << names.back() << "..." << std::endl;   
+                    if(FestinoVision::TrainingPerson(names.back()))
                     {
                         // Beverage state
                         state = SM_BEVERAGE_LOC;
@@ -702,7 +703,7 @@ int main(int argc, char **argv)
                 findPersonAttemps = 0;
                 findPersonRestart = 0;
 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv(host_loc);
                 std::cout <<"Coordenates of Jade"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                 
@@ -730,6 +731,7 @@ int main(int argc, char **argv)
                         ss.str("");
                         ss << names[0] << ", I found you";
                         FestinoHRI::say(ss.str(), 3);
+                        host_loc = "sofa";
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -742,6 +744,7 @@ int main(int argc, char **argv)
                             ss.str("");
                             ss << names[0] << ", I found you";
                             FestinoHRI::say(ss.str(), 3);
+                            host_loc = "sofa";
                             findPersonCount = 0;
                             findPersonAttemps = 0;
                             findPersonRestart = 0;
@@ -754,10 +757,10 @@ int main(int argc, char **argv)
                             ss << names[0] << ", I'm going to find you in another site";
                             FestinoHRI::say(ss.str(), 3);
                             goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
-                            std::cout <<"Coordenates of John"<<std::endl;
+                            std::cout <<"Coordenates of Jade"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                                std::cout << "Cannot move to john_location" << std::endl;
+                                std::cout << "Cannot move to jade_location" << std::endl;
                             state = SM_FIND_TO_HOST_CHAIR_B;
                         }
                     }
@@ -767,6 +770,7 @@ int main(int argc, char **argv)
                     ss.str("");
                     ss << names[0] << ", I'm going to find you in another site";
                     FestinoHRI::say(ss.str(), 3);
+
                     goal_vec = FestinoKnowledge::CoordenatesLocSrv("chair_b1");
                     std::cout <<"Coordenates of Jade"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -796,6 +800,7 @@ int main(int argc, char **argv)
                         ss.str("");
                         ss << names[0] << ", I found you";
                         FestinoHRI::say(ss.str(), 3);
+                        host_loc = "chair_b1";
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -847,6 +852,7 @@ int main(int argc, char **argv)
                         ss.str("");
                         ss << names[0] << ", I found you";
                         FestinoHRI::say(ss.str(), 3);
+                        host_loc = "chair_a1";
                         findPersonCount = 0;
                         findPersonAttemps = 0;
                         findPersonRestart = 0;
@@ -854,8 +860,11 @@ int main(int argc, char **argv)
                     }
                     else
                     {
+                        std::cout << "SM_FIND_TO_HOST attempts: " << findPersonAttemps << std::endl;
+
                         if(findPersonAttemps > MAX_FIND_PERSON_ATTEMPTS)
                         {
+                            host_loc = "sofa";
                             findPersonCount = 0;
                             findPersonAttemps = 0;
                             findPersonRestart = 0;
@@ -864,7 +873,7 @@ int main(int argc, char **argv)
                             ss << names[0] << ", I did not find you, I will navigate to your chair";
                             FestinoHRI::say(ss.str(), 5);
                             FestinoHardware::setHeadOrientation(0.0, -0.2);
-                            goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
+                            goal_vec = FestinoKnowledge::CoordenatesLocSrv(host_loc);
                             std::cout <<"Coordenates of John"<<std::endl;
                             std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                             if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
@@ -889,6 +898,7 @@ int main(int argc, char **argv)
                 }
                 else
                 {
+                    host_loc = "sofa";
                     findPersonCount = 0;
                     findPersonAttemps = 0;
                     findPersonRestart = 0;
@@ -897,9 +907,8 @@ int main(int argc, char **argv)
                     ss.str("");
                     ss << names[0] << ", I did not find you, I will navigate to your chair";
                     FestinoHRI::say(ss.str(), 5);
-                    FestinoHardware::setHeadOrientation(0.0, -0.2);
 
-                    goal_vec = FestinoKnowledge::CoordenatesLocSrv("sofa");
+                    goal_vec = FestinoKnowledge::CoordenatesLocSrv(host_loc);
                     std::cout <<"Coordenates of Jade"<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -931,6 +940,14 @@ int main(int argc, char **argv)
                 ss << names[names.size() - 1] << ", the host is " << names[0] << ", his favorite drink is " << drinks[0] << " and he likes " << interests[0] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
                 sleep(2);ss.str("");
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv(host_loc);
+                std::cout <<"Coordenates of host location"<<std::endl;
+                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to host location" << std::endl;
+
                 ss << names[0] << " the new guest is " << names[names.size() - 1] << ", his favorite drink is " << drinks[drinks.size() - 1] << " and he likes " << interests[interests.size() - 1] << std::endl;
                 FestinoHRI::say(ss.str(), 8);
 
@@ -985,7 +1002,9 @@ int main(int argc, char **argv)
             case SM_FINISH_TEST:
                 std::cout << test << ".-> State SM_FINISH: Finish the test." << std::endl;
                 
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("end_location");
+                FestinoHardware::setHeadOrientation(0.0, -0.2);
+
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("beverage_area");
                 std::cout <<"Coordenates of finish test"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
 
