@@ -23,6 +23,7 @@ enum SMState
         SM_FIND_OBJECTS,
         SM_PRE_GRASP,
         SM_TRY_TO_GRASPING_OBJECT,
+        SM_DESCRIBE_OBJECTS,
         SM_NAVIGATE_TO_SHELF,
         SM_FINISH_TEST
 };
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
                 case SM_NAVIGATE_TO_STORING_POINT:
                         std::cout << "SM_NAVIGATE_TO_STORING_POINT --> I'm navigating to the storing point" << std::endl;
                         
-                        goal_vec = FestinoKnowledge::CoordenatesLocSrv("storing_table");
+                        goal_vec = FestinoKnowledge::CoordenatesLocSrv("table");
                         std::cout <<"Coordenates of storing table:"<<std::endl;
                         std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
                         if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
@@ -111,18 +112,27 @@ int main(int argc, char **argv)
                         std::cout << "SM_PRE_GRASP --> I'm moving my left arm to a pre-grasp position" << std::endl;
                         FestinoHardware::setArmPose("pre_grasp");
                         sleep(2);
-                        state = SM_FINISH_TEST;
+                        state = SM_FIND_OBJECTS;
                         break;
 
                 case SM_FIND_OBJECTS:
-   
+                        std::cout << "SM_FIND_OBJECTS --> I'm find objects" << std::endl;
+                        FestinoHRI::say("Oh no! I can't use my arm, i'm sorry",3);	
+                        FestinoHardware::setArmPose("default");
+                        sleep(2);
+
+                        //Aqui se buscan los objetooooos
                         break;
 
-                case SM_TRY_TO_GRASPING_OBJECT:
+                case SM_DESCRIBE_OBJECTS:
+                        std::cout << "SM_DESCRIBE_OBJECTS --> I'm going to describe objects" << std::endl;
+                        sleep(2);
 
+                        //Aqui se describen los objetooooos
                         break;
                 
                 case SM_NAVIGATE_TO_SHELF:
+
                         break;
                 
                 case SM_FINISH_TEST:
