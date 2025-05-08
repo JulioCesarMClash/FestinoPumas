@@ -13,6 +13,8 @@
 #include <festino_tools/FestinoKnowledge.h>
 #include <festino_tools/FestinoHardware.h>
 
+
+#include <yolo_detect/StringArray.h>
 // Estados
 enum SMState
 {
@@ -51,10 +53,15 @@ float distanceArm = 0.6;
 
 std::stringstream ss;
 std::stringstream ss2;
-
-ros::NodeHandle nh;
+std::vector <std::string> objects;
+//ros::NodeHandle nh;
 
 SMState state = SM_INIT;
+
+void callback_detect(const yolo_detect::StringArray::ConstPtr& msg)
+{
+        objects  = msg -> data;
+}
 
 // Variables de inicio
 std::vector<float> goal_vec(3);
@@ -72,7 +79,13 @@ int main(int argc, char **argv)
     FestinoVision::setNodeHandle(&nh);
     FestinoKnowledge::setNodeHandle(&nh);
     FestinoHardware::setNodeHandle(&nh);
-    FestinoHRI::say(" ",2);
+
+
+        //ESTO NO DEBERIA IR ASI XDDD
+    ros::Subscriber detect;
+    detect = nh.subscribe("/detected_objects", 1, &callback_detect);
+
+    FestinoHRI::say(" ",1);
 
     while(ros::ok() && !success)
     {
@@ -86,7 +99,7 @@ int main(int argc, char **argv)
 
                 case SM_WAIT_FOR_DOOR:
                         std::cout << "SM_WAIT_FOR_DOOR --> I'm waitig for the door is open" << std::endl;
-                        state = FestinoNavigation::waitForDoor() ? SM_SAY_OPEN_DOOR : SM_NAVIGATE_TO_STORING_POINT;
+                        state = FestinoNavigation::waitForDoor() ?  SM_NAVIGATE_TO_STORING_POINT : SM_SAY_OPEN_DOOR;
                         break;
 
                 case SM_SAY_OPEN_DOOR:
@@ -117,27 +130,44 @@ int main(int argc, char **argv)
 
                 case SM_FIND_OBJECTS:
                         std::cout << "SM_FIND_OBJECTS --> I'm find objects" << std::endl;
-                        FestinoHRI::say("Oh no! I can't use my arm, i'm sorry",3);	
+                        FestinoHRI::say("Oh no! I can't use my arm, i'm sorry, i'm ",3);	
                         FestinoHardware::setArmPose("default");
                         sleep(2);
+                        
 
-                        //Aqui se buscan los objetooooos
                         break;
 
                 case SM_DESCRIBE_OBJECTS:
                         std::cout << "SM_DESCRIBE_OBJECTS --> I'm going to describe objects" << std::endl;
                         sleep(2);
 
-                        //Aqui se describen los objetooooos
+                        /*for x_in objects.size():
+                        detecté x items
+                        destecte x1 y es de la categoria ta*/
+
+                        state = SM_NAVIGATE_TO_SHELF;
                         break;
                 
                 case SM_NAVIGATE_TO_SHELF:
+                        goal_vec = FestinoKnowledge::CoordenatesLocSrv("shelve");
+                        std::cout <<"Coordenates of shelve:"<<std::endl;
+                        std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                        if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                            std::cout << "Cannot move to shelve" << std::endl; 
 
+                        FestinoHRI::say("I have arrived to shelve",3);	
+
+                        /*for (ver shelves empezando arriba y bajando 3 veces )
+                                objects[1] = onjers[2] (categoria) -> categoria = categoriaShelf
+                                decir que el n floor es cartegpria categoriaShelf
+
+                                bajar cabeza*/
+
+                        state = SM_FINISH_TEST;
                         break;
                 
                 case SM_FINISH_TEST:
                         std::cout << "SM_FINISH_TEST --> I finish the test: wuuuuu :)" << std::endl;
-                        
                         break;
         }
     }
