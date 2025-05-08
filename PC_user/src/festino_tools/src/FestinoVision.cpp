@@ -102,7 +102,7 @@ bool FestinoVision::TrainingPerson(std::string person)
     std::cout << "FestinoVision.->Train person: " << person << std::endl;
     vision_msgs::FaceTrainSrv srv;
     std_msgs::String name_msg;
-    srv.request.name.data = person;
+    name_msg.data = person;
     srv.request.name = name_msg;
 
     if (cltTrainPersons.call(srv))
