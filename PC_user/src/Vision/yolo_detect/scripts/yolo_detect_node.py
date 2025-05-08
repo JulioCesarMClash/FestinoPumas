@@ -3,6 +3,7 @@
 import rospy
 from sensor_msgs.msg import Image
 from yolo_detect.msg import StringArray
+
 from cv_bridge import CvBridge
 import cv2
 from ultralytics import YOLO
@@ -34,7 +35,7 @@ CATEGORY_MAP = {
 }
 
 def load_model():
-    model_path = rospy.get_param('~model_path', 'best.pt')
+    model_path = rospy.get_param('~model_path', '/models/best.pt')
     model = YOLO(model_path)
     rospy.loginfo(f"Loaded YOLOv8 model from {model_path}")
     return model

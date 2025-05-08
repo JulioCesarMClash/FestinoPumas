@@ -118,7 +118,8 @@ int main(int argc, char **argv)
                         if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
                             std::cout << "Cannot move to storing table" << std::endl; 
                         
-                        FestinoHRI::say("I have arrived to storing table",3);	
+                        FestinoHRI::say("I have arrived to storing table",3);
+                        FestinoNavigation::moveDist(0.15, 2000);	
                         state = SM_PRE_GRASP;
                         break;
 
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
                             std::cout << "Cannot move to shelve" << std::endl; 
 
                         FestinoHRI::say("I have arrived to shelve",3);	
-                        FestinoNavigation::moveDist(0.1, 2000);
+                        FestinoNavigation::moveDist(-0.1, 2000);
                         /*for (ver shelves empezando arriba y bajando 3 veces )
                                 objects[1] = onjers[2] (categoria) -> categoria = categoriaShelf
                                 decir que el n floor es cartegpria categoriaShelf

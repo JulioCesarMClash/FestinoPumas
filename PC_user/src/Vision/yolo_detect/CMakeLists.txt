@@ -29,6 +29,6 @@ include_directories(
 )
 
 catkin_install_python(PROGRAMS
-  scripts/yolo_detect.py
+  scripts/yolo_detect_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
