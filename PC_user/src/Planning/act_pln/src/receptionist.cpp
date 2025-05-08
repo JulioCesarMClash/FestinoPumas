@@ -102,7 +102,7 @@ std::vector<std::string> names;
 std::vector<std::string> drinks;
 std::vector<std::string> interests;
 std::vector<std::string> tokens;
-std::string hostName = "john";
+std::string hostName = "jade";
 std::string hostDrink = "coke";
 std::string hostInterest = "sports";
 std::string commands_grammar = "receptionist_commands.json";
@@ -275,22 +275,22 @@ int main(int argc, char **argv)
                 switch(topic)
                 {
                     case NAME:
-                        FestinoHRI::say("Nice to meet you, my name is Justina",6);
-                        FestinoHRI::say("What is your name?",6);
+                        FestinoHRI::say("Nice to meet you, my name is Justina",5);
+                        FestinoHRI::say("What is your name?",3);
                         sleep(2);
                         break;
 
                     case DRINK:
                         ss.str("");
                         ss << names[names.size() - 1] << ", what is your favorite drink?";
-                        FestinoHRI::say(ss.str(), 5);
+                        FestinoHRI::say(ss.str(), 4);
                         sleep(2);
                         break;
 
                     case INTEREST:
                         ss.str("");
                         ss << names[names.size() - 1] << ", what is your favorite topic?";
-                        FestinoHRI::say(ss.str(), 5);
+                        FestinoHRI::say(ss.str(), 4);
                         sleep(2);
                         break;
                 }
@@ -312,7 +312,7 @@ int main(int argc, char **argv)
                         names.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << names[names.size()-1];
-                        FestinoHRI::say(ss.str(), 4);
+                        FestinoHRI::say(ss.str(), 3);
                         state = SM_PRESENTATION_CONFIRM;
                         break;
 
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
                         drinks.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << drinks[drinks.size()-1];
-                        FestinoHRI::say(ss.str(), 4);
+                        FestinoHRI::say(ss.str(), 3);
                         state = SM_PRESENTATION_CONFIRM;
                         break;
 
@@ -332,7 +332,7 @@ int main(int argc, char **argv)
                         interests.push_back(lastRecoSpeech);
                         ss.str("");
                         ss << "Did you say?" << interests[interests.size()-1];
-                        FestinoHRI::say(ss.str(), 4);
+                        FestinoHRI::say(ss.str(), 3);
                         state = SM_PRESENTATION_CONFIRM;
                         break;
                 }
@@ -351,7 +351,7 @@ int main(int argc, char **argv)
                         case NAME:
                             ss2.str("");
                             ss2 << "Ok, your name is " << names[names.size() - 1];
-                            FestinoHRI::say(ss2.str(), 6);
+                            FestinoHRI::say(ss2.str(), 4);
                             topic = DRINK;
                             state = SM_INTRO_GUEST;
                             break;
@@ -359,7 +359,7 @@ int main(int argc, char **argv)
                         case DRINK:
                             ss2.str("");
                             ss2 << "Ok, your favorite drink is " << drinks[drinks.size() - 1];
-                            FestinoHRI::say(ss2.str(), 6);
+                            FestinoHRI::say(ss2.str(), 4);
                             topic = INTEREST;
                             state = SM_INTRO_GUEST;
                             break;
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
                         case INTEREST:
                             ss2.str("");
                             ss2 << "Ok, your favorite topic is " << interests[interests.size() - 1];
-                            FestinoHRI::say(ss2.str(), 6);
+                            FestinoHRI::say(ss2.str(), 4);
                             attemptsMemorizing = 0;
                             state = SM_MEMORIZING_OPERATOR;
                             break;
@@ -493,12 +493,15 @@ int main(int argc, char **argv)
                 if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
                     std::cout << "Cannot move to beverage_area" << std::endl;
 
+                // Señalar hacia la mesa de bebidas Cambiar pose
+                left_arm_pose = "hold"; 
+                FestinoHardware::setArmPose(left_arm_pose);
+
                 ss.str("");
                 ss << names[names.size() - 1] << " feel free to take your " << drinks[drinks.size() - 1];
                 FestinoHRI::say(ss.str(),4);
 
-                // Señalar hacia la mesa de bebidas Cambiar pose
-                left_arm_pose = "pre_grasp"; 
+                left_arm_pose = "default"; 
                 FestinoHardware::setArmPose(left_arm_pose);
 
                 sleep(5);
