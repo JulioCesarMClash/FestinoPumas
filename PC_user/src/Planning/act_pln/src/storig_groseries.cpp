@@ -94,12 +94,13 @@ int main(int argc, char **argv)
                 case SM_INIT:
                         std::cout << "SM_INIT --> Start Storing groseries :)" << std::endl;
                         FestinoHRI::say("I'm ready for storing groseries test", 3);
+                        FestinoHardware::setHeadOrientation(0.0, 0.0);
                         state = SM_WAIT_FOR_DOOR;
                         break;
 
                 case SM_WAIT_FOR_DOOR:
                         std::cout << "SM_WAIT_FOR_DOOR --> I'm waitig for the door is open" << std::endl;
-                        state = FestinoNavigation::waitForDoor() ?  SM_NAVIGATE_TO_STORING_POINT : SM_SAY_OPEN_DOOR;
+                        state = FestinoNavigation::waitForDoor() ?  SM_NAVIGATE_TO_STORING_POINT : SM_NAVIGATE_TO_STORING_POINT;
                         break;
 
                 case SM_SAY_OPEN_DOOR:
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
 
                 case SM_NAVIGATE_TO_STORING_POINT:
                         std::cout << "SM_NAVIGATE_TO_STORING_POINT --> I'm navigating to the storing point" << std::endl;
-                        
+                        FestinoHRI::say("I will navigate to the kitchen,", 3);
                         goal_vec = FestinoKnowledge::CoordenatesLocSrv("table");
                         std::cout <<"Coordenates of storing table:"<<std::endl;
                         std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -125,6 +126,7 @@ int main(int argc, char **argv)
                         std::cout << "SM_PRE_GRASP --> I'm moving my left arm to a pre-grasp position" << std::endl;
                         FestinoHardware::setArmPose("pre_grasp");
                         sleep(2);
+                        FestinoHardware::setHeadOrientation(0.0, -0.6);
                         state = SM_FIND_OBJECTS;
                         break;
 
@@ -134,14 +136,14 @@ int main(int argc, char **argv)
                         FestinoHardware::setArmPose("default");
                         sleep(2);
                         
-
+                        state=SM_DESCRIBE_OBJECTS;
                         break;
 
                 case SM_DESCRIBE_OBJECTS:
                         std::cout << "SM_DESCRIBE_OBJECTS --> I'm going to describe objects" << std::endl;
                         sleep(2);
-
-                        /*for x_in objects.size():
+                        FestinoHRI::say("I wish to describe the objects", 3);
+                        /*for x_in objects.size>():
                         detecté x items
                         destecte x1 y es de la categoria ta*/
 
@@ -149,6 +151,7 @@ int main(int argc, char **argv)
                         break;
                 
                 case SM_NAVIGATE_TO_SHELF:
+                        FestinoHRI::say("I am going to the shelf", 3);
                         goal_vec = FestinoKnowledge::CoordenatesLocSrv("shelve");
                         std::cout <<"Coordenates of shelve:"<<std::endl;
                         std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
@@ -162,12 +165,15 @@ int main(int argc, char **argv)
                                 decir que el n floor es cartegpria categoriaShelf
 
                                 bajar cabeza*/
-
                         state = SM_FINISH_TEST;
                         break;
                 
                 case SM_FINISH_TEST:
                         std::cout << "SM_FINISH_TEST --> I finish the test: wuuuuu :)" << std::endl;
+                        success = true;
+                        FestinoHRI::say("I have finished the test... wuuu",3);  
+
+
                         break;
         }
     }

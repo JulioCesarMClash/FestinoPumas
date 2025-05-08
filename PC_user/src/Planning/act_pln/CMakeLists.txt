@@ -231,3 +231,6 @@ add_executable(receptionist src/receptionist.cpp)
 add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(receptionist ${catkin_LIBRARIES})
 
+add_executable(storing_groseries src/storig_groseries.cpp)
+add_dependencies(storing_groseries ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(storing_groseries ${catkin_LIBRARIES})
