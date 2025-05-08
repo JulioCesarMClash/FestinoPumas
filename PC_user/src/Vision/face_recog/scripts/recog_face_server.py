@@ -151,7 +151,7 @@ class DeepFaceRecognitionNode:
             face_names = []
             for face_obj in face_objs:
                 if not face_obj['facial_area']:
-                    face_names.append("no_face")
+                    #face_names.append("no_face")
                     continue
                 
                 # Obtener embedding de la cara detectada
@@ -178,8 +178,8 @@ class DeepFaceRecognitionNode:
                     name = self.known_face_names[best_match]
                     face_names.append(f"{name}")
                     rospy.loginfo(f"{name} ({best_confidence:.2f})");
-                else:
-                    face_names.append("unknown")
+                #else:
+                #    face_names.append("unknown")
             
             # Publicar resultados
             self.result_pub.publish(String(",".join(face_names)))

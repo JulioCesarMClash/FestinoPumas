@@ -211,16 +211,23 @@ int main(int argc, char** argv){
 			    left_arm_pose = "default";
 			    FestinoHardware::setArmPose(left_arm_pose);
 
+                // Cerrar gripper
+			    FestinoHardware::setGripperPose(-0.15);
+                
+                //Storage the ultimate pose with Map
+			    FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
+			    poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
+
 	            voice = "My name is Justina, I am ready for the help me carry test";
-	            FestinoHRI::say(voice, 5);
+	            FestinoHRI::say(voice, 4);
 
 //				voice = "Please tell me your name. I will use it while helping you";
 //				FestinoHRI::say(voice, 5);
 
-	            voice = "Please point at the bag you would like me to carry";
-	    		FestinoHRI::say(voice, 5);
+//	            voice = "Please point at the bag you would like me to carry";
+//	    		FestinoHRI::say(voice, 4);
 
-	    		state = SM_FIND_BAG;
+	    		state = SM_FIND_PERSON;
 
 	    		break;
 
@@ -279,7 +286,7 @@ int main(int argc, char** argv){
                     FestinoHardware::setHeadOrientation(-0.5, -0.5);
 
     				voice = "Are you pointing at the bag on your left? Answer with, Justina yes, or, Justina no";
-    				FestinoHRI::say(voice, 8);
+    				FestinoHRI::say(voice, 7);
     
                     recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
@@ -296,7 +303,7 @@ int main(int argc, char** argv){
 			    		FestinoHardware::setGripperPose(0.5);
 		    			
                         voice = "Please hang the bag on my left arm";
-		            	FestinoHRI::say(voice, 10);
+		            	FestinoHRI::say(voice, 8);
 		            	
                         FestinoHRI::enableLegFinder(true);
 		    			
@@ -311,7 +318,7 @@ int main(int argc, char** argv){
                     FestinoHardware::setHeadOrientation(0.5, -0.5);
 
     				voice = "Are you pointing at the bag on your right? Answer with, Justina yes, or, Justina no";
-    				FestinoHRI::say(voice, 8);
+    				FestinoHRI::say(voice, 7);
 
                     recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
@@ -328,7 +335,7 @@ int main(int argc, char** argv){
 			    		FestinoHardware::setGripperPose(0.5);
 
 		    			voice = "Please hang the bag on my left arm";
-                        FestinoHRI::say(voice, 10);
+                        FestinoHRI::say(voice, 8);
 
 		            	FestinoHRI::enableLegFinder(true);
 		    			
@@ -368,7 +375,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_WAIT_FOR_BAG" << std::endl;
 	    		
 	    		voice = "Tell me, Justina yes, once the bag was securely placed in my arm";
-				FestinoHRI::say(voice, 8);
+				FestinoHRI::say(voice, 6);
 
                 recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
@@ -381,7 +388,7 @@ int main(int argc, char** argv){
 	    			//Save the point or coord of point
                     
 
-					state = SM_FIND_PERSON;
+					state = SM_BACK_TO_ARENA;
 
 	    		}
 
@@ -422,14 +429,14 @@ int main(int argc, char** argv){
     				if(1){
 
     					voice = "Say, Justina follow me, when you are ready";
-						FestinoHRI::say(voice, 4);
+						FestinoHRI::say(voice, 5);
 
                         recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 
 		    			if(recogSpeech == "justina follow me" || recogSpeech == "robot follow me" || recogSpeech == "follow me"){
 
 		    				voice = "I'm going to follow you, please say, Justina we arrived, once we reach the final destination";
-							FestinoHRI::say(voice, 5);
+							FestinoHRI::say(voice, 7);
 		    				
                             state = SM_FOLLOW_OPERATOR;
 
@@ -456,26 +463,26 @@ int main(int argc, char** argv){
 			    if(confirm_car_again){
 
 			        voice = "Please confirm our arrival. Say, Justina yes, if we are in the final destination";
-			        FestinoHRI::say(voice, 5);
+			        FestinoHRI::say(voice, 7);
+                    stop = false;
 			        confirm_car_again = false;
 			    
                 }
 
+                FestinoHRI::enableLegFinder(true);
 			    FestinoHRI::enableHumanFollower(true);
 
 				std::cout << "XYZ" << std::endl;
 			    
-				//Storage the ultimate pose with Map
-			    FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
-			    poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
-
+				
 				std::cout << "ZYX" << std::endl;
 			    
 				// Bucle para capturar las poses
 			    while (!stop) {
 			      
-			        FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
-					poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
+			        std::cout << "In loop" << std::endl;
+			        //FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
+					//poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);
 
 			        // Guardar la pose cada 10 poses
 			        //if (pose_counter % 3 == 0) {
@@ -521,8 +528,8 @@ int main(int argc, char** argv){
 	    		break;
 
 	    	case SM_WAIT_CONF_CAR:
-				voice = "Is this your car? Say, Justina yes, or, Justina, no";
-				FestinoHRI::say(voice, 5);
+				voice = "Is this your car? Say, Justina yes, or, Justina no";
+				FestinoHRI::say(voice, 8);
 
 		        recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 
@@ -534,14 +541,14 @@ int main(int argc, char** argv){
 					FestinoHRI::enableHumanFollower(false);
 				    FestinoVision::enablePoseEstimation(false);
                     
-                    state = SM_LEAVE_BAG;
+                    state = SM_FIND_BAG;
 
 				}
 
 				else{
 
 					confirm_car_again = true;
-					state = SM_LEAVE_BAG;
+					state = SM_FIND_PERSON;
 
 				}
 
@@ -550,32 +557,36 @@ int main(int argc, char** argv){
 	    	case SM_LEAVE_BAG:
 	    		std::cout << "State machine: SM_LEAVE_BAG" << std::endl;	
 	    		
-                voice = "Please take the bag from my left arm";
-	    		FestinoHRI::say(voice, 5);
+                //voice = "Please grab the bag hanging in my left arm";
+	    		//FestinoHRI::say(voice, 5);
 	    		
-                voice = "Tell me, Justina yes, once you have the bag";
-				FestinoHRI::say(voice, 5);
+                //voice = "Tell me, Justina yes, once you would like me to release the bag";
+				//FestinoHRI::say(voice, 5);
 
-                recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
+                //recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 				
-                if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
+                //if(recogSpeech == "justina yes" || recogSpeech == "robot yes" || recogSpeech == "yes"){
 					//state = SM_FIND_QUEUE;
                     
-                    FestinoHRI::enableLegFinder(true);   
-                    FestinoHRI::enableHumanFollower(false);
-                
-                    // Abrir gripper
-			        FestinoHardware::setGripperPose(0.5);
-
-                     voice = "I hope I had been usefull";
-				    FestinoHRI::say(voice, 3);
-
-			        // Dejar de extender el brazo
+                   // FestinoHRI::enableLegFinder(true);   
+                   // FestinoHRI::enableHumanFollower(false);
+                    
+                   // Dejar de extender el brazo
 			        left_arm_pose = "default";
 			        FestinoHardware::setArmPose(left_arm_pose);
 
-					state = SM_BACK_TO_ARENA;
-	    		 }
+
+                    // Abrir gripper
+			        FestinoHardware::setGripperPose(0.5);
+
+                    voice = "I hope I had been usefull";
+				    FestinoHRI::say(voice, 3);
+
+			        // Cerrar gripper
+			        FestinoHardware::setGripperPose(-0.15);
+
+					state = SM_FINAL_STATE;
+	    		// }
 
                                
 
@@ -584,6 +595,9 @@ int main(int argc, char** argv){
 	    	case SM_BACK_TO_ARENA:
 	    		std::cout<<"State: Back to arena"<<std::endl;
 				
+                voice = "I am going to return to my start position";
+	    		FestinoHRI::say(voice, 5);
+
                 for (const auto& pose : poses) {
 
 		        	counter = counter + 1;
@@ -592,13 +606,13 @@ int main(int argc, char** argv){
                 	     
 		        }
 
-				goal_vec = FestinoKnowledge::CoordenatesLocSrv("living_room");
+//				goal_vec = FestinoKnowledge::CoordenatesLocSrv("living_room");
 
                 std::cout <<"Coordenates of inspection_point:"<<std::endl;
-                std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
+                std::cout <<"x = "<<goalX<<"; y = "<<goalY<<"; a = "<<goalTheta<<std::endl;
                 
-                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
+                if(!FestinoNavigation::getClose(currentX, currentY, currentTheta,120000))
+                    if(!FestinoNavigation::getClose(currentX, currentY, currentTheta, 120000))
                     	std::cout << "Cannot move to inspection point" << std::endl;
 
 		        /*for (const auto& pose : poses) {
@@ -615,9 +629,10 @@ int main(int argc, char** argv){
 		        FestinoNavigation::stopNavigation();
 		        FestinoHRI::enableHumanFollower(false);
 
-		        FestinoHRI::say("I have reached the starting point", 4);
+		        voice = "I have reached my final destination";
+	    		FestinoHRI::say(voice, 5);
 
-		        state = SM_FINAL_STATE;
+		        state = SM_LEAVE_BAG;
 	    		
                 break;	
 
@@ -685,7 +700,7 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
 
 	            voice =  "I have finished the test";
-	            FestinoHRI::say(voice, 2);
+	            FestinoHRI::say(voice, 3);
 
 	    		success = true;
 	    		fail = true;
