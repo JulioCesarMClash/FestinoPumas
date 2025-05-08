@@ -142,10 +142,31 @@ int main(int argc, char **argv)
                 case SM_DESCRIBE_OBJECTS:
                         std::cout << "SM_DESCRIBE_OBJECTS --> I'm going to describe objects" << std::endl;
                         sleep(2);
-                        FestinoHRI::say("I wish to describe the objects", 3);
-                        /*for x_in objects.size>():
-                        detecté x items
-                        destecte x1 y es de la categoria ta*/
+                        FestinoHRI::say("I'm going to describe the objects", 3);
+                        sleep(2);
+
+                        ss << "Detected " << objects.size() << " items.\n";
+                        
+                        FestinoHRI::say(ss.str(), 3);
+                        
+                        // Iterate over each object, store details in ss2
+                        for (size_t i = 0; i < objects.size(); ++i) {
+                            std::string object = objects[i];
+                        
+                            // Find the position of ":"
+                            size_t pos = object.find(":");
+                            if (pos != std::string::npos)
+                            {
+                                std::string category = object.substr(0, pos);
+                                std::string class_name = object.substr(pos + 2); // +2 to skip ": "
+
+                                ss2 << "I detected " << class_name << " and it belongs to the category " << category;
+                                FestinoHRI::say(ss2.str(), 3);
+
+                            } else {
+                                ss2 << "Invalid format in object: " << object << ".\n";
+                            }
+                        }
 
                         state = SM_NAVIGATE_TO_SHELF;
                         break;
@@ -159,7 +180,7 @@ int main(int argc, char **argv)
                             std::cout << "Cannot move to shelve" << std::endl; 
 
                         FestinoHRI::say("I have arrived to shelve",3);	
-
+                        FestinoNavigation::moveDist(0.1, 2000);
                         /*for (ver shelves empezando arriba y bajando 3 veces )
                                 objects[1] = onjers[2] (categoria) -> categoria = categoriaShelf
                                 decir que el n floor es cartegpria categoriaShelf
