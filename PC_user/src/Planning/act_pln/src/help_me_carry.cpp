@@ -556,19 +556,28 @@ int main(int argc, char** argv){
                 voice = "Tell me, Justina yes, once you have the bag";
 				FestinoHRI::say(voice, 5);
 
-                FestinoHRI::enableLegFinder(true);   
-                FestinoHRI::enableHumanFollower(false);
-
-			    // Dejar de extender el brazo
-			    left_arm_pose = "default";
-			    FestinoHardware::setArmPose(left_arm_pose);
-
-		        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
+                recogSpeech = FestinoHRI::lastRecogSpeech(interactionCommandsGrammar);
 				
                 if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
 					//state = SM_FIND_QUEUE;
+                    
+                    FestinoHRI::enableLegFinder(true);   
+                    FestinoHRI::enableHumanFollower(false);
+                
+                    // Abrir gripper
+			        FestinoHardware::setGripperPose(0.5);
+
+                     voice = "I hope I had been usefull";
+				    FestinoHRI::say(voice, 3);
+
+			        // Dejar de extender el brazo
+			        left_arm_pose = "default";
+			        FestinoHardware::setArmPose(left_arm_pose);
+
 					state = SM_BACK_TO_ARENA;
 	    		 }
+
+                               
 
 	    		break;
 
