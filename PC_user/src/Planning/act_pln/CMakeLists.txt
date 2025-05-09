@@ -237,3 +237,7 @@ target_link_libraries(storing_groseries ${catkin_LIBRARIES})
 add_executable(gpsr src/gpsr.cpp)
 add_dependencies(gpsr ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(gpsr  ${catkin_LIBRARIES} nlohmann_json::nlohmann_json)
+
+add_executable(el_bueno src/el_bueno.cpp)
+add_dependencies(el_bueno ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(el_bueno ${catkin_LIBRARIES})
