@@ -19,8 +19,11 @@ CATEGORY_MAP = {
     '012_banana': 'Fruits',
     '013_apple': 'Fruits',
     '009_pear': 'Fruits',
+    '020_lemon': 'Fruits',
 
-    '010_ball of baseball': 'Toys',
+    '010_bali of baseball': 'Toys',
+    '021 ball of tenis': 'Toys',
+    '022_rubik': 'Toys',
     '017_square': 'Toys',
     '018_lego_4': 'Toys',
 
@@ -28,11 +31,19 @@ CATEGORY_MAP = {
     '014_mustard': 'Food',
     '015_can of tuna': 'Food',
     '016_spam': 'Food',
+    '019_tuna': 'Food',
     '011_chips': 'Food',
     '007_cereal': 'Food',
 
+    '023_cup': 'Utensils',
+    '024_knife': 'Utensils',
+    '025_spoon': 'Utensils',
+    '026_plate': 'Utensils',
+    '027_bowl': 'Utensils',
+
     '006_zote': 'Others'
 }
+
 
 def load_model():
     model_path = rospy.get_param('~model_path', '/models/best.pt')
