@@ -31,7 +31,7 @@
 #include "pose_estimation/PersonPose2D.h"
 
 //Parameters for the test
-#define MAX_FIND_PERSON_COUNT 2
+#define MAX_FIND_PERSON_COUNT 1
 #define MAX_FIND_PERSON_RESTART 0
 #define MAX_FIND_PERSON_ATTEMPTS 1
 #define MAX_CHECK_DOOR 2
@@ -43,7 +43,7 @@
 #define MAX_ATTEMPTS_CONFIRMATION 2
 #define MAX_ATTEMPTS_WAIT_CONFIRMATION 2
 #define MAX_ATTEMPTS_MEMORIZING 2
-#define MAX_FIND_SEAT_COUNT 3
+#define MAX_FIND_SEAT_COUNT 4
 #define TIMEOUT_MEMORIZING 3000
 
 
@@ -51,7 +51,7 @@
 //States for the state machine
 enum STATE
 {
-	SM_INIT,
+    SM_INIT,
     SM_SAY_WAIT_FOR_DOOR,
     SM_WAIT_FOR_DOOR,
     SM_GOTO_RECEPTIONIST_POINT,
@@ -99,7 +99,7 @@ std::string lastInteSpeech;
 std::string guestLocation;
 std::string auxNames;
 
-std::string test("receptionist");
+std::string test("receptionist.json");
 std::vector<float> goal_vec(3);
 
 // Variables globales
@@ -109,7 +109,7 @@ bool person = false;
 double CENTER_THRESHOLD = 10.0; // Umbral en píxeles para considerar centrado
 const int IMAGE_CENTER_X = 320;      // Centro horizontal de la imagen (ajustar según resolución)
 const int IMAGE_CENTER_Y = 260;      // Centro vertical de la imagen (ajustar según resolución)
-
+float nariz;
 int find_index(const std::vector<std::string>& vec, const std::string& target) {
     auto it = std::find(vec.begin(), vec.end(), target);
     if (it != vec.end()) {
@@ -139,27 +139,33 @@ bool isCenteredY()
 {
     if(!new_centroid) return false;
     
-    float error = last_centroid.y - IMAGE_CENTER_Y;
+    float error = nariz - IMAGE_CENTER_Y;
+    std::cout<<"N->"<<nariz<<"C->"<<IMAGE_CENTER_Y<<std::endl;
     return (fabs(error) < CENTER_THRESHOLD);
 }
 
 // Función para mover la camara (simulada)
 void moveCamera(double dx, double dy)
 {
-    FestinoNavigation::move_base(0,0,dx*0.02,0.3);
+    FestinoNavigation::move_base(0,0,dx*0.02,0.2);
 }
 
 // void pose_2dCallback(int id, PersonPose2D::Keypoint2D[] keypoints )
-// {
-
-// }
+void pose_2dCallback(const pose_estimation::PersonPose2D::ConstPtr& msg)
+{
+    int id = msg->id;
+    const std::vector<pose_estimation::Keypoint2D>& keypoints = msg->keypoints;
+    nariz = keypoints[0].y;
+    // std::cout << keypoints[0] << std::endl;
+    // Process the keypoints here
+}
 
 // Función principal de centrado
 void centerCamera()
 {
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe("/vision/person_centroid", 1, centroidCallback);
-    // ros::Subscriber sub = nh.subscribe("/vision/pose_2d", 1, pose_2dCallback);
+    ros::Subscriber sub2d = nh.subscribe("/vision/pose_2d", 1, pose_2dCallback);
     ros::Rate rate(10); // 10 Hz
     bool kinect = true;
     ROS_INFO("Iniciando rutina de centrado de camara...");
@@ -170,7 +176,7 @@ void centerCamera()
 
         if (new_centroid)
         {
-            if (isCenteredX())
+            if (isCenteredX() && isCenteredY())
             {
                 ROS_INFO("Persona centrada en la imagen!");
                 if(person)
@@ -183,7 +189,7 @@ void centerCamera()
             {
                 // Calcular movimiento necesario
                 double dx = IMAGE_CENTER_X - last_centroid.x;
-                double dy = IMAGE_CENTER_Y - last_centroid.y;
+                double dy = IMAGE_CENTER_Y - nariz;
                 
                 // Mover la camara (proporcional al error)
                 moveCamera(dx * 0.1, dy * 0.1); // Factor de ganancia 0.1
@@ -192,11 +198,11 @@ void centerCamera()
                     person = false;
                     break;
                 }
-                if(kinect && !isCenteredY())
-                {
-                    kinect = FestinoHardware::move_kinect(dy*0.2, 0.3);
+                // if(kinect && !isCenteredY())
+                // {
+                FestinoHardware::move_kinect(dy*0.1, 0.2);
                     // sleep(0.2);
-                }
+                // }
             }
             
             new_centroid = false; // Resetear flag
@@ -285,7 +291,7 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 int main(int argc, char **argv)
 {
     std::cout << "INITIALIZING ACT_PLN BY PAREJITASOFT Inc..." << std::endl; //cout
-	ros::init(argc, argv, "receptionist_test");
+    ros::init(argc, argv, "receptionist_test");
     ros::NodeHandle nh;
     ros::Rate rate(10);
 
@@ -363,7 +369,7 @@ int main(int argc, char **argv)
     bool usePointArmLeft = false;
 
     boost::posix_time::ptime prev;
-	boost::posix_time::ptime curr;
+    boost::posix_time::ptime curr;
     
     std::vector<std::string> tokens;
 
@@ -392,10 +398,10 @@ int main(int argc, char **argv)
     FestinoHardware::init_kinect();
     while(ros::ok() && !success)
     {
-    	switch(state)
-    	{
-    		case SM_INIT:
-    			std::cout << test << ".-> State SM_INIT: Init the test." << std::endl;
+        switch(state)
+        {
+            case SM_INIT:
+                std::cout << test << ".-> State SM_INIT: Init the test." << std::endl;
                 // arr_values.values = {0,0,0,1,1,1};
                 // pub_digital.publish(arr_values);
                 ros::Duration(0.5, 0).sleep();
@@ -410,11 +416,11 @@ int main(int argc, char **argv)
                 // FestinoHRI::enableSpeechRecognized(false);
 
                 FestinoHRI::say("I will navigate to the entrance door",4);
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("entrance_door");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("door");
                 std::cout <<"Coordenates of entrance_door"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                // if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //     std::cout << "Cannot move to entrace_door" << std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to entrace_door" << std::endl;
 
                 FestinoHRI::say("I have reached the entrance door", 4);
 
@@ -425,13 +431,14 @@ int main(int argc, char **argv)
                 {
                     FestinoHRI::say("Hello human, please enter to the house",6);
                     state = SM_WAIT_FOR_PERSON_ENTRANCE;
-                    // FestinoNavigation::moveDist(-1.3, 300);
-                    centerCamera();
+                    FestinoNavigation::moveDist(-0.7, 200);
                 }
                 else
                 {
                     state = SM_SAY_OPEN_DOOR;
                 }
+                sleep(5);
+                centerCamera();
                 break;
 
             case SM_SAY_OPEN_DOOR:
@@ -508,9 +515,9 @@ int main(int argc, char **argv)
                     // }
                 }
                 break;
-    				
-    		case SM_INTRO_GUEST:
-    			std::cout << test << ".-> State SM_INTRO_GUEST: Intro Guest." << std::endl;
+                    
+            case SM_INTRO_GUEST:
+                std::cout << test << ".-> State SM_INTRO_GUEST: Intro Guest." << std::endl;
                 recogPersonAux = FestinoVision::enableRecogFacesName(false);
                 // arr_values.values = {0,0,0,1,0,1};
                 // pub_digital.publish(arr_values);
@@ -582,9 +589,9 @@ int main(int argc, char **argv)
 
                 // state = SM_WAIT_FOR_PRESENTATION;                
                 break;
-    				
-    		case SM_WAIT_FOR_PRESENTATION:
-    			std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the dates." << std::endl;
+                    
+            case SM_WAIT_FOR_PRESENTATION:
+                std::cout << test << ".-> State SM_WAIT_FOR_PRESENTATION: Waiting for the dates." << std::endl;
                 switch(topic)
                 {
                     case NAME:
@@ -681,6 +688,8 @@ int main(int argc, char **argv)
                 }
                 else{
                     FestinoHRI::say("Sorry I don't understand you, please speak again.",6);
+
+                        state = SM_FIND_EMPTY_SEAT;
                 }
                 break;
 
@@ -705,11 +714,11 @@ int main(int argc, char **argv)
             case SM_GUIDE_TO_LOC:
                 std::cout << test << ".-> State SM_GUIDING_TO_LOC: Guide to loc." << std::endl;
                 FestinoHRI::say("Follow me to the drinks table",3);
-                goal_vec = FestinoKnowledge::CoordenatesLocSrv("drink_table");
+                goal_vec = FestinoKnowledge::CoordenatesLocSrv("beverage_area");
                 std::cout <<"Coordenates of drinks table"<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                // if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //     std::cout << "Cannot move to drinks table" << std::endl;
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to drinks table" << std::endl;
 
                 //Girar la base 180
                 FestinoNavigation::move_base(0,0,0.02,3.0);
@@ -730,20 +739,23 @@ int main(int argc, char **argv)
                 {
                     FestinoHRI::say("Follow me to the next seat.",3);
                 }
-                for(int c=0;c<MAX_FIND_SEAT_COUNT;c++)
+                for(int c=1;c<MAX_FIND_SEAT_COUNT+1;c++)
                 {
                     
-                    place << "chair_" << c;
+                    place << "silla" << c;
                     goal_vec = FestinoKnowledge::CoordenatesLocSrv(place.str());
                     std::cout <<"Coordenates of "<<place.str()<<std::endl;
                     std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                    // if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                    //     std::cout << "Cannot move to drinks table" << std::endl;
+                    if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                        std::cout << "Cannot move to drinks table" << std::endl;
 
                     //Buscar persona en la primera silla            
                     recogPersonAux.clear();                
                     CENTER_THRESHOLD = 20.0;
                     person = true;
+                    FestinoHardware::init_kinect(); 
+                    sleep(2);                
+                    FestinoHardware::move_kinect(-10, 0.2);
                     centerCamera();                
                     std::cout<<"Persona->"<<person<<std::endl;
                     if(person)
@@ -799,9 +811,9 @@ int main(int argc, char **argv)
                 goal_vec = FestinoKnowledge::CoordenatesLocSrv(vacio);
                 std::cout <<"Coordenates of "<<vacio<<std::endl;
                 std::cout <<"x = "<<goal_vec[0]<<"; y = "<<goal_vec[1]<<"; a = "<<goal_vec[2]<<std::endl;
-                // if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
-                //     std::cout << "Cannot move to drinks table" << std::endl;
-                // FestinoNavigation::moveDist(-1.3, 10);
+                if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2],120000))
+                    std::cout << "Cannot move to drinks table" << std::endl;
+                FestinoNavigation::moveDist(-1.3, 10);
                 FestinoNavigation::move_base(0,0,0.02,3.0);
                 centerCamera();
                 ss.str("");
@@ -821,9 +833,9 @@ int main(int argc, char **argv)
                 
                 break;           
                 
-    	}
-    	rate.sleep();
-    	ros::spinOnce();
+        }
+        rate.sleep();
+        ros::spinOnce();
     }
 
     rate.sleep();

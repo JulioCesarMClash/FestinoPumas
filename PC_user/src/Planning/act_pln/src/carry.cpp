@@ -79,6 +79,13 @@ geometry_msgs::PoseStamped tf_human_coordinates;
 
 SMState state = SM_INIT;
 
+// Variables globales
+geometry_msgs::Point last_centroid;
+bool new_centroid = false;
+bool person = false;
+double CENTER_THRESHOLD = 10.0; // Umbral en píxeles para considerar centrado
+const int IMAGE_CENTER_X = 320;      // Centro horizontal de la imagen (ajustar según resolución)
+const int IMAGE_CENTER_Y = 260;      // Centro vertical de la imagen (ajustar según resolución)
 
 // Grammars
 std::string namesGrammar("help_me_carry_names.json");
@@ -267,7 +274,7 @@ int main(int argc, char** argv){
     arr_values.values = {0,0,0,0,0,0};
     //This delay is necessary
     FestinoHRI::say(" ",3);
-
+    FestinoHardware::init_kinect();
     //TF related stuff
     tf_human_coordinates.header.frame_id = "/map";
     tf_human_coordinates.pose.position.x = 0.0;
@@ -294,6 +301,7 @@ int main(int argc, char** argv){
 	    		// Move head to the origin
                 // FestinoHardware::setHeadOrientation(0.0, -0.3);
                 FestinoHardware::init_kinect();
+                sleep(2);
 
                 // Dejar de extender el brazo
 			    left_arm_pose = "default";
@@ -314,7 +322,7 @@ int main(int argc, char** argv){
 
 	    	case SM_FIND_BAG:
 	    		std::cout << "State machine: SM_FIND_BAG" << std::endl;
-	    		
+	    		FestinoHardware::move_kinect(-10, 0.2);
                 voice = "Say, Festino yes, once you are pointing at the bag";
 				FestinoHRI::say(voice, 5);
 
@@ -329,6 +337,11 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_CONF_POINTING_HAND" << std::endl;
 	    		
 	    		FestinoVision::enablePoseEstimation(true);
+
+                    // FestinoHardware::init_kinect();
+                    sleep(2);
+                	FestinoHardware::move_kinect(-20, 0.2);
+                	sleep(3);
 	    	
 		        for (int i = 0; i < 10; ++i) {
 		        
@@ -364,7 +377,7 @@ int main(int argc, char** argv){
 	    		if (chosenDirection == "left"){
 
                     // Move head to the left
-                    FestinoHardware::move_kinect(1.5, 2.5);
+                    // FestinoHardware::move_kinect(1.5, 2.5);
 
     				voice = "Are you pointing at the bag on your left? Answer with, festino yes, or, festino no";
     				FestinoHRI::say(voice, 8);
@@ -376,7 +389,8 @@ int main(int argc, char** argv){
                         // Move head to the origin
 	                    // FestinoHardware::setHeadOrientation(0.0, -0.3);
 	                    FestinoHardware::init_kinect();
-
+	                    sleep(3);
+	                    // FestinoHardware::move_kinect(-10, 0.5);
                         // Extender el brazo izquierdo
                         left_arm_pose = "pre_grasp";
 			    		// FestinoHardware::setArmPose(left_arm_pose);
@@ -384,7 +398,7 @@ int main(int argc, char** argv){
 			    		// Abrir gripper
 			    		// FestinoHardware::setGripperPose(0.5);
 		    			
-                        voice = "Please hang the bag on my left arm";
+                        voice = "Please hang the bag on my arm";
 		            	FestinoHRI::say(voice, 10);
 		            	
                         FestinoHRI::enableLegFinder(true);
@@ -409,7 +423,7 @@ int main(int argc, char** argv){
     					// Move head to the origin
                     	// FestinoHardware::setHeadOrientation(0.0, -0.3);
                     	FestinoHardware::init_kinect();
-
+                    	sleep(3);
                         // Extender el brazo izquierdo
                         left_arm_pose = "pre_grasp";
 			    		// FestinoHardware::setArmPose(left_arm_pose);
@@ -417,7 +431,7 @@ int main(int argc, char** argv){
 			    		// Abrir gripper
 			    		// FestinoHardware::setGripperPose(0.5);
 
-		    			voice = "Please hang the bag on my left arm";
+		    			voice = "Please hang the bag on my arm";
                         FestinoHRI::say(voice, 10);
 
 		            	FestinoHRI::enableLegFinder(true);
@@ -432,7 +446,8 @@ int main(int argc, char** argv){
                     // Move head to the origin
                     // FestinoHardware::setHeadOrientation(0.0, -0.3);
                     FestinoHardware::init_kinect();
-
+                    sleep(2);
+                	FestinoHardware::move_kinect(-15, 0.2);
                     voice = "I could not identify where you were pointing at";
     				FestinoHRI::say(voice, 4);
 
@@ -445,7 +460,8 @@ int main(int argc, char** argv){
                     // Move head to the origin
                     // FestinoHardware::setHeadOrientation(0.0, -0.3);
                     FestinoHardware::init_kinect();
-
+                    sleep(2);
+                	FestinoHardware::move_kinect(-15, 0.2);
                     voice = "I could not identify where you were pointing at";
     				FestinoHRI::say(voice, 4);
 
@@ -482,8 +498,11 @@ int main(int argc, char** argv){
 	    	case SM_FIND_PERSON:
 				std::cout << "State machine: SM_FIND_PERSON" << std::endl;
 
-                FestinoHRI::enableLegFinder(true);
-                FestinoHRI::enableHumanFollower(true);
+                // FestinoHRI::enableLegFinder(true);
+                // FestinoHRI::enableHumanFollower(true);
+                FestinoHardware::init_kinect();
+                sleep(3);
+                FestinoHardware::move_kinect(-20, 0.2);
 
                 legs_found = FestinoHRI::frontalLegsFound();
 	    		std::cout << "Legs found: " << legs_found << std::endl;    
@@ -554,6 +573,7 @@ int main(int argc, char** argv){
                 }
 
 			    FestinoHRI::enableHumanFollower(true);
+			    FestinoHRI::enableLegFinder(true);
 
 			    //Storage the ultimate pose with Map
 			    FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
@@ -592,11 +612,13 @@ int main(int argc, char** argv){
 
 			        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 
-			        if(recogSpeech == "festino we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
+			        if(recogSpeech == "festino we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived" || recogSpeech == "yes"){
 
                         std::cout << "We arrived" << std::endl;
-
+                        stop = true;
                         state = SM_WAIT_CONF_CAR;
+                        FestinoHardware::init_kinect();
+                        sleep(3);
 			        }
 
 			     }
@@ -637,7 +659,7 @@ int main(int argc, char** argv){
 	    	case SM_LEAVE_BAG:
 	    		std::cout << "State machine: SM_LEAVE_BAG" << std::endl;	
 	    		
-                voice = "Please take the bag from my left arm";
+                voice = "Please take the bag from my arm";
 	    		FestinoHRI::say(voice, 5);
 	    		
                 voice = "Tell me, festino yes, once you have the bag";

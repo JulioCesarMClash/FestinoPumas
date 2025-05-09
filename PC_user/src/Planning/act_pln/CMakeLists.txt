@@ -230,3 +230,18 @@ target_link_libraries(receptionist ${catkin_LIBRARIES})
 add_executable(carry src/carry.cpp)
 add_dependencies(carry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(carry ${catkin_LIBRARIES})
+
+
+add_executable(carry_2 src/carry_2.cpp)
+add_dependencies(carry_2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(carry_2 ${catkin_LIBRARIES})
+
+
+add_executable(stories src/stor.cpp)
+add_dependencies(stories ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(stories ${catkin_LIBRARIES})
+
+
+
+
+
