@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(act_pln)
+project(ollama_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,19 +8,14 @@ project(act_pln)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
-  roscpp
   rospy
-  sensor_msgs
   std_msgs
-  tf
-  robotino_msgs
-  festino_tools
-  message_generation
+    message_generation
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(nlohmann_json REQUIRED)
+# find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -59,13 +54,11 @@ find_package(nlohmann_json REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
- #add_service_files(
- #  FILES
-   #Locate_server.srv
-   #FaceRecogSrv.srv
-   #FaceTrainSrv.srv
-   #Set_location_server.srv
- #)
+ add_service_files(
+   FILES
+   CommandPlan.srv
+#   Service2.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -77,8 +70,7 @@ find_package(nlohmann_json REQUIRED)
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
    DEPENDENCIES
-   std_msgs  # Or other packages containing msgs
-   geometry_msgs
+   std_msgs
  )
 
 ################################################
@@ -111,11 +103,9 @@ find_package(nlohmann_json REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES act_pln
-  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs robotino_msgs message_runtime
-#  DEPENDS system_lib
+  CATKIN_DEPENDS rospy std_msgs message_runtime
 )
+
 
 ###########
 ## Build ##
@@ -130,7 +120,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/act_pln.cpp
+#   src/${PROJECT_NAME}/ollama_ros.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -141,7 +131,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/act_pln_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/ollama_ros_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -205,7 +195,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_act_pln.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_ollama_ros.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -214,26 +204,7 @@ include_directories(
 # catkin_add_nosetests(test)
 
 
-add_executable(test_mvbase src/test_mvbase.cpp)
-add_dependencies(test_mvbase ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_mvbase ${catkin_LIBRARIES})
-
-add_executable(robot_inspection src/robot_inspection.cpp)
-add_dependencies(robot_inspection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(robot_inspection ${catkin_LIBRARIES})
-
-add_executable(help_me_carry src/help_me_carry.cpp)
-add_dependencies(help_me_carry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(help_me_carry ${catkin_LIBRARIES})
-
-add_executable(receptionist src/receptionist.cpp)
-add_dependencies(receptionist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(receptionist ${catkin_LIBRARIES})
-
-add_executable(storing_groseries src/storig_groseries.cpp)
-add_dependencies(storing_groseries ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(storing_groseries ${catkin_LIBRARIES})
-
-add_executable(gpsr src/gpsr.cpp)
-add_dependencies(gpsr ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(gpsr  ${catkin_LIBRARIES} nlohmann_json::nlohmann_json)
+catkin_install_python(PROGRAMS
+  scripts/ollama_node.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

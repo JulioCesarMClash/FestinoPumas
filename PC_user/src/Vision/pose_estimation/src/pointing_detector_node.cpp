@@ -14,7 +14,7 @@ public:
         sub_ = nh.subscribe("/vision/pose_3d", 10, &PointingDetector::poseCallback, this);
         pub_direction_ = nh.advertise<std_msgs::String>("/vision/pointing_direction", 10);
         pub_centroid_ = nh.advertise<geometry_msgs::Point>("/vision/body_centroid", 10);  // Nuevo publisher
-        dist_threshold_ = 0.15;
+        dist_threshold_ = 0.03;
         ROS_INFO("[pointing_detector_node] Init node.");
     }
 
@@ -65,7 +65,7 @@ private:
             float cos_angle = v1.normalized().dot(v2.normalized());
             float dist_hand_hip = norm(toVec(hip, wrist));
 
-            bool arm_straight = (cos_angle > 0.95);
+            bool arm_straight = (cos_angle > 0.90);
             bool hand_far = (dist_hand_hip > dist_threshold_);
 
             return arm_straight && hand_far;
