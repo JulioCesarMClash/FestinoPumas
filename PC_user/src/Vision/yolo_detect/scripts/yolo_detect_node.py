@@ -21,8 +21,8 @@ CATEGORY_MAP = {
     '009_pear': 'Fruits',
     '020_lemon': 'Fruits',
 
-    '010_bali of baseball': 'Toys',
-    '021 ball of tenis': 'Toys',
+    '010_ball of baseball': 'Toys',
+    '021_ball of tenis': 'Toys',
     '022_rubik': 'Toys',
     '017_square': 'Toys',
     '018_lego_4': 'Toys',
@@ -57,7 +57,7 @@ class YoloCategoryNode:
         self.bridge = CvBridge()
 
         self.sub = rospy.Subscriber('/camera/rgb/image_color', Image, self.image_callback)
-        self.pub = rospy.Publisher('/detected_objects_array', StringArray, queue_size=10)
+        self.pub = rospy.Publisher('/detected_objects', StringArray, queue_size=10)
 
     def image_callback(self, msg):
         try:

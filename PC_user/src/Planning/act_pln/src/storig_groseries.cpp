@@ -119,7 +119,7 @@ int main(int argc, char **argv)
                             std::cout << "Cannot move to storing table" << std::endl; 
                         
                         FestinoHRI::say("I have arrived to storing table",3);
-                        FestinoNavigation::moveDist(0.15, 2000);	
+                        FestinoNavigation::moveDist(0.30, 2000);	
                         state = SM_PRE_GRASP;
                         break;
 
