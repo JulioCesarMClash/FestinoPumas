@@ -465,7 +465,7 @@ int main(int argc, char** argv){
 
 			        }
 
-			        r ecogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
+			        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 
 			        if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
 
