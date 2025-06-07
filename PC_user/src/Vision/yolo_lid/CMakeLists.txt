@@ -30,5 +30,6 @@ include_directories(
 
 catkin_install_python(PROGRAMS
   scripts/yolo_detect_node.py
+  scripts/centroid_to_3d.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
