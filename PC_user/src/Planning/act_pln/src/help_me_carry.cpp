@@ -191,7 +191,7 @@ int main(int argc, char** argv){
     //Dict with coords pose,
 // Navigation to Arena
 	int pose_counter = 0;
-	int save_every = 5000;
+	int save_every = 500;
     std::map<int, std::tuple<float, float, float>> poses;
     float currentX, currentY, currentTheta;
     float goalX, goalY, goalTheta;
@@ -428,11 +428,13 @@ int main(int argc, char** argv){
 
                 FestinoHRI::enableLegFinder(true);
 			    FestinoHRI::enableHumanFollower(true);
+			    
+			    stop = false;
 
 				// Bucle para capturar las poses
 			    while (!stop) {
-			        
-                    std::cout << "In loop" << std::endl;
+			    
+			    	 std::cout << "In loop" << std::endl;
                     
                     // Obtener la pose actual
 					FestinoNavigation::getRobotPoseWrtMap(currentX, currentY, currentTheta);
@@ -442,10 +444,17 @@ int main(int argc, char** argv){
 					
 						poses[pose_counter] = std::make_tuple(currentX, currentY, currentTheta);	
             			std::cout << "Saved pose " << pose_counter << ": x = " << currentX << ", y = " << currentY << ", theta = " << currentTheta << std::endl;
+					
 					}
 			        
                     pose_counter++;
+                    
+                    std::cout << "Antes" << std::endl;
+                    
+                    recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
 
+					std::cout << "Despues" << std::endl;
+			        
 			        // Comprobar si se ha perdido al operador
                     legs_found = FestinoHRI::frontalLegsFound(); 
 	    		    std::cout << "Legs found: " << legs_found << std::endl;    
@@ -465,9 +474,7 @@ int main(int argc, char** argv){
 
 			        }
 
-			        recogSpeech = FestinoHRI::lastRecogSpeech(navigationCommandsGrammar);
-
-			        if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
+			        else if(recogSpeech == "justina we arrived" || recogSpeech == "robot we arrived" || recogSpeech == "we arrived"){
 
                         std::cout << "We arrived" << std::endl;
 
@@ -523,7 +530,7 @@ int main(int argc, char** argv){
 				    FestinoHRI::say(voice, 3);
 
 			        // Cerrar gripper
-			        FestinoHardware::setGripperPose(-0.15);
+			        //FestinoHardware::setGripperPose(-0.15);
 
 					state = SM_FINAL_STATE;                              
 
@@ -541,16 +548,27 @@ int main(int argc, char** argv){
 					std::tie(goalX, goalY, goalTheta) = poses[i];
 
 					// Sumar 180° (π rad) y normalizar entre -π y π
-					goalTheta += M_PI;
-					if (goalTheta > M_PI) goalTheta -= 2 * M_PI;
-					if (goalTheta < -M_PI) goalTheta += 2 * M_PI;
+					//goalTheta += M_PI;
+					//if (goalTheta > M_PI) goalTheta -= 2 * M_PI;
+					//if (goalTheta < -M_PI) goalTheta += 2 * M_PI;
 
 					std::cout << "Navigating to: x = " << goalX << "; y = " << goalY << "; theta = " << goalTheta << std::endl;
 
-					if (!FestinoNavigation::getClose(goalX, goalY, goalTheta, 120000))
-						if (!FestinoNavigation::getClose(goalX, goalY, goalTheta, 120000))
+					if (!FestinoNavigation::getClose(goalX, goalY, goalTheta, 30000)) {
+						if (!FestinoNavigation::getClose(goalX, goalY, goalTheta, 30000)){
+						
 						    std::cout << "Cannot move to point" << std::endl;
-						    
+						    FestinoNavigation::stopNavigation();
+		        			FestinoHRI::enableHumanFollower(false);
+
+							voice = "I have reached my final destination";
+							FestinoHRI::say(voice, 5);
+
+							state = SM_LEAVE_BAG;
+
+						}
+						
+					}
 				}
 
 		        FestinoNavigation::stopNavigation();
